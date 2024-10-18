@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: test
-          image: gitlab-registry.nrp-nautilus.io/chiajuichou/gw-anomaly-detection:latest
+          image: gitlab-registry.nrp-nautilus.io/chiajuichou/gw-anomaly-detection:test
           resources:
             limits:
               memory: 500Mi
