@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "gw-anomaly-detection"
+version = "0.1.0"
+description = "Detecting anomaly signals in GW data."
+authors = ["Chia-jui Chou <agoodmanjerry@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+gwpy = "^3.0.10"
+bilby = "^2.3.0"
+PyCBC = "^2.6.0"
+lalsuite = "^7.23"
+boto3 = "^1.35.43"
+numpy = "1.24.4"
+torchmetrics = "^1"
+torchaudio = {version = "^2", source = "torch"}
+
+[[tool.poetry.source]]
+name = "torch"
+url = "https://download.pytorch.org/whl/cu121"
+priority = "explicit"
+
+[tool.poetry.group.dev.dependencies]
+jupyter = "^1.0.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
