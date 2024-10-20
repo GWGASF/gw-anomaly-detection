@@ -13,8 +13,9 @@ PyCBC = "^2.6.0"
 lalsuite = "^7.23"
 boto3 = "^1.35.43"
 numpy = "1.24.4"
-torchmetrics = "^1"
-torchaudio = {version = "^2", source = "torch"}
+toml = "^0.10.2"
+# torchmetrics = "^1"
+# torchaudio = {version = "^2", source = "torch"}
 
 [[tool.poetry.source]]
 name = "torch"
