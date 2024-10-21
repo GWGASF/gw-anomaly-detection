@@ -1,15 +1,16 @@
 FROM python:3.10
-WORKDIR /opt/app
+WORKDIR /opt
 
 # Install the application dependencies
 RUN apt-get update \
- && apt-get -y install --no-install-recommends vim \
+#  && apt-get -y install --no-install-recommends vim \
+ && apt-get -y upgrade \
  && rm -rf /var/lib/apt/lists/* \
  && pip install --upgrade pip \
  && pip install poetry
 
 # Copy in the sourrce code
-COPY . /opt/app
+COPY . /opt
 
 # Install python packages
 RUN poetry install

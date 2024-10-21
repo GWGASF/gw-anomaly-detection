@@ -1,12 +1,12 @@
 [tool.poetry]
-name = "gw-anomaly-detection"
+name = "gw_anomaly_detection"
 version = "0.1.0"
 description = "Detecting anomaly signals in GW data."
 authors = ["Chia-jui Chou <agoodmanjerry@gmail.com>"]
 license = "MIT"
 readme = "README.md"
 packages = [
-  {include = "gw-anomaly-detection"},
+  {include = "gw_anomaly_detection"},
 ]
 
 [tool.poetry.dependencies]
