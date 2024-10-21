@@ -3,7 +3,11 @@ name = "gw-anomaly-detection"
 version = "0.1.0"
 description = "Detecting anomaly signals in GW data."
 authors = ["Chia-jui Chou <agoodmanjerry@gmail.com>"]
+license = "MIT"
 readme = "README.md"
+packages = [
+  {include = "gw-anomaly-detection"},
+]
 
 [tool.poetry.dependencies]
 python = "^3.10"
