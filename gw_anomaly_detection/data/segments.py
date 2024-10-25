@@ -11,6 +11,7 @@ def get_background_segments(
         start: float,
         end: float,
         glitch_window_length: float=4,
+        min_window_length: float=4,
 ):
     # Get science segments with start and end time.
     loaded_segs = SegmentList([])
@@ -57,6 +58,12 @@ def get_background_segments(
             to_new_seg = True
             seg_id += 1
 
-    bg_segs.write("./bg_segs.segwizard", format="segwizard")
+    output_segs = SegmentList([])
+    for seg in bg_segs:
+        if (seg.end - seg.start) >= (min_window_length + glitch_window_length):
+            cropped_seg = Segment(seg.start+2, seg.end-2)
+            output_segs.append(cropped_seg)
 
-    return bg_segs
+    output_segs.write("./bg_segs.segwizard", format="segwizard")
+
+    return output_segs
