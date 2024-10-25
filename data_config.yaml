@@ -1,0 +1,7 @@
+data:
+  ifo: 'H1'
+  background:
+    segment_file:
+  glitch:
+    glitch_info_file:
+    glitch_window_length:
