@@ -1,3 +1,11 @@
 __pycache__/
 *.pyc
 *~
+
+
+# From mac env file
+*.DS_Store
+
+
+# Some debugging files
+*cache/
