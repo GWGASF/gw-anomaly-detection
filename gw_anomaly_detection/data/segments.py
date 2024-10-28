@@ -1,5 +1,6 @@
 #!/bin/python
 import h5py
+import numpy as np
 from gwpy.segments import Segment
 from gwpy.segments import SegmentList
 
@@ -7,14 +8,18 @@ class segment_info():
     def __init__(
             self,
             ifo: str,
-            segment_files: list,
-            glitch_info_file: str,
-            data_cache: str,
-            start: float,
-            end: float,
     ):
         """ The information about the science segments and glitch triggers from Omicron.
         """
+        self.get_segs = None
+
+    def load_segment_info(
+            self,
+            segment_files: list,
+            glitch_info_file: str,
+            start: float,
+            end: float,
+        ) -> None:
         # Get science segments with start and end time.
         self.loaded_segs = SegmentList([])
         for file in segment_files:
@@ -43,8 +48,8 @@ class segment_info():
     def get_segments(
             self,
             kind: str,
-            output_file: None,
-            output_file_format: None,
+            output_file: str=None,
+            output_file_format: str=None,
             glitch_window_length: float=4,
             min_window_length: float=4,
     ):
@@ -86,14 +91,70 @@ class segment_info():
                     output_segs.append(cropped_seg)
 
         self.get_segs = output_segs
+
+        # Write the segment file.
         if (output_file != None) and (output_file_format != None):
             output_segs.write(output_file, format=output_file_format)
+            print(f"Segment file written to {output_file}")
 
         return output_segs
 
     def get_samples(
             self,
-            number_of_samples,
+            number_of_samples: int,
+            start: float,
+            end: float,
+            kind: str=None,
+            segment_file: str=None,
+            output_file: str=None,
+            output_file_format: str=None,
+            window_length: float=4,
     ):
+        if (kind != 'background') and (kind != 'glitch'):
+            raise RuntimeError("Please choose either \'glitch\' or \'background\'.")
+        if (segment_file == None) and (self.get_segs == None):
+            raise RuntimeError("Please get segments first or provide a segment file in order to sample from those segments.")
+        if segment_file != None:
+            try:
+                try_segs = SegmentList.read(
+                    segment_file,
+                    format="segwizard",
+                )
+                try_segs.sort()
+                self.get_segs = try_segs
+            except Exception as e:
+                print(str(e))
 
-        return
+        # Get the segments with the given interval for sampling.
+        sample_interval_seg = Segment(start, end)
+        filtered_segs = SegmentList([])
+        for seg in self.get_segs:
+            if sample_interval_seg.intersects(seg):
+                filtered_segs.append(sample_interval_seg & seg)
+
+        # Get the sample segments.
+        sample_segs = SegmentList([])
+        if (kind == 'glitch') and (len(filtered_segs) < number_of_samples):
+            print(f"Number of glitches between {start} and {end} is {len(filtered_segs)} which is smaller than {number_of_samples}. Changing the number of samples to {len(filtered_segs)}.")
+            number_of_samples = len(filtered_segs)
+
+        seg_ids = np.random.randint(0, len(filtered_segs), number_of_samples)
+        for id in seg_ids:
+            try:
+                sample_st = filtered_segs[id].start
+                sample_ed = filtered_segs[id].end - window_length
+                sample_t0 = np.random.uniform(sample_st, sample_ed)
+                seg = Segment(sample_t0, sample_t0 + window_length)
+                sample_segs.append(seg)
+            except Exception as e:
+                print(str(e))
+                continue
+
+        self.sample_segs = sample_segs
+
+        # Write the segment file.
+        if (output_file != None) and (output_file_format != None):
+            sample_segs.write(output_file, format=output_file_format)
+            print(f"Sample segments written to {output_file}")
+
+        return sample_segs
