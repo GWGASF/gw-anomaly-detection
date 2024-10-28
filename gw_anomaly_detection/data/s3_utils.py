@@ -181,8 +181,8 @@ def Fetch_data(
 
 
 # def main():
-    # ACCESS_KEY = "XRIYL1052YCQ125N75UM"
-    # SECRET_KEY = "XES9mLNbxAWKZC1AUcYFlGd7ByyXXSYw5yB3UrwM"
+    # ACCESS_KEY = ""
+    # SECRET_KEY = ""
     # HOST_BASE = "https://s3-west.nrp-nautilus.io"
     # s3 = s3_session()
     # s3.set_client(ACCESS_KEY, SECRET_KEY, HOST_BASE)

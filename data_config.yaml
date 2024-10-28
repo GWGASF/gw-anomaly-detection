@@ -1,7 +1,13 @@
 data:
   ifo: 'H1'
+  data_cache: 
+  start:1238166018
+  end: 1238856499
   background:
     segment_file:
+    min_window_length: 4
+    output_file:
   glitch:
     glitch_info_file:
-    glitch_window_length:
+    glitch_window_length: 4
+    output_file:

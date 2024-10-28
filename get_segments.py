@@ -1,5 +1,5 @@
 #!/bin/python
-from gw_anomaly_detection.data.segments import get_background_segments
+from gw_anomaly_detection.data.segments import segment_info
 
 def main():
     ifos = ['H1', 'L1']
@@ -16,17 +16,25 @@ def main():
     start = interval[ifo][0]
     end = interval[ifo][1]
 
-    segs = get_background_segments(
+    SegInfo = segment_info(
         ifo=ifo,
         segment_files=segment_files,
         glitch_info_file=glitch_info_file,
         data_cache=data_cache,
         start=start,
         end=end,
-        glitch_window_length=4,
     )
-    print(len(segs))
-    print(segs[0])
+    
+    kinds = ['glitch', 'background']
+    for kind in kinds:
+        output_file = f"segments/O3a/{ifo}_{kind}_segs-{start}-{int(end-start)}.segwizard"
+        segs = SegInfo.get_segments(
+            kind=kind,
+            output_file=output_file,
+            output_file_format='segwizard',
+            glitch_window_length=4,
+            min_window_length=4,
+        )
 
 if __name__ == "__main__":
     main()
