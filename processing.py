@@ -15,11 +15,23 @@ glitch_segment_file = config['data']['glitch']['segment_file']
 
 background_seglist = SegmentList.read(background_segment_file, format='segwizard')
 glitch_seglist = SegmentList.read(glitch_segment_file, format='segwizard')
+
 print(len(background_seglist))
-print(len(glitch_seglist))
+background_starts = [seg.start.gpsSeconds for seg in background_seglist]
+background_ends = [seg.end.gpsSeconds for seg in background_seglist]
+background_interval = (min(background_starts), max(background_ends))
+print(background_interval)
 
 # Loading strain and asd into data cache.
 data_cache = config['data']['data_cache']
+s3 = s3_session(config['s3'])
+s3.fetch_data(
+        ifo=config['data']['ifo'],
+        start=background_interval[0],
+        end=background_interval[1],
+        bucket=config['s3']['bucket'],
+        data_cache=config['data']['data_cache'],
+)
 
 # Waveform injection.
 

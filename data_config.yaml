@@ -1,8 +1,9 @@
 data:
   ifo: "H1"
-  data_cache: "/home/chiajui/data_cache"
   start: 1238166018
   end: 1238856499
+  data_cache: "/home/chiajui/data_cache"
+  asd_cache: "/home/chiajui/gw-anomaly-detection/asds"
   background:
     segment_file: "./segments/O3a/H1-background_samples-1238172987-23806.segwizard"
     min_window_length: 4
@@ -11,11 +12,10 @@ data:
     segment_file: "./segments/O3a/H1-glitch_samples-1238172987-23806.segwizard"
     glitch_window_length: 4
     output_file:
+  processing:
 s3:
-  session_client_configurations:
-    access_key: XRIYL1052YCQ125N75UM
-    secret_key: XES9mLNbxAWKZC1AUcYFlGd7ByyXXSYw5yB3UrwM
-    host_base: https://s3-west.nrp-nautilus.io
-  session_bucket_configurations:
+  access_key: XRIYL1052YCQ125N75UM
+  secret_key: XES9mLNbxAWKZC1AUcYFlGd7ByyXXSYw5yB3UrwM
+  host_base: https://s3-west.nrp-nautilus.io
   bucket: cchou
   common_prefix: O3_data/
