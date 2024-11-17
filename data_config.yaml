@@ -34,6 +34,8 @@ data:
     window_length: 4
     flow: 30
     fhigh: 1500
+    resample: 4096
+    crop_length: 1
     
 s3:
   access_key: XRIYL1052YCQ125N75UM

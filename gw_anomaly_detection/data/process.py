@@ -149,15 +149,33 @@ class Process():
 
     def get_proccessed_data(
             self,
-            ts,
-            asd,
-            flow=30,
-            fhigh=1500,
-            resample=4096,
-            crop_length=1,
+            timeseries: list,
+            background_segments: dict,
+            flow: float=30,
+            fhigh: float=1500,
+            resample: float=4096,
+            crop_length: float=1,
+            method: int=1,
     ):
-        ts = ts.whiten(asd=asd)
-        ts = ts.bandpass(flow, fhigh)
-        ts = ts.crop(ts.t0.value + crop_length, ts.t0.value + ts.duration.value - crop_length)
-        ts = ts.resample(resample)
-        return ts
+        processed_ts = []
+        for i, ts in enumerate(timeseries):
+            input_ts = dict.fromkeys(self.ifos)
+            proc_ts = dict.fromkeys(self.ifos)
+            for ifo in self.ifos:
+                input_ts[ifo] = ts[ifo].copy()
+                segment = background_segments[ifo][i]
+                asd = self.get_asd(ifo, segment)
+                asd = asd.interpolate(1/input_ts[ifo].duration.value)
+                input_ts[ifo] = input_ts[ifo].whiten(asd=asd)
+                input_ts[ifo] = input_ts[ifo].bandpass(flow, fhigh)
+                if method == 1:
+                    input_ts[ifo] = input_ts[ifo].resample(resample)
+                    input_ts[ifo] = input_ts[ifo].crop(segment.start + crop_length, segment.end - crop_length)
+                if method == 2:
+                    input_ts[ifo] = input_ts[ifo].crop(segment.start + crop_length, segment.end - crop_length)
+                    input_ts[ifo] = input_ts[ifo].resample(resample)
+                proc_ts[ifo] = input_ts[ifo]
+
+            processed_ts.append(proc_ts)
+
+        return processed_ts

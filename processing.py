@@ -65,6 +65,8 @@ waveforms = wav.generate_waveforms(
 # Rescaling and Injection.
 flow = config['data']['processing']['flow']
 fhigh = config['data']['processing']['fhigh']
+resample = config['data']['processing']['resample']
+crop_length = config['data']['processing']['crop_length']
 target_snr_low = config['data']['gw_anomaly']['target_snr_low']
 target_snr_high = config['data']['gw_anomaly']['target_snr_high']
 proc = Process(
@@ -78,9 +80,22 @@ injected_ts, snrs = proc.inject(
     target_snr_high=target_snr_high,
     background_segments=bg_segs,
 )
-print(snrs)
 
 # Processing data.
+timeseries = injected_ts
+processed_data = proc.get_proccessed_data(
+    timeseries=timeseries,
+    background_segments=bg_segs,
+    flow=flow,
+    fhigh=fhigh,
+    resample=resample,
+    crop_length=crop_length,
+)
+for ifo in ifos:
+    print(processed_data[0][ifo].t0)
+    print(processed_data[0][ifo].duration)
+    print(processed_data[0][ifo].sample_rate)
+    # processed_data[0][ifo].plot().savefig(f"{ifo}-proc_ts_2.png")
 
 # Uploading processed data to s3 buckets.
 
