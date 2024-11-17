@@ -102,7 +102,7 @@ class Process():
 
             current_snr = self.network_snr(snrs)
             scale_factor = target_snr/current_snr
-            print(f"waveform_id: {i}, snrs: {snrs.items()}, network_snr: {current_snr}, target_snr: {target_snr}")
+            # print(f"waveform_id: {i}, snrs: {snrs.items()}, network_snr: {current_snr}, target_snr: {target_snr}")
             for ifo in self.ifos:
                 sigs[ifo] = scale_factor * sigs[ifo]
                 snrs[ifo] = self.estimate_snr(sigs[ifo], asds[ifo], flow, fhigh)
@@ -112,12 +112,40 @@ class Process():
 
         return rescaled_waveforms, rescaled_snrs
             
-
     def inject(
             self,
+            waveforms: list,
+            background_segments: dict,
+            flow: float=30,
+            fhigh: float=1500,
+            target_snr_low: float=None,
+            target_snr_high: float=None,
     ):
+        if (target_snr_low == None) and (target_snr_high == None):
+            target_snr_low = 1
+            target_snr_high = 1
 
-        return
+        rescaled_waveforms, rescaled_snrs = self.rescale(
+            waveforms=waveforms,
+            target_snr_low=target_snr_low,
+            target_snr_high=target_snr_high,
+            background_segments=background_segments,
+            flow=flow,
+            fhigh=fhigh,
+        )
+        
+        injected_ts = []
+        for i, waveform in enumerate(rescaled_waveforms):
+            inj_ts = dict.fromkeys(self.ifos)
+            for ifo in self.ifos:
+                segment = background_segments[ifo][i]
+                ts = self.get_ts(ifo, segment)
+                waveform[ifo].t0 = ts.t0
+                inj_ts[ifo] = ts.inject(waveform[ifo])
+
+            injected_ts.append(inj_ts)
+
+        return injected_ts, rescaled_snrs
 
     def get_proccessed_data(
             self,

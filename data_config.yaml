@@ -23,7 +23,7 @@ data:
     glitch_window_length: 4
     output_file:
   gw_anomaly:
-    waveform: 'bbh'
+    waveform: 'lfsg'
     qm_file: './ccsn_source/Pan_2021/SR.h5'
     sampling_frequency: 16384
     length: 4

@@ -15,6 +15,7 @@ ifos = config['data']['ifos']
 data_cache = config['data']['data_cache']
 asd_cache = config['data']['asd_cache']
 injection = config['data']['injection']
+keep_waveform = config['data']['gw_anomaly']['keep_waveform']
 
 # Loading the information of the target segments.
 background_segment_files = dict.fromkeys(ifos)
@@ -71,19 +72,13 @@ proc = Process(
     data_cache=data_cache,
     asd_cache=asd_cache,
 )
-rescaled_waveforms, rescaled_snrs = proc.rescale(
+injected_ts, snrs = proc.inject(
     waveforms=waveforms,
     target_snr_low=target_snr_low,
     target_snr_high=target_snr_high,
     background_segments=bg_segs,
 )
-
-        # ts = proc.get_ts(ifo, segment)
-        # signal.t0 = ts.t0
-        # inj_ts = ts.inject(signal)
-        # injs[ifo] = inj_ts
-    # inj_tss.append(injs)
-
+print(snrs)
 
 # Processing data.
 
