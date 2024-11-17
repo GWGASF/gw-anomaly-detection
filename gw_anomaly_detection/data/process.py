@@ -1,5 +1,6 @@
 #!/bin/python
 import glob
+import re
 import numpy as np
 from gwpy.timeseries import TimeSeries
 from gwpy.frequencyseries import FrequencySeries
@@ -7,17 +8,21 @@ from gwpy.frequencyseries import FrequencySeries
 class Process():
     def __init__(
         self,
-        ifo: str,
+        ifos: list,
+        data_cache: str,
+        asd_cache: str,
     ):
-        self.ifo = ifo
+        self.ifos = ifos
+        self.data_cache = data_cache
+        self.asd_cache = asd_cache
 
     def get_ts(
             self,
-            data_cache: str,
+            ifo: str,
             segment: tuple,
             format: str="hdf5",
     ):
-        source = glob.glob(f"{data_cache}/{self.ifo}/*.{format}")
+        source = glob.glob(f"{self.data_cache}/{ifo}/*.{format}")
         source.sort()
         start = segment.start
         end = segment.end
@@ -33,19 +38,33 @@ class Process():
 
     def get_asd(
             self,
+            ifo: str,
             segment: tuple,
-            asd_cache: str,
+            format: str="txt",
     ):
-        asd = 'asd'
+        start = segment.start
+        parse_time = re.compile(r"-[0-9]*-[0-9]*")
+        asds = glob.glob(f"{self.asd_cache}/{ifo}/*.{format}")
+        asds.sort()
+        for file in asds:
+            asd_start = int(parse_time.findall(file)[0].split('-')[1])
+            duration = int(parse_time.findall(file)[0].split('-')[2])
+            asd_end = asd_start + duration
+            if (start >= asd_start) and (start < asd_end):
+                asd_file = file
+                break
+
+        asd = FrequencySeries.read(asd_file)
         return asd
 
     def estimate_snr(
             self,
             signal,
             asd,
-            flow=30,
-            fhigh=1500
+            flow: float=30,
+            fhigh: float=1500,
         ):
+        asd = asd.interpolate(1/signal.duration.value)
         sigf = signal.fft()
         sigf = sigf/sigf.df
         snrf = sigf.conj()*sigf/asd**2
@@ -54,31 +73,45 @@ class Process():
 
     def network_snr(
             self,
-            snrs,
+            snrs: dict,
         ):
-        return np.sqrt(np.square(np.array(snrs)).sum())
+        snrs_list = list(snrs.values())
+        return np.sqrt(np.square(np.array(snrs_list)).sum())
 
-    def rescale_snr(
+    def rescale(
             self,
-            target_snr,
-            signals,
-            asds,
-            flow=30,
-            fhigh=1500
+            waveforms: list,
+            target_snr_low: float,
+            target_snr_high: float,
+            background_segments: dict,
+            flow: float=30,
+            fhigh: float=1500,
         ):
-        ifos = list(signals.keys())
-        ifo_snrs = dict.fromkeys(ifos) 
-        re_sigs = dict.fromkeys(ifos) 
-        re_ifo_snrs = dict.fromkeys(ifos) 
-        for ifo in ifos:
-            ifo_snrs[ifo] = self.estimate_snr(signals[ifo], asds[ifo], flow, fhigh)
+        rescaled_waveforms = []
+        rescaled_snrs = []
+        for i, waveform in enumerate(waveforms):
+            target_snr = np.random.uniform(target_snr_low, target_snr_high)
+            sigs = dict.fromkeys(self.ifos)
+            asds = dict.fromkeys(self.ifos)
+            snrs = dict.fromkeys(self.ifos)
+            for ifo in self.ifos:
+                segment = background_segments[ifo][i]
+                sigs[ifo] = waveform[ifo]
+                asds[ifo] = self.get_asd(ifo, segment)
+                snrs[ifo] = self.estimate_snr(sigs[ifo], asds[ifo], flow, fhigh)
 
-        current_snr = self.network_snr(list(ifo_snrs.values()))
-        scale_factor = target_snr/current_snr
-        for ifo in ifos:
-            re_sigs[ifo] = scale_factor * signals[ifo]
-            re_ifo_snrs[ifo] = scale_factor * ifo_snrs[ifo]
-        return re_sigs, re_ifo_snrs
+            current_snr = self.network_snr(snrs)
+            scale_factor = target_snr/current_snr
+            print(f"waveform_id: {i}, snrs: {snrs.items()}, network_snr: {current_snr}, target_snr: {target_snr}")
+            for ifo in self.ifos:
+                sigs[ifo] = scale_factor * sigs[ifo]
+                snrs[ifo] = self.estimate_snr(sigs[ifo], asds[ifo], flow, fhigh)
+
+            rescaled_waveforms.append(sigs)
+            rescaled_snrs.append(snrs)
+
+        return rescaled_waveforms, rescaled_snrs
+            
 
     def inject(
             self,

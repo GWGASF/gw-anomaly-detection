@@ -1,22 +1,25 @@
 data:
-  ifo: "H1"
-  start: 1238166018
-  end: 1238856499
-  # ifo: "L1"
-  # start: 1238166018
-  # end: 1238772909
+  ifos: ["H1", "L1"]
+  start:
+    H1: 1238166018
+    L1: 1238166018
+  end: 
+    H1: 1238856499
+    L1: 1238772909
   data_cache: "/home/chiajui/data_cache"
   asd_cache: "/home/chiajui/gw-anomaly-detection/asds"
   injection: True
   output_dir:
   background:
-    segment_files: ["./segments/O3a/H1-background_samples-1238172987-23806.segwizard"]
-    # segment_files: ["./segments/O3a/L1-background_samples-1238205073-23812.segwizard"]
+    segment_files:
+      H1: ["./segments/O3a/H1-background_samples-1238172987-23806.segwizard"]
+      L1: ["./segments/O3a/L1-background_samples-1238205073-23812.segwizard"]
     min_window_length: 4
     output_file:
   glitch:
-    segment_files: ["./segments/O3a/H1-glitch_samples-1238172987-23806.segwizard"]
-    # segment_files: ["./segments/O3a/L1-glitch_samples-1238205073-23812.segwizard"]
+    segment_files:
+      H1: ["./segments/O3a/H1-glitch_samples-1238172987-23806.segwizard"]
+      L1: ["./segments/O3a/L1-glitch_samples-1238205073-23812.segwizard"]
     glitch_window_length: 4
     output_file:
   gw_anomaly:
