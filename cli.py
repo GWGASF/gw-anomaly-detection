@@ -56,7 +56,7 @@ wav = Waveforms(
     length=length,
     sampling_frequency=sampling_frequency,
 )
-waveforms = wav.generate_waveforms(
+waveforms, params = wav.generate_waveforms(
     waveform,
     number,
     qm_file=qm_file,
@@ -92,10 +92,10 @@ processed_data = proc.get_proccessed_data(
     crop_length=crop_length,
 )
 for ifo in ifos:
-    print(processed_data[0][ifo].t0)
-    print(processed_data[0][ifo].duration)
-    print(processed_data[0][ifo].sample_rate)
-    # processed_data[0][ifo].plot().savefig(f"{ifo}-proc_ts_2.png")
+    # print(processed_data[0][ifo].t0)
+    # print(processed_data[0][ifo].duration)
+    # print(processed_data[0][ifo].sample_rate)
+    processed_data[0][ifo].plot().savefig(f"./test/{ifo}-test.png")
 
 # Uploading processed data to s3 buckets.
 

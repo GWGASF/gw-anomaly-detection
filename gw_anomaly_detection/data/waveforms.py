@@ -267,8 +267,8 @@ class Waveforms():
             pad_signal = pad_signal[:self.length*self.sampling_frequency]
         signal_ts = TimeSeries(
             pad_signal,
-            name=f'{ifo}:BBH_SIG',
-            channel=f'{ifo}:BBH_SIG',
+            name=f'{ifo}:CCSN_SIG',
+            channel=f'{ifo}:CCSN_SIG',
             sample_rate=self.sampling_frequency,
             t0=t0,
         )
@@ -319,4 +319,4 @@ class Waveforms():
             
             waveforms.append(wav)
         
-        return waveforms
+        return waveforms, params
