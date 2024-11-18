@@ -162,7 +162,6 @@ with h5py.File(f"{output_dir}/test_data.hdf5", 'w') as w:
         for ifo in ifos:
             waveform_data[ifo] = np.array([waveform[ifo] for waveform in processed_waveforms])
             channel = str(processed_waveforms[0][ifo].channel)
-            print(waveform_data[ifo][0])
             waveform_dset = w.create_dataset(
                 f"waveform_{ifo}",
                 shape=waveform_data[ifo].shape,
