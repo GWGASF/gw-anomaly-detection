@@ -1,6 +1,7 @@
 #!/bin/python
 import os
 import yaml
+import h5py
 import numpy as np
 from gw_anomaly_detection.data.segments import SegmentInfo
 from gw_anomaly_detection.data.s3_utils import S3_session
@@ -15,6 +16,7 @@ ifos = config['data']['ifos']
 data_cache = config['data']['data_cache']
 asd_cache = config['data']['asd_cache']
 injection = config['data']['injection']
+output_dir = config['data']['output_dir']
 keep_waveform = config['data']['gw_anomaly']['keep_waveform']
 
 # Loading the information of the target segments.
@@ -74,7 +76,7 @@ proc = Process(
     data_cache=data_cache,
     asd_cache=asd_cache,
 )
-injected_ts, snrs = proc.inject(
+injected_ts, rescaled_waveforms, snrs = proc.inject(
     waveforms=waveforms,
     target_snr_low=target_snr_low,
     target_snr_high=target_snr_high,
