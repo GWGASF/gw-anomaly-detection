@@ -91,12 +91,21 @@ processed_data = proc.get_proccessed_data(
     resample=resample,
     crop_length=crop_length,
 )
-for ifo in ifos:
-    # print(processed_data[0][ifo].t0)
-    # print(processed_data[0][ifo].duration)
-    # print(processed_data[0][ifo].sample_rate)
-    processed_data[0][ifo].plot().savefig(f"./test/{ifo}-test.png")
+
+# Write data to hdf5 files.
+print(len(params))
+print(params[0])
+print(len(waveforms))
+# print(waveforms[0])
+print(len(snrs))
+print(snrs[0])
+print(len(processed_data))
+# print(processed_data[0])
+# for ifo in ifos:
+#     network_snr = snrs[0]['network_snr']
+#     snr = snrs[0][ifo]
+#     processed_data[0][ifo].plot(title=f"{ifo}: {waveform}, SNR: {snr}, Network SNR: {network_snr}").savefig(f"./test/{ifo}-test.png")
 
 # Uploading processed data to s3 buckets.
 
-# Gathering data.
+# Gathering data on s3 buckets.

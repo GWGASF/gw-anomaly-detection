@@ -107,6 +107,8 @@ class Process():
                 sigs[ifo] = scale_factor * sigs[ifo]
                 snrs[ifo] = self.estimate_snr(sigs[ifo], asds[ifo], flow, fhigh)
 
+            network_snr = self.network_snr(snrs)
+            snrs["network_snr"] = network_snr
             rescaled_waveforms.append(sigs)
             rescaled_snrs.append(snrs)
 
