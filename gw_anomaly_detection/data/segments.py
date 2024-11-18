@@ -4,7 +4,7 @@ import numpy as np
 from gwpy.segments import Segment
 from gwpy.segments import SegmentList
 
-class segment_info():
+class SegmentInfo():
     def __init__(
             self,
             ifo: str,
@@ -12,6 +12,17 @@ class segment_info():
         """ The information about the science segments and glitch triggers from Omicron.
         """
         self.get_segs = None
+
+    def read_segment_files(
+            self,
+            segment_files: list,
+    ):
+        output_segs = SegmentList([])
+        for file in segment_files:
+            output_segs.extend(SegmentList.read(file, format='segwizard'))
+
+        output_segs.sort()
+        return output_segs
 
     def load_segment_info(
             self,
@@ -21,9 +32,7 @@ class segment_info():
             end: float,
         ) -> None:
         # Get science segments with start and end time.
-        self.loaded_segs = SegmentList([])
-        for file in segment_files:
-            self.loaded_segs.extend(SegmentList.read(file, format='segwizard'))
+        self.loaded_segs = self.read_segment_files(segment_files)
 
         self.target_seg = Segment(start, end)
         self.selected_segs = SegmentList([])
@@ -158,3 +167,16 @@ class segment_info():
             print(f"Sample segments written to {output_file}")
 
         return sample_segs
+
+    def whole_segment(
+            self,
+            segment_file: str,
+    ):
+        seglist = SegmentList.read(
+            segment_file,
+            format='segwizard',
+        )
+        starts = [seg.start.gpsSeconds for seg in seglist]
+        ends = [seg.end.gpsSeconds for seg in seglist]
+        interval = (min(starts), max(ends))
+        return interval

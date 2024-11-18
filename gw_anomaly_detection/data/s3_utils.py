@@ -12,7 +12,7 @@ sys.path.append(
     os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir, os.path.pardir))
 )
 
-class s3_session(boto3.Session):
+class S3_session(boto3.Session):
     def __init__(
             self,
             s3_config: dict,
@@ -97,7 +97,9 @@ class s3_session(boto3.Session):
             os.mkdir(data_cache)
 
         for file in download_list:
-            file_name = data_cache+'/'+file.split('/')[-1]
+            if not os.path.exists(data_cache+'/'+ifo):
+                os.mkdir(data_cache+'/'+ifo)
+            file_name = data_cache+'/'+ifo+'/'+file.split('/')[-1]
             self.s3client.download_file(
                 bucket,
                 file,
