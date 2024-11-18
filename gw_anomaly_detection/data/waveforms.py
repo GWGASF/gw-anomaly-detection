@@ -272,6 +272,12 @@ class Waveforms():
             sample_rate=self.sampling_frequency,
             t0=t0,
         )
+        if (signal_ts.duration.value > self.length):
+            crop_ed = -int((signal_ts.duration.value - self.length)*signal_ts.sample_rate.value)
+            signal_ts = signal_ts.crop(end=signal_ts.times[crop_ed])
+        if (signal_ts.duration.value < self.length):
+            pad_width = (int((self.length - signal_ts.duration.value)*signal_ts.sample_rate.value), 0)
+            signal_ts = signal_ts.pad(pad_width)
         return signal_ts
 
     def parse_waveforms(
