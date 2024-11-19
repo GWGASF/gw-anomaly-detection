@@ -93,20 +93,22 @@ class Process():
             target_snr = np.random.uniform(target_snr_low, target_snr_high)
             sigs = dict.fromkeys(self.ifos)
             asds = dict.fromkeys(self.ifos)
-            snrs = dict.fromkeys(self.ifos)
+            snrs = dict.fromkeys([f"snr_{ifo}" for ifo in self.ifos])
             for ifo in self.ifos:
                 segment = background_segments[ifo][i]
                 sigs[ifo] = waveform[ifo]
                 asds[ifo] = self.get_asd(ifo, segment)
-                snrs[ifo] = self.estimate_snr(sigs[ifo], asds[ifo], flow, fhigh)
+                snrs[f"snr_{ifo}"] = self.estimate_snr(sigs[ifo], asds[ifo], flow, fhigh)
 
             current_snr = self.network_snr(snrs)
             scale_factor = target_snr/current_snr
             # print(f"waveform_id: {i}, snrs: {snrs.items()}, network_snr: {current_snr}, target_snr: {target_snr}")
             for ifo in self.ifos:
                 sigs[ifo] = scale_factor * sigs[ifo]
-                snrs[ifo] = self.estimate_snr(sigs[ifo], asds[ifo], flow, fhigh)
+                snrs[f"snr_{ifo}"] = self.estimate_snr(sigs[ifo], asds[ifo], flow, fhigh)
 
+            network_snr = self.network_snr(snrs)
+            snrs["network_snr"] = network_snr
             rescaled_waveforms.append(sigs)
             rescaled_snrs.append(snrs)
 
@@ -145,7 +147,7 @@ class Process():
 
             injected_ts.append(inj_ts)
 
-        return injected_ts, rescaled_snrs
+        return injected_ts, rescaled_waveforms, rescaled_snrs
 
     def get_proccessed_data(
             self,

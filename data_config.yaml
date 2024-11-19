@@ -9,7 +9,7 @@ data:
   data_cache: "/home/chiajui/data_cache"
   asd_cache: "/home/chiajui/gw-anomaly-detection/asds"
   injection: True
-  output_dir:
+  output_dir: "/home/chiajui/test_data"
   background:
     segment_files:
       H1: ["./segments/O3a/H1-background_samples-1238172987-23806.segwizard"]
@@ -23,13 +23,13 @@ data:
     glitch_window_length: 4
     output_file:
   gw_anomaly:
-    waveform: 'lfsg'
+    waveform: 'ccsn'
     qm_file: './ccsn_source/Pan_2021/SR.h5'
     sampling_frequency: 16384
     length: 4
     target_snr_low: 12
     target_snr_high: 24
-    keep_waveform: False
+    keep_waveform: True
   processing:
     window_length: 4
     flow: 30
