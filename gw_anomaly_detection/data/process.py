@@ -187,9 +187,6 @@ class Process():
         processed_data: list,
         processed_waveforms: list=None,
     ):
-        if not os.path.exists(output_file):
-            os.makedirs(output_file)
-
         with h5py.File(output_file, 'w') as w:
             # Waveform Parameters
             param_names = list(waveform_parameters[0].keys())
@@ -255,19 +252,22 @@ class Process():
 
         return
 
-    def get_processed_noise(
+    def get_processed_glitch(
             self,
-            noise_segments: dict,
+            glitch_segments: dict,
             start_id: int=None,
             end_id: int=None,
+            glitch_info_files: dict=None,
+            glitch_window_length: float=4,
             flow: float=30,
             fhigh: float=1500,
             resample: float=4096,
             crop_length: float=1,
     ):
-        noise_ts = dict.fromkeys(self.ifos)
+        glitch_infos = dict.fromkeys(self.ifos)
+        processed_glitch = dict.fromkeys(self.ifos)
         for ifo in self.ifos:
-            seg_length = len(noise_segments[ifo])
+            seg_length = len(glitch_segments[ifo])
             if start_id == None:
                 st = 0
             if end_id > seg_length:
@@ -275,9 +275,9 @@ class Process():
             else:
                 st = start_id
                 ed = end_id
-
+            # Process glitch.
             proc_ts = []
-            for segment in noise_segments[ifo][st:ed]:
+            for segment in glitch_segments[ifo][st:ed]:
                 ts = self.get_ts(ifo, segment)
                 asd = self.get_asd(ifo, segment)
                 asd = asd.interpolate(1/ts.duration.value)
@@ -287,33 +287,135 @@ class Process():
                 ts = ts.crop(segment.start + crop_length, segment.end - crop_length)
                 proc_ts.append(ts)
             
-            noise_ts[ifo] = proc_ts
+            processed_glitch[ifo] = proc_ts
+            # Get glitch info.
+            starts = [seg[0] for seg in glitch_segments[ifo][st:ed]]
+            ends = [seg[1] for seg in glitch_segments[ifo][st:ed]]
+            interval = (min(starts), max(ends))
+            select_infos = []
+            for file in glitch_info_files[ifo]:
+                with h5py.File(file, 'r') as f:
+                    infos = f['glitch_info']
+                    for info in infos:
+                        trig_time = info['time']
+                        after_start =  trig_time - glitch_window_length/2 >= interval[0]
+                        before_end =  trig_time + glitch_window_length/2 <= interval[1]
+                        if after_start and before_end:
+                            select_infos.append(info)
 
-        return noise_ts
+            glitch_infos[ifo] = select_infos
 
-    # def write_noise_data(
-    #         self,
-    #         kind: str,
-    #         output_file: str,
-    #         processed_noise: dict,
-    #         glitch_info_files: dict=None,
-    # ):
-    #     if kind == "glitch":
-    #         ifos = list(glitch_info_files.keys())
-    #         output_infos = dict.fromkeys(ifos)
-    #         for ifo in ifos:
-    #             starts = [ts.t0.value for ts in processed_noise[ifo]]
-    #             ends = [ts.t0.value + ts.duration.value for ts in processed_noise[ifo]]
+        return processed_glitch, glitch_infos
 
-    #             glitch_infos = []
-    #             for file in glitch_info_files[ifo]:
-    #                 with h5py.File(file, 'r') as f:
-    #                     for i, st, ed in enumerate(zip(starts, ends)):
-    #                         if f['glitch_info']['time']
+    def write_glitch_data(
+            self,
+            output_file: str,
+            processed_glitch: dict,
+            glitch_infos: dict,
+    ):
+        ifos = list(processed_glitch.keys())
+        with h5py.File(output_file, 'w') as w:
+            for ifo in ifos:
+                # Glitch Info
+                info_names = list(glitch_infos[ifo][0].dtype.names)
+                info_formats = []
+                for name in info_names:
+                    if isinstance(glitch_infos[ifo][0][name], float) or isinstance(glitch_infos[ifo][0][name], int):
+                            info_formats.append('f8')
+                    if isinstance(glitch_infos[ifo][0][name], bytes):
+                        info_formats.append(h5py.string_dtype(encoding="ascii"))
+            
+                info_dtype = np.dtype({'names': info_names, 'formats': info_formats})
+                info_data = np.stack(glitch_infos[ifo])
+                w.create_dataset(
+                    f"{ifo}_glitch_info",
+                    shape=info_data.shape,
+                    dtype=info_data.dtype,
+                    data=info_data,
+                )
+                # Time Series Data
+                glitch_data = np.stack([data.value for data in processed_glitch[ifo]])
+                t0_data = np.stack([data.t0.value for data in processed_glitch[ifo]])
+                sample_rate = 1/processed_glitch[ifo][0].dt.value
+                glitch_dset = w.create_dataset(
+                    ifo,
+                    shape=glitch_data.shape,
+                    dtype=glitch_data.dtype,
+                    data=glitch_data,
+                )
+                glitch_dset.attrs['sample_rate'] = sample_rate
+                glitch_dset.attrs['channel'] = f"{ifo}:GLITCH"
+                w.create_dataset(
+                    f"t0_{ifo}",
+                    shape=t0_data.shape,
+                    dtype=t0_data.dtype,
+                    data=t0_data,
+                )
 
-    #             output_infos[ifo] = glitch_infos
+        return
 
-    #     if kind == "background":
-    #         print("background")
+    def get_processed_background(
+            self,
+            background_segments: dict,
+            start_id: int=None,
+            end_id: int=None,
+            window_length: float=4,
+            flow: float=30,
+            fhigh: float=1500,
+            resample: float=4096,
+            crop_length: float=1,
+    ):
+        processed_background = dict.fromkeys(self.ifos)
+        for ifo in self.ifos:
+            seg_length = len(background_segments[ifo])
+            if start_id == None:
+                st = 0
+            if end_id > seg_length:
+                ed = seg_length
+            else:
+                st = start_id
+                ed = end_id
+            # Process background.
+            proc_ts = []
+            for segment in background_segments[ifo][st:ed]:
+                ts = self.get_ts(ifo, segment)
+                asd = self.get_asd(ifo, segment)
+                asd = asd.interpolate(1/ts.duration.value)
+                ts = ts.whiten(asd=asd)
+                ts = ts.bandpass(flow, fhigh)
+                ts = ts.resample(resample)
+                ts = ts.crop(segment.start + crop_length, segment.end - crop_length)
+                proc_ts.append(ts)
+            
+            processed_background[ifo] = proc_ts
 
-    #     return
+        return processed_background
+
+    def write_background_data(
+            self,
+            output_file: str,
+            processed_background: dict,
+    ):
+        ifos = list(processed_background.keys())
+        with h5py.File(output_file, 'w') as w:
+            for ifo in ifos:
+                # Time Series Data
+                background_data = np.stack([data.value for data in processed_background[ifo]])
+                t0_data = np.stack([data.t0.value for data in processed_background[ifo]])
+                sample_rate = 1/processed_background[ifo][0].dt.value
+                glitch_dset = w.create_dataset(
+                    ifo,
+                    shape=background_data.shape,
+                    dtype=background_data.dtype,
+                    data=background_data,
+                )
+                glitch_dset.attrs['sample_rate'] = sample_rate
+                glitch_dset.attrs['channel'] = f"{ifo}:BACKGROUND_NOISE"
+                w.create_dataset(
+                    f"t0_{ifo}",
+                    shape=t0_data.shape,
+                    dtype=t0_data.dtype,
+                    data=t0_data,
+                )
+
+        return

@@ -29,11 +29,20 @@ class SegmentInfo():
 
     def whole_segment(
             self,
-            segment_file: str,
+            segment_list: list=None,
+            segment_file: list=None,
     ):
-        seglist = self.read_segment_files(segment_file)
-        starts = [seg.start for seg in seglist]
-        ends = [seg.end for seg in seglist]
+        if segment_list == None and segment_file == None:
+            raise RuntimeError("Please provide a segment list or a segment file.")
+        if segment_list != None and segment_file != None:
+            raise RuntimeError("Please don't use segment list and segment file at the same time.")
+        if segment_list != None:
+            seglist = segment_list
+        if segment_file != None:
+            seglist = self.read_segment_files(segment_file)
+
+        starts = [seg[0] for seg in seglist]
+        ends = [seg[1] for seg in seglist]
         interval = (min(starts), max(ends))
         return interval
 
@@ -43,6 +52,7 @@ class SegmentInfo():
             glitch_info_file: str,
             start: float,
             end: float,
+            glitch_window_length: float=4,
         ) -> None:
         # Get science segments with start and end time.
         self.loaded_segs = self.read_segment_files(segment_files)
@@ -60,7 +70,7 @@ class SegmentInfo():
         self.selected_times = []
         for time in self.glitch_times:
             for seg in self.selected_segs:
-                if time - seg.start >= 2 and time - seg.end <= 2:
+                if time - seg.start >= glitch_window_length/2 and time - seg.end <= glitch_window_length/2:
                     self.selected_times.append(time)
 
         return
@@ -95,7 +105,7 @@ class SegmentInfo():
                 if to_new_seg:
                     previous = seg_st
                 time = self.selected_times.pop(0)
-                if (time - seg_st >= 0 and time - seg_ed <=0):
+                if (time - seg_st >= 0 and time - seg_ed <= 0):
                     bg_segs.append(Segment(previous, time))
                     previous = time
                     to_new_seg = False
@@ -107,7 +117,7 @@ class SegmentInfo():
 
             for seg in bg_segs:
                 if (seg.end - seg.start) >= (min_window_length + glitch_window_length):
-                    cropped_seg = Segment(seg.start+2, seg.end-2)
+                    cropped_seg = Segment(seg.start + glitch_window_length/2, seg.end - glitch_window_length/2)
                     output_segs.append(cropped_seg)
 
         self.get_segs = output_segs

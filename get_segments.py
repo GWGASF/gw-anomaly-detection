@@ -13,6 +13,9 @@ def main():
             'L1': (1238166018, 1238772909),
         }
         start, end = interval[ifo]
+        glitch_window_length = 4
+        min_window_length = 4
+        window_length = 4
 
         SegInfo = SegmentInfo()
         kinds = ['glitch', 'background']
@@ -22,6 +25,7 @@ def main():
             glitch_info_file=glitch_info_file,
             start=start,
             end=end,
+            glitch_window_length=glitch_window_length,
         )
         for kind in kinds:
             output_file = f"segments/O3a/{ifo}-{kind}_segs-{start}-{int(end-start)}.segwizard"
@@ -29,8 +33,8 @@ def main():
                 kind=kind,
                 output_file=output_file,
                 output_file_format='segwizard',
-                glitch_window_length=4,
-                min_window_length=4,
+                glitch_window_length=glitch_window_length,
+                min_window_length=min_window_length,
             )
 
     # Get glitch samples.
@@ -57,7 +61,7 @@ def main():
 
     # Get background samples.
     kind = "background"
-    number_of_samples = 60000
+    number_of_samples = 5000
     sample_intervals = {
         'H1': (1238172987, 1238196793),
         'L1': (1238205073, 1238228885),
@@ -77,7 +81,32 @@ def main():
             segment_files=segment_files,
             output_file=output_file,
             output_file_format='segwizard',
-            window_length=4,
+            window_length=window_length,
+        )
+
+    # Get injection samples.
+    kind = "injection"
+    number_of_samples = 5000
+    sample_intervals = {
+        'H1': (1238172987, 1238196793),
+        'L1': (1238205073, 1238228885),
+    }
+    for ifo in ifos:
+        start, end = sample_intervals[ifo]
+        seg_file_st, seg_file_ed = interval[ifo]
+        segment_files = [
+            f"segments/O3a/{ifo}-background_segs-{seg_file_st}-{seg_file_ed-seg_file_st}.segwizard",
+        ]
+        output_file = f"segments/O3a/{ifo}-{kind}_samples-{start}-{end-start}.segwizard"
+
+        sample_segs = SegInfo.get_background_samples(
+            number_of_samples=number_of_samples,
+            start=start,
+            end=end,
+            segment_files=segment_files,
+            output_file=output_file,
+            output_file_format='segwizard',
+            window_length=window_length,
         )
 
 if __name__ == "__main__":
