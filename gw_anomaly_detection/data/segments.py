@@ -7,7 +7,6 @@ from gwpy.segments import SegmentList
 class SegmentInfo():
     def __init__(
             self,
-            ifo: str,
     ):
         """ The information about the science segments and glitch triggers from Omicron.
         """
@@ -17,12 +16,26 @@ class SegmentInfo():
             self,
             segment_files: list,
     ):
-        output_segs = SegmentList([])
+        output_segs = []
         for file in segment_files:
-            output_segs.extend(SegmentList.read(file, format='segwizard'))
+            with open(file, 'r') as f:
+                for line in f.readlines()[1:]:
+                    start = float(line.split("\t")[1])
+                    end = float(line.split("\t")[2])
+                    seg = Segment(start, end)
+                    output_segs.append(seg)
 
-        output_segs.sort()
-        return output_segs
+        return SegmentList(output_segs)
+
+    def whole_segment(
+            self,
+            segment_file: str,
+    ):
+        seglist = self.read_segment_files(segment_file)
+        starts = [seg.start for seg in seglist]
+        ends = [seg.end for seg in seglist]
+        interval = (min(starts), max(ends))
+        return interval
 
     def load_segment_info(
             self,
@@ -40,8 +53,6 @@ class SegmentInfo():
             if self.target_seg.intersects(seg):
                 self.selected_segs.append(self.target_seg & seg)
 
-        self.selected_segs.sort()
-
         # Get the trigger times of the glitches.
         with h5py.File(glitch_info_file, 'r') as f:
             self.glitch_times = f['glitch_info']['time'][:]
@@ -49,10 +60,10 @@ class SegmentInfo():
         self.selected_times = []
         for time in self.glitch_times:
             for seg in self.selected_segs:
-                if time >= seg.start and time <= seg.end:
+                if time - seg.start >= 2 and time - seg.end <= 2:
                     self.selected_times.append(time)
 
-        self.selected_times.sort()
+        return
 
     def get_segments(
             self,
@@ -103,33 +114,27 @@ class SegmentInfo():
 
         # Write the segment file.
         if (output_file != None) and (output_file_format != None):
-            output_segs.write(output_file, format=output_file_format)
-            print(f"Segment file written to {output_file}")
+            try:
+                output_segs.write(output_file, format=output_file_format)
+                print(f"Segment file written to {output_file}")
+            except Exception as e:
+                print(str(e))
 
         return output_segs
 
-    def get_samples(
+    def get_glitch_samples(
             self,
-            number_of_samples: int,
             start: float,
             end: float,
-            kind: str=None,
-            segment_file: str=None,
+            segment_files: list=None,
             output_file: str=None,
             output_file_format: str=None,
-            window_length: float=4,
     ):
-        if (kind != 'background') and (kind != 'glitch'):
-            raise RuntimeError("Please choose either \'glitch\' or \'background\'.")
-        if (segment_file == None) and (self.get_segs == None):
+        if (segment_files == None) and (self.get_segs == None):
             raise RuntimeError("Please get segments first or provide a segment file in order to sample from those segments.")
-        if segment_file != None:
+        if segment_files != None:
             try:
-                try_segs = SegmentList.read(
-                    segment_file,
-                    format="segwizard",
-                )
-                try_segs.sort()
+                try_segs = self.read_segment_files(segment_files)
                 self.get_segs = try_segs
             except Exception as e:
                 print(str(e))
@@ -143,10 +148,56 @@ class SegmentInfo():
 
         # Get the sample segments.
         sample_segs = SegmentList([])
-        if (kind == 'glitch') and (len(filtered_segs) < number_of_samples):
-            print(f"Number of glitches between {start} and {end} is {len(filtered_segs)} which is smaller than {number_of_samples}. Changing the number of samples to {len(filtered_segs)}.")
-            number_of_samples = len(filtered_segs)
+        for seg in filtered_segs:
+            try:
+                sample_st = seg.start
+                sample_ed = seg.end
+                seg = Segment(sample_st, sample_ed)
+                sample_segs.append(seg)
+            except Exception as e:
+                print(str(e))
+                continue
 
+        self.sample_segs = sample_segs
+
+        # Write the segment file.
+        if (output_file != None) and (output_file_format != None):
+            try:
+                sample_segs.write(output_file, format=output_file_format)
+                print(f"Sample segments written to {output_file}")
+            except Exception as e:
+                print(str(e))
+
+        return sample_segs
+
+    def get_background_samples(
+            self,
+            number_of_samples: int,
+            start: float,
+            end: float,
+            segment_files: list=None,
+            output_file: str=None,
+            output_file_format: str=None,
+            window_length: float=4,
+    ):
+        if (segment_files == None) and (self.get_segs == None):
+            raise RuntimeError("Please get segments first or provide a segment file in order to sample from those segments.")
+        if segment_files != None:
+            try:
+                try_segs = self.read_segment_files(segment_files)
+                self.get_segs = try_segs
+            except Exception as e:
+                print(str(e))
+
+        # Get the segments with the given interval for sampling.
+        sample_interval_seg = Segment(start, end)
+        filtered_segs = SegmentList([])
+        for seg in self.get_segs:
+            if sample_interval_seg.intersects(seg):
+                filtered_segs.append(sample_interval_seg & seg)
+
+        # Get the sample segments.
+        sample_segs = SegmentList([])
         seg_ids = np.random.randint(0, len(filtered_segs), number_of_samples)
         for id in seg_ids:
             try:
@@ -163,20 +214,10 @@ class SegmentInfo():
 
         # Write the segment file.
         if (output_file != None) and (output_file_format != None):
-            sample_segs.write(output_file, format=output_file_format)
-            print(f"Sample segments written to {output_file}")
+            try:
+                sample_segs.write(output_file, format=output_file_format)
+                print(f"Sample segments written to {output_file}")
+            except Exception as e:
+                print(str(e))
 
         return sample_segs
-
-    def whole_segment(
-            self,
-            segment_file: str,
-    ):
-        seglist = SegmentList.read(
-            segment_file,
-            format='segwizard',
-        )
-        starts = [seg.start.gpsSeconds for seg in seglist]
-        ends = [seg.end.gpsSeconds for seg in seglist]
-        interval = (min(starts), max(ends))
-        return interval

@@ -1,7 +1,5 @@
 #!/bin/python
-import os
 import yaml
-import h5py
 import numpy as np
 from gw_anomaly_detection.data.segments import SegmentInfo
 from gw_anomaly_detection.data.s3_utils import S3_session
@@ -16,24 +14,28 @@ ifos = config['data']['ifos']
 data_cache = config['data']['data_cache']
 asd_cache = config['data']['asd_cache']
 injection = config['data']['injection']
-output_dir = config['data']['output_dir']
+output_file = config['data']['output_file']
 keep_waveform = config['data']['gw_anomaly']['keep_waveform']
 
 # Loading the information of the target segments.
 background_segment_files = dict.fromkeys(ifos)
 glitch_segment_files = dict.fromkeys(ifos)
 bg_segs = dict.fromkeys(ifos)
+glitch_info_files = dict.fromkeys(ifos)
 glitch_segs = dict.fromkeys(ifos)
 interval = dict.fromkeys(ifos)
 for ifo in ifos:
     background_segment_files[ifo] = config['data']['background']['segment_files'][ifo]
+    glitch_info_files[ifo] = config['data']['glitch']['info_files'][ifo]
     glitch_segment_files[ifo] = config['data']['glitch']['segment_files'][ifo]
     seg_info = SegmentInfo(ifo)
     bg_segs[ifo] = seg_info.read_segment_files(background_segment_files[ifo])
-    glitch_segs[ifo] = seg_info.read_segment_files(glitch_segment_files[ifo])
     interval[ifo] = seg_info.whole_segment(background_segment_files[ifo])
-
     print(f"Number of background segments from {ifo}: {len(bg_segs[ifo])}, interval: {interval[ifo]}.")
+
+    glitch_segs[ifo] = seg_info.read_segment_files(glitch_segment_files[ifo])
+    interval[ifo] = seg_info.whole_segment(glitch_segment_files[ifo])
+    print(f"Number of glitch segments from {ifo}: {len(glitch_segs[ifo])}, interval: {interval[ifo]}.")
 
 # Loading strain and asd into data cache.
 # s3 = S3_session(config['s3'])
@@ -47,55 +49,46 @@ for ifo in ifos:
 #             data_cache=data_cache,
 #     )
 
-# Generating Waveform.
-waveform = config['data']['gw_anomaly']['waveform']
-qm_file = config['data']['gw_anomaly']['qm_file']
-sampling_frequency = config['data']['gw_anomaly']['sampling_frequency']
-length = config['data']['gw_anomaly']['length']
-number = 3
-wav = Waveforms(
-    ifos=ifos,
-    length=length,
-    sampling_frequency=sampling_frequency,
-)
-waveforms, params = wav.generate_waveforms(
-    waveform,
-    number,
-    qm_file=qm_file,
-)
-
-# Rescaling and Injection.
-flow = config['data']['processing']['flow']
-fhigh = config['data']['processing']['fhigh']
-resample = config['data']['processing']['resample']
-crop_length = config['data']['processing']['crop_length']
-target_snr_low = config['data']['gw_anomaly']['target_snr_low']
-target_snr_high = config['data']['gw_anomaly']['target_snr_high']
+# Processing data.
 proc = Process(
     ifos=ifos,
     data_cache=data_cache,
     asd_cache=asd_cache,
 )
-injected_ts, rescaled_waveforms, snrs = proc.inject(
-    waveforms=waveforms,
-    target_snr_low=target_snr_low,
-    target_snr_high=target_snr_high,
-    background_segments=bg_segs,
-)
+if injection:
+    # Generating Waveform.
+    number = 10
+    waveform = config['data']['gw_anomaly']['waveform']
+    qm_file = config['data']['gw_anomaly']['qm_file']
+    sampling_frequency = config['data']['gw_anomaly']['sampling_frequency']
+    length = config['data']['gw_anomaly']['length']
+    wav = Waveforms(
+        ifos=ifos,
+        length=length,
+        sampling_frequency=sampling_frequency,
+    )
+    waveforms, params = wav.generate_waveforms(
+        waveform,
+        number,
+        qm_file=qm_file,
+    )
 
-# Processing data.
-timeseries = injected_ts
-processed_data = proc.get_proccessed_data(
-    timeseries=timeseries,
-    background_segments=bg_segs,
-    flow=flow,
-    fhigh=fhigh,
-    resample=resample,
-    crop_length=crop_length,
-)
-if keep_waveform:
-    timeseries = rescaled_waveforms
-    processed_waveforms = proc.get_proccessed_data(
+    # Rescaling and Injection.
+    flow = config['data']['processing']['flow']
+    fhigh = config['data']['processing']['fhigh']
+    resample = config['data']['processing']['resample']
+    crop_length = config['data']['processing']['crop_length']
+    target_snr_low = config['data']['gw_anomaly']['target_snr_low']
+    target_snr_high = config['data']['gw_anomaly']['target_snr_high']
+    injected_ts, rescaled_waveforms, snrs = proc.inject(
+        waveforms=waveforms,
+        target_snr_low=target_snr_low,
+        target_snr_high=target_snr_high,
+        background_segments=bg_segs,
+    )
+
+    timeseries = injected_ts
+    processed_data = proc.get_proccessed_data(
         timeseries=timeseries,
         background_segments=bg_segs,
         flow=flow,
@@ -103,72 +96,46 @@ if keep_waveform:
         resample=resample,
         crop_length=crop_length,
     )
-
-# Write data to hdf5 files.
-param_names = list(params[0].keys())
-param_formats = []
-for name in param_names:
-    if isinstance(params[0][name], float) or isinstance(params[0][name], int):
-        param_formats.append('f8')
-    if isinstance(params[0][name], str):
-        param_formats.append(h5py.string_dtype(encoding="ascii"))
-
-snr_names = list(snrs[0].keys())
-snr_formats = ['f8' for i in range(len(snr_names))]
-names = param_names + snr_names
-formats = param_formats + snr_formats
-dt = np.dtype({'names': names, 'formats': formats})
-param_data = np.array(
-    [tuple(param.values()) + tuple(snr.values())
-        for param, snr in zip(params, snrs)],
-    dtype=dt,
-)
-
-if not os.path.exists(output_dir):
-    os.makedirs(output_dir)
-
-with h5py.File(f"{output_dir}/test_data.hdf5", 'w') as w:
-    w.create_dataset(
-        'waveform_parameters',
-        shape=param_data.shape,
-        dtype=dt,
-        data=param_data,
-    )
-
-    ifos = list(processed_data[0].keys())
-    proc_data = dict.fromkeys(ifos)
-    t0_data = dict.fromkeys(ifos)
-    for ifo in ifos:
-        proc_data[ifo] = np.array([data[ifo] for data in processed_data])
-        t0_data[ifo] = np.array([data[ifo].t0.value for data in processed_data])
-        sample_rate = processed_data[0][ifo].sample_rate.value
-        proc_dset = w.create_dataset(
-            ifo,
-            shape=proc_data[ifo].shape,
-            dtype=proc_data[ifo].dtype,
-            data=proc_data[ifo]
-        )
-        proc_dset.attrs['sample_rate'] = sample_rate
-        w.create_dataset(
-            f"t0_{ifo}",
-            shape=t0_data[ifo].shape,
-            dtype=t0_data[ifo].dtype,
-            data=t0_data[ifo]
-        )
-
     if keep_waveform:
-        ifos = list(processed_waveforms[0].keys())
-        waveform_data = dict.fromkeys(ifos)
-        for ifo in ifos:
-            waveform_data[ifo] = np.array([waveform[ifo] for waveform in processed_waveforms])
-            channel = str(processed_waveforms[0][ifo].channel)
-            waveform_dset = w.create_dataset(
-                f"waveform_{ifo}",
-                shape=waveform_data[ifo].shape,
-                dtype=waveform_data[ifo].dtype,
-                data=waveform_data[ifo]
-            )
-            waveform_dset.attrs['channel'] = channel
+        timeseries = rescaled_waveforms
+        processed_waveforms = proc.get_proccessed_data(
+            timeseries=timeseries,
+            background_segments=bg_segs,
+            flow=flow,
+            fhigh=fhigh,
+            resample=resample,
+            crop_length=crop_length,
+        )
+
+    # Write data to hdf5 files.
+    proc.write_injection_data(
+        output_file=output_file,
+        waveform_parameters=params,
+        snrs=snrs,
+        processed_data=processed_data,
+        processed_waveforms=processed_waveforms,
+    )
+else:
+    seg_start = 0
+    seg_end = 1
+    # noise_segments = bg_segs
+    noise_segments = glitch_segs
+    proc_noise = proc.get_processed_noise(
+        noise_segments=noise_segments,
+        seg_start=seg_start,
+        seg_end=seg_end,
+    )
+    for ifo in ifos:
+        print(ifo)
+        print(len(proc_noise[ifo]))
+        # print(proc_noise[ifo])
+
+    # proc.write_noise_data(
+    #     kind,
+    #     output_file=output_file,
+    #     processed_noise=proc_noise,
+    #     glitch_info_files=glitch_info_files,
+    # )
 
 # Uploading processed data to s3 buckets.
 

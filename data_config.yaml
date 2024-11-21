@@ -8,22 +8,25 @@ data:
     L1: 1238772909
   data_cache: "/home/chiajui/data_cache"
   asd_cache: "/home/chiajui/gw-anomaly-detection/asds"
-  injection: True
-  output_dir: "/home/chiajui/test_data"
+  injection: False
+  output_file: "/home/chiajui/test_data/data.hdf5"
   background:
     segment_files:
       H1: ["./segments/O3a/H1-background_samples-1238172987-23806.segwizard"]
       L1: ["./segments/O3a/L1-background_samples-1238205073-23812.segwizard"]
     min_window_length: 4
-    output_file:
+    output_file: "/home/chiajui/test_data/bg_data.hdf5"
   glitch:
+    info_files:
+      H1: ["./glitch_info/O3a/H1-glitch_info.hdf5"]
+      L1: ["./glitch_info/O3a/L1-glitch_info.hdf5"]
     segment_files:
       H1: ["./segments/O3a/H1-glitch_samples-1238172987-23806.segwizard"]
       L1: ["./segments/O3a/L1-glitch_samples-1238205073-23812.segwizard"]
     glitch_window_length: 4
-    output_file:
+    output_file: "/home/chiajui/test_data/glitch_data.hdf5"
   gw_anomaly:
-    waveform: 'ccsn'
+    waveform: 'bbh'
     qm_file: './ccsn_source/Pan_2021/SR.h5'
     sampling_frequency: 16384
     length: 4
