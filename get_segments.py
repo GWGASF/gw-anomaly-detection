@@ -2,6 +2,37 @@
 import yaml
 from gw_anomaly_detection.data.segments import SegmentInfo
 
+def generate_samples(
+        kind: str,
+        config: dict,
+        segment_files: dict,
+):
+    ifos = config['data'][kind]['ifos']
+    sample_interval = config['data'][kind]['sample_interval']
+    number_of_samples = config['data'][kind]['number_of_samples']
+    window_length = config['data']['processing']['window_length']
+    for ifo in ifos:
+        start = sample_interval[ifo]['start']
+        end = sample_interval[ifo]['end']
+        seg_file_st = config['data']['total_interval'][ifo]['start']
+        seg_file_ed = config['data']['total_interval'][ifo]['end']
+        segment_files = [
+            f"segments/O3a/{ifo}-background_segs-{int(seg_file_st)}-{int(seg_file_ed-seg_file_st)}.segwizard"
+        ]
+        output_file = f"segments/O3a/{ifo}-{kind}_samples_test-{int(start)}-{int(end-start)}.segwizard"
+
+        SegInfo = SegmentInfo()
+        SegInfo.get_background_samples(
+            number_of_samples=number_of_samples,
+            start=start,
+            end=end,
+            segment_files=segment_files,
+            output_file=output_file,
+            output_file_format='segwizard',
+            window_length=window_length,
+        )
+
+
 def main():
     # Loading data_config.yaml
     with open("./data_config.yaml", "r") as file:
@@ -29,7 +60,7 @@ def main():
             glitch_window_length=glitch_window_length,
         )
         for kind in kinds:
-            output_file = f"segments/O3a/{ifo}-{kind}_segs-{start}-{int(end-start)}.segwizard"
+            output_file = f"segments/O3a/{ifo}-{kind}_segs-{int(start)}-{int(end-start)}.segwizard"
             segs = SegInfo.get_segments(
                 kind=kind,
                 output_file=output_file,
@@ -60,52 +91,18 @@ def main():
         )
 
     # Get background samples.
-    kind = "background"
-    number_of_samples = 5000
-    sample_interval = config['data']['background']['sample_interval']
-    for ifo in ifos:
-        start = sample_interval[ifo]['start']
-        end = sample_interval[ifo]['end']
-        seg_file_st = total_interval[ifo]['start']
-        seg_file_ed = total_interval[ifo]['end']
-        segment_files = [
-            f"segments/O3a/{ifo}-{kind}_segs-{seg_file_st}-{seg_file_ed-seg_file_st}.segwizard",
-        ]
-        output_file = f"segments/O3a/{ifo}-{kind}_samples-{start}-{end-start}.segwizard"
-
-        sample_segs = SegInfo.get_background_samples(
-            number_of_samples=number_of_samples,
-            start=start,
-            end=end,
-            segment_files=segment_files,
-            output_file=output_file,
-            output_file_format='segwizard',
-            window_length=window_length,
-        )
+    generate_samples(
+        kind="background",
+        config=config,
+        segment_files=segment_files,
+    )
 
     # Get injection samples.
-    kind = "injection"
-    number_of_samples = 5000
-    sample_interval = config['data']['injection']['sample_interval']
-    for ifo in ifos:
-        start = sample_interval[ifo]['start']
-        end = sample_interval[ifo]['end']
-        seg_file_st = total_interval[ifo]['start']
-        seg_file_ed = total_interval[ifo]['end']
-        segment_files = [
-            f"segments/O3a/{ifo}-background_segs-{seg_file_st}-{seg_file_ed-seg_file_st}.segwizard",
-        ]
-        output_file = f"segments/O3a/{ifo}-{kind}_samples-{start}-{end-start}.segwizard"
-
-        sample_segs = SegInfo.get_background_samples(
-            number_of_samples=number_of_samples,
-            start=start,
-            end=end,
-            segment_files=segment_files,
-            output_file=output_file,
-            output_file_format='segwizard',
-            window_length=window_length,
-        )
+    generate_samples(
+        kind="injection",
+        config=config,
+        segment_files=segment_files,
+    )
 
 if __name__ == "__main__":
     main()
