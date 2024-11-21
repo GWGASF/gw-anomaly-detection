@@ -1,28 +1,29 @@
 #!/bin/python
+import yaml
 from gw_anomaly_detection.data.segments import SegmentInfo
 
 def main():
-    ifos = ['H1', 'L1']
-    for ifo in ifos:
-        segment_files = [
-            f"/home/chiajui/gw-anomaly-detection/segments/O3a/{ifo}-science_segs.segwizard",
-        ]
-        glitch_info_file = f"/home/chiajui/gw-anomaly-detection/glitch_info/O3a/{ifo}-glitch_info.hdf5"
-        interval = {
-            'H1': (1238166018, 1238856499),
-            'L1': (1238166018, 1238772909),
-        }
-        start, end = interval[ifo]
-        glitch_window_length = 4
-        min_window_length = 4
-        window_length = 4
+    # Loading data_config.yaml
+    with open("./data_config.yaml", "r") as file:
+        config = yaml.safe_load(file)
 
-        SegInfo = SegmentInfo()
+    ifos = config['data']['ifos']
+    segment_files = config['data']['segment_files']
+    glitch_info_files = config['data']['glitch']['glitch_info_files']
+    total_interval = config['data']['total_interval']
+    glitch_window_length = config['data']['glitch']['glitch_window_length']
+    min_window_length = config['data']['background']['min_window_length']
+    window_length = min_window_length
+
+    SegInfo = SegmentInfo()
+    for ifo in ifos:
+        start = total_interval[ifo]['start']
+        end = total_interval[ifo]['end']
         kinds = ['glitch', 'background']
         # Create segment files of the glitches and background noise.
         SegInfo.load_segment_info(
-            segment_files=segment_files,
-            glitch_info_file=glitch_info_file,
+            segment_files=segment_files[ifo],
+            glitch_info_files=glitch_info_files[ifo],
             start=start,
             end=end,
             glitch_window_length=glitch_window_length,
@@ -39,13 +40,12 @@ def main():
 
     # Get glitch samples.
     kind = "glitch"
-    sample_intervals = {
-        'H1': (1238172987, 1238196793),
-        'L1': (1238205073, 1238228885),
-    }
+    sample_interval = config['data']['glitch']['sample_interval']
     for ifo in ifos:
-        start, end = sample_intervals[ifo]
-        seg_file_st, seg_file_ed = interval[ifo]
+        start = sample_interval[ifo]['start']
+        end = sample_interval[ifo]['end']
+        seg_file_st = total_interval[ifo]['start']
+        seg_file_ed = total_interval[ifo]['end']
         segment_files = [
             f"segments/O3a/{ifo}-{kind}_segs-{seg_file_st}-{seg_file_ed-seg_file_st}.segwizard",
         ]
@@ -62,13 +62,12 @@ def main():
     # Get background samples.
     kind = "background"
     number_of_samples = 5000
-    sample_intervals = {
-        'H1': (1238172987, 1238196793),
-        'L1': (1238205073, 1238228885),
-    }
+    sample_interval = config['data']['background']['sample_interval']
     for ifo in ifos:
-        start, end = sample_intervals[ifo]
-        seg_file_st, seg_file_ed = interval[ifo]
+        start = sample_interval[ifo]['start']
+        end = sample_interval[ifo]['end']
+        seg_file_st = total_interval[ifo]['start']
+        seg_file_ed = total_interval[ifo]['end']
         segment_files = [
             f"segments/O3a/{ifo}-{kind}_segs-{seg_file_st}-{seg_file_ed-seg_file_st}.segwizard",
         ]
@@ -87,13 +86,12 @@ def main():
     # Get injection samples.
     kind = "injection"
     number_of_samples = 5000
-    sample_intervals = {
-        'H1': (1238172987, 1238196793),
-        'L1': (1238205073, 1238228885),
-    }
+    sample_interval = config['data']['injection']['sample_interval']
     for ifo in ifos:
-        start, end = sample_intervals[ifo]
-        seg_file_st, seg_file_ed = interval[ifo]
+        start = sample_interval[ifo]['start']
+        end = sample_interval[ifo]['end']
+        seg_file_st = total_interval[ifo]['start']
+        seg_file_ed = total_interval[ifo]['end']
         segment_files = [
             f"segments/O3a/{ifo}-background_segs-{seg_file_st}-{seg_file_ed-seg_file_st}.segwizard",
         ]

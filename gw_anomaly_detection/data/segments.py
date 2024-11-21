@@ -49,7 +49,7 @@ class SegmentInfo():
     def load_segment_info(
             self,
             segment_files: list,
-            glitch_info_file: str,
+            glitch_info_files: list,
             start: float,
             end: float,
             glitch_window_length: float=4,
@@ -64,8 +64,11 @@ class SegmentInfo():
                 self.selected_segs.append(self.target_seg & seg)
 
         # Get the trigger times of the glitches.
-        with h5py.File(glitch_info_file, 'r') as f:
-            self.glitch_times = f['glitch_info']['time'][:]
+        self.glitch_times = np.array([])
+        for file in glitch_info_files:
+            with h5py.File(file, 'r') as f:
+                glitch_times = f['glitch_info']['time'][:]
+                self.glitch_times = np.append(self.glitch_times, glitch_times)
 
         self.selected_times = []
         for time in self.glitch_times:

@@ -1,19 +1,30 @@
 data:
   ifos: ["H1", "L1"]
+  segment_files:
+    H1: ["./segments/O3a/H1-science_segs.segwizard"]
+    L1: ["./segments/O3a/L1-science_segs.segwizard"]
   total_interval:
-    H1: (1238166018, 1238856499)
-    L1: (1238166018, 1238772909)
+    H1: 
+      start: 1238166018
+      end: 1238856499
+    L1:
+      start: 1238166018
+      end: 1238772909
   data_cache: "/home/chiajui/data_cache"
   asd_cache: "/home/chiajui/gw-anomaly-detection/asds"
-  kind: "injection"
+  kind: "background"
   background:
     ifos: ["H1", "L1"]
     segment_files:
       H1: ["./segments/O3a/H1-background_samples-1238172987-23806.segwizard"]
       L1: ["./segments/O3a/L1-background_samples-1238205073-23812.segwizard"]
     sample_interval:
-      H1: (1238172987, 1238196793)
-      L1: (1238205073, 1238228885)
+      H1: 
+        start: 1238172987
+        end: 1238196793
+      L1:
+        start: 1238205073
+        end: 1238228885
     start_id: 0
     end_id: 3
     min_window_length: 4
@@ -24,8 +35,12 @@ data:
       H1: ["./segments/O3a/H1-glitch_samples-1238172987-23806.segwizard"]
       L1: ["./segments/O3a/L1-glitch_samples-1238205073-23812.segwizard"]
     sample_interval:
-      H1: (1238172987, 1238196793)
-      L1: (1238205073, 1238228885)
+      H1: 
+        start: 1238172987
+        end: 1238196793
+      L1:
+        start: 1238205073
+        end: 1238228885
     start_id: 0
     end_id: 3
     glitch_info_files:
@@ -39,8 +54,12 @@ data:
       H1: ["./segments/O3a/H1-injection_samples-1238172987-23806.segwizard"]
       L1: ["./segments/O3a/L1-injection_samples-1238205073-23812.segwizard"]
     sample_interval:
-      H1: (1238172987, 1238196793)
-      L1: (1238205073, 1238228885)
+      H1: 
+        start: 1238172987
+        end: 1238196793
+      L1:
+        start: 1238205073
+        end: 1238228885
     number: 3
     waveform: 'bbh'
     qm_file: './ccsn_source/Pan_2021/SR.h5'
