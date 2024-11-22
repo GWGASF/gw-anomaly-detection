@@ -18,18 +18,18 @@ def main():
     seg_info = SegmentInfo()
 
     # Loading strain and asd into data cache.
-    background_interval = config['data']['background']['sample_interval']
-    print("Downloading data from s3 bucket...")
-    s3 = S3_session(config['s3'])
-    bucket = config['s3']['bucket']
-    for ifo in ifos:
-        s3.fetch_data(
-            ifo=ifo,
-            start=background_interval[ifo]['start'],
-            end=background_interval[ifo]['end'],
-            bucket=bucket,
-            data_cache=data_cache,
-        )
+    # background_interval = config['data']['background']['sample_interval']
+    # print("Downloading data from s3 bucket...")
+    # s3 = S3_session(config['s3'])
+    # bucket = config['s3']['bucket']
+    # for ifo in ifos:
+    #     s3.fetch_data(
+    #         ifo=ifo,
+    #         start=background_interval[ifo]['start'],
+    #         end=background_interval[ifo]['end'],
+    #         bucket=bucket,
+    #         data_cache=data_cache,
+    #     )
 
     # Processing background noise
     if kind == "background":
@@ -149,6 +149,8 @@ def main():
             target_snr_low=target_snr_low,
             target_snr_high=target_snr_high,
             background_segments=background_segments,
+            start_id=start_id,
+            end_id=end_id,
         )
         # Processing.
         timeseries = injected_ts
@@ -168,6 +170,8 @@ def main():
             processed_waveforms = proc.get_proccessed_data(
                 timeseries=timeseries,
                 background_segments=background_segments,
+                start_id=start_id,
+                end_id=end_id,
                 flow=flow,
                 fhigh=fhigh,
                 resample=resample,

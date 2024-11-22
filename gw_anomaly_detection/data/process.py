@@ -120,6 +120,8 @@ class Process():
             self,
             waveforms: list,
             background_segments: dict,
+            start_id: int,
+            end_id: int,
             flow: float=30,
             fhigh: float=1500,
             target_snr_low: float=None,
@@ -129,11 +131,15 @@ class Process():
             target_snr_low = 1
             target_snr_high = 1
 
+        selected_segments = dict.fromkeys(self.ifos)
+        for ifo in self.ifos:
+            selected_segments[ifo] = background_segments[ifo][start_id:end_id]
+
         rescaled_waveforms, rescaled_snrs = self.rescale(
             waveforms=waveforms,
             target_snr_low=target_snr_low,
             target_snr_high=target_snr_high,
-            background_segments=background_segments,
+            background_segments=selected_segments,
             flow=flow,
             fhigh=fhigh,
         )
@@ -142,7 +148,7 @@ class Process():
         for i, waveform in enumerate(rescaled_waveforms):
             inj_ts = dict.fromkeys(self.ifos)
             for ifo in self.ifos:
-                segment = background_segments[ifo][i]
+                segment = selected_segments[ifo][i]
                 ts = self.get_ts(ifo, segment)
                 waveform[ifo].t0 = ts.t0
                 inj_ts[ifo] = ts.inject(waveform[ifo])
@@ -156,7 +162,7 @@ class Process():
             timeseries: list,
             background_segments: dict,
             start_id: int,
-            end_id: int,           
+            end_id: int,
             flow: float=30,
             fhigh: float=1500,
             resample: float=4096,
@@ -164,10 +170,10 @@ class Process():
     ):
         selected_segments = dict.fromkeys(self.ifos)
         for ifo in self.ifos:
-            selected_segments = background_segments[ifo]
+            selected_segments[ifo] = background_segments[ifo][start_id:end_id]
 
         processed_ts = []
-        for i, ts in enumerate(timeseries[start_id:end_id]):
+        for i, ts in enumerate(timeseries):
             input_ts = dict.fromkeys(self.ifos)
             proc_ts = dict.fromkeys(self.ifos)
             for ifo in self.ifos:
