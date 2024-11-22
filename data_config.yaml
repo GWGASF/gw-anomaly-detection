@@ -1,0 +1,86 @@
+data:
+  ifos: ["H1", "L1"]
+  segment_files:
+    H1: ["./segments/O3a/H1-science_segs.segwizard"]
+    L1: ["./segments/O3a/L1-science_segs.segwizard"]
+  total_interval:
+    H1: 
+      start: 1238166018
+      end: 1238856499
+    L1:
+      start: 1238166018
+      end: 1238772909
+  data_cache: "/home/chiajui/data_cache"
+  asd_cache: "/home/chiajui/gw-anomaly-detection/asds"
+  kind: "injection"
+  background:
+    ifos: ["H1", "L1"]
+    number_of_samples: 5000
+    sample_interval:
+      H1: 
+        start: 1238172987
+        end: 1238196793
+      L1:
+        start: 1238205073
+        end: 1238228885
+    segment_files:
+      H1: ["./segments/O3a/H1-background_samples-1238172987-23806.segwizard"]
+      L1: ["./segments/O3a/L1-background_samples-1238205073-23812.segwizard"]
+    start_id: 0
+    end_id: 3
+    min_window_length: 4
+    output_file: "/home/chiajui/test_data/bg_data.hdf5"
+  glitch:
+    ifos: ["H1", "L1"]
+    sample_interval:
+      H1: 
+        start: 1238172987
+        end: 1238196793
+      L1:
+        start: 1238205073
+        end: 1238228885
+    segment_files:
+      H1: ["./segments/O3a/H1-glitch_samples-1238172987-23806.segwizard"]
+      L1: ["./segments/O3a/L1-glitch_samples-1238205073-23812.segwizard"]
+    start_id: 0
+    end_id: 3
+    glitch_info_files:
+      H1: ["./glitch_info/O3a/H1-glitch_info.hdf5"]
+      L1: ["./glitch_info/O3a/L1-glitch_info.hdf5"]
+    glitch_window_length: 4
+    output_file: "/home/chiajui/test_data/glitch_data.hdf5"
+  injection:
+    ifos: ["H1", "L1"]
+    number_of_samples: 5000
+    sample_interval:
+      H1: 
+        start: 1238172987
+        end: 1238196793
+      L1:
+        start: 1238205073
+        end: 1238228885
+    segment_files:
+      H1: ["./segments/O3a/H1-injection_samples-1238172987-23806.segwizard"]
+      L1: ["./segments/O3a/L1-injection_samples-1238205073-23812.segwizard"]
+    start_id: 0
+    end_id: 3
+    waveform: 'bbh'
+    qm_file: './ccsn_source/Pan_2021/SR.h5'
+    sampling_frequency: 16384
+    window_length: 4
+    target_snr_low: 12
+    target_snr_high: 24
+    keep_waveform: True
+    output_file: "/home/chiajui/test_data/injection_data.hdf5"
+  processing:
+    window_length: 4
+    flow: 30
+    fhigh: 1500
+    resample: 4096
+    crop_length: 1
+s3:
+  access_key: XRIYL1052YCQ125N75UM
+  secret_key: XES9mLNbxAWKZC1AUcYFlGd7ByyXXSYw5yB3UrwM
+  host_base: https://s3-west.nrp-nautilus.io
+  bucket: cchou
+  common_prefix: O3_data/

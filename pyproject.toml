@@ -10,13 +10,14 @@ packages = [
 ]
 
 [tool.poetry.dependencies]
-python = "^3.10"
+python = ">=3.10, <3.11"
 gwpy = "^3.0.10"
 bilby = "^2.3.0"
 PyCBC = "^2.6.0"
-numpy = "1.24.4"
 boto3 = "^1.35.43"
 toml = "^0.10.2"
+# lalsuite = "7.11" # Use 7.11 only on asz018.
+numpy = "<2.0.0"
 # torchmetrics = "^1"
 # torchaudio = {version = "^2", source = "torch"}
 
