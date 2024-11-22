@@ -371,7 +371,6 @@ class Process():
             background_segments: dict,
             start_id: int=None,
             end_id: int=None,
-            window_length: float=4,
             flow: float=30,
             fhigh: float=1500,
             resample: float=4096,
