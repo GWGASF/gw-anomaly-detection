@@ -18,16 +18,18 @@ def main():
     seg_info = SegmentInfo()
 
     # Loading strain and asd into data cache.
-    # s3 = S3_session(config['s3'])
-    # bucket = config['s3']['bucket']
-    # for ifo in ifos:
-    #     s3.fetch_data(
-    #             ifo=ifo,
-    #             start=total_interval[ifo][0],
-    #             end=total_interval[ifo][1],
-    #             bucket=bucket,
-    #             data_cache=data_cache,
-    #     )
+    background_interval = config['data']['background']['sample_interval']
+    print("Downloading data from s3 bucket...")
+    s3 = S3_session(config['s3'])
+    bucket = config['s3']['bucket']
+    for ifo in ifos:
+        s3.fetch_data(
+            ifo=ifo,
+            start=background_interval[ifo]['start'],
+            end=background_interval[ifo]['end'],
+            bucket=bucket,
+            data_cache=data_cache,
+        )
 
     # Processing background noise
     if kind == "background":
@@ -109,7 +111,8 @@ def main():
             interval = seg_info.whole_segment(segment_file=segment_files[ifo])
             print(f"Number of background segments from {ifo}: {len(background_segments[ifo])}, interval: {interval}.")
 
-        number = config['data']['injection']['number']
+        start_id = config['data']['injection']['start_id']
+        end_id = config['data']['injection']['end_id']
         waveform = config['data']['injection']['waveform']
         qm_file = config['data']['injection']['qm_file']
         sampling_frequency = config['data']['injection']['sampling_frequency']
@@ -117,12 +120,13 @@ def main():
         target_snr_high = config['data']['injection']['target_snr_high']
         keep_waveform = config['data']['injection']['keep_waveform']
         output_file = config['data']['injection']['output_file']
-        length = config['data']['injection']['length']
+        window_length = config['data']['injection']['window_length']
         flow = config['data']['processing']['flow']
         fhigh = config['data']['processing']['fhigh']
         resample = config['data']['processing']['resample']
         crop_length = config['data']['processing']['crop_length']
 
+        number = end_id - start_id
         proc = Process(
             ifos=ifos,
             data_cache=data_cache,
@@ -131,7 +135,7 @@ def main():
         # Generating Waveform.
         wav = Waveforms(
             ifos=ifos,
-            length=length,
+            window_length=window_length,
             sampling_frequency=sampling_frequency,
         )
         waveforms, params = wav.generate_waveforms(
@@ -151,6 +155,8 @@ def main():
         processed_data = proc.get_proccessed_data(
             timeseries=timeseries,
             background_segments=background_segments,
+            start_id=start_id,
+            end_id=end_id,
             flow=flow,
             fhigh=fhigh,
             resample=resample,

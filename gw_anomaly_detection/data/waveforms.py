@@ -19,11 +19,11 @@ class Waveforms():
             self,
             ifos: list,
             sampling_frequency: float=16384,
-            length: float=4,
+            window_length: float=4,
         ):
         self.ifos = ifos
         self.sampling_frequency = sampling_frequency
-        self.length = length
+        self.length = window_length
 
     def sg_params(
             self,

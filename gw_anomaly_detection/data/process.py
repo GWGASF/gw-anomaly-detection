@@ -155,18 +155,24 @@ class Process():
             self,
             timeseries: list,
             background_segments: dict,
+            start_id: int,
+            end_id: int,           
             flow: float=30,
             fhigh: float=1500,
             resample: float=4096,
             crop_length: float=1,
     ):
+        selected_segments = dict.fromkeys(self.ifos)
+        for ifo in self.ifos:
+            selected_segments = background_segments[ifo]
+
         processed_ts = []
-        for i, ts in enumerate(timeseries):
+        for i, ts in enumerate(timeseries[start_id:end_id]):
             input_ts = dict.fromkeys(self.ifos)
             proc_ts = dict.fromkeys(self.ifos)
             for ifo in self.ifos:
                 input_ts[ifo] = ts[ifo].copy()
-                segment = background_segments[ifo][i]
+                segment = selected_segments[ifo][i]
                 asd = self.get_asd(ifo, segment)
                 asd = asd.interpolate(1/input_ts[ifo].duration.value)
                 input_ts[ifo] = input_ts[ifo].whiten(asd=asd)

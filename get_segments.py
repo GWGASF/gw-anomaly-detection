@@ -19,7 +19,7 @@ def generate_samples(
         segment_files = [
             f"segments/O3a/{ifo}-background_segs-{int(seg_file_st)}-{int(seg_file_ed-seg_file_st)}.segwizard"
         ]
-        output_file = f"segments/O3a/{ifo}-{kind}_samples_test-{int(start)}-{int(end-start)}.segwizard"
+        output_file = f"segments/O3a/{ifo}-{kind}_samples-{int(start)}-{int(end-start)}.segwizard"
 
         SegInfo = SegmentInfo()
         SegInfo.get_background_samples(
