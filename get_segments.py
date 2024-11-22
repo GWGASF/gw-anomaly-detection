@@ -67,7 +67,6 @@ def generate_glitch_samples(
 def generate_samples(
         kind: str,
         config: dict,
-        segment_files: dict,
 ):
     window_length = config['data']['processing']['window_length']
     number_of_samples = config['data'][kind]['number_of_samples']
@@ -115,14 +114,12 @@ def main():
     generate_samples(
         kind="background",
         config=config,
-        segment_files=segment_files,
     )
 
     # Get injection samples.
     generate_samples(
         kind="injection",
         config=config,
-        segment_files=segment_files,
     )
 
 if __name__ == "__main__":
