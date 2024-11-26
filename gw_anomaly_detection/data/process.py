@@ -13,10 +13,18 @@ class Process():
         ifos: list,
         data_cache: str,
         asd_cache: str,
+        flow: float=30,
+        fhigh: float=1500,
+        resample: float=4096,
+        crop_length: float=1,
     ):
         self.ifos = ifos
         self.data_cache = data_cache
         self.asd_cache = asd_cache
+        self.flow = flow
+        self.fhigh = fhigh
+        self.resample = resample
+        self.crop_length = crop_length
 
     def get_ts(
             self,
@@ -58,6 +66,24 @@ class Process():
 
         asd = FrequencySeries.read(asd_file)
         return asd
+
+    def process(
+            self,
+            ts,
+            asd,
+            flow: float=30,
+            fhigh: float=1500,
+            resample: float=4096,
+            crop_length: float=1,
+    ):
+        asd = asd.interpolate(1/ts.duration.value)
+        start = ts.t0.value
+        end = ts.t0.value + ts.duration.value
+        ts = ts.whiten(asd=asd)
+        ts = ts.bandpass(flow, fhigh)
+        ts = ts.resample(resample)
+        ts = ts.crop(start + crop_length, end - crop_length)
+        return ts
 
     def estimate_snr(
             self,
@@ -157,16 +183,12 @@ class Process():
 
         return injected_ts, rescaled_waveforms, rescaled_snrs
 
-    def get_proccessed_data(
+    def get_proccessed_injection(
             self,
             timeseries: list,
             background_segments: dict,
             start_id: int,
             end_id: int,
-            flow: float=30,
-            fhigh: float=1500,
-            resample: float=4096,
-            crop_length: float=1,
     ):
         selected_segments = dict.fromkeys(self.ifos)
         for ifo in self.ifos:
@@ -180,12 +202,14 @@ class Process():
                 input_ts[ifo] = ts[ifo].copy()
                 segment = selected_segments[ifo][i]
                 asd = self.get_asd(ifo, segment)
-                asd = asd.interpolate(1/input_ts[ifo].duration.value)
-                input_ts[ifo] = input_ts[ifo].whiten(asd=asd)
-                input_ts[ifo] = input_ts[ifo].bandpass(flow, fhigh)
-                input_ts[ifo] = input_ts[ifo].resample(resample)
-                input_ts[ifo] = input_ts[ifo].crop(segment.start + crop_length, segment.end - crop_length)
-                proc_ts[ifo] = input_ts[ifo]
+                proc_ts[ifo] = self.process(
+                    ts=input_ts[ifo],
+                    asd=asd,
+                    flow=self.flow,
+                    fhigh=self.fhigh,
+                    resample=self.resample,
+                    crop_length=self.crop_length,
+                )
 
             processed_ts.append(proc_ts)
 
@@ -264,6 +288,70 @@ class Process():
 
         return
 
+    def get_processed_background(
+            self,
+            background_segments: dict,
+            start_id: int=None,
+            end_id: int=None,
+    ):
+        processed_background = dict.fromkeys(self.ifos)
+        for ifo in self.ifos:
+            seg_length = len(background_segments[ifo])
+            if start_id == None:
+                st = 0
+            if end_id > seg_length:
+                ed = seg_length
+            else:
+                st = start_id
+                ed = end_id
+            # Process background.
+            proc_bg = []
+            for segment in background_segments[ifo][st:ed]:
+                ts = self.get_ts(ifo, segment)
+                asd = self.get_asd(ifo, segment)
+                proc_ts = self.process(
+                    ts=ts,
+                    asd=asd,
+                    flow=self.flow,
+                    fhigh=self.fhigh,
+                    resample=self.resample,
+                    crop_length=self.crop_length,
+                )
+                proc_bg.append(proc_ts)
+            
+            processed_background[ifo] = proc_bg
+
+        return processed_background
+
+    def write_background_data(
+            self,
+            output_file: str,
+            processed_background: dict,
+    ):
+        ifos = list(processed_background.keys())
+        with h5py.File(output_file, 'w') as w:
+            for ifo in ifos:
+                # Time Series Data
+                background_data = np.stack([data.value for data in processed_background[ifo]])
+                t0_data = np.stack([data.t0.value for data in processed_background[ifo]])
+                sample_rate = 1/processed_background[ifo][0].dt.value
+                glitch_dset = w.create_dataset(
+                    ifo,
+                    shape=background_data.shape,
+                    dtype=background_data.dtype,
+                    data=background_data,
+                )
+                glitch_dset.attrs['sample_rate'] = sample_rate
+                glitch_dset.attrs['channel'] = f"{ifo}:BACKGROUND_NOISE"
+                w.create_dataset(
+                    f"t0_{ifo}",
+                    shape=t0_data.shape,
+                    dtype=t0_data.dtype,
+                    data=t0_data,
+                )
+
+        return
+
     def get_processed_glitch(
             self,
             glitch_segments: dict,
@@ -271,10 +359,6 @@ class Process():
             end_id: int=None,
             glitch_info_files: dict=None,
             glitch_window_length: float=4,
-            flow: float=30,
-            fhigh: float=1500,
-            resample: float=4096,
-            crop_length: float=1,
     ):
         glitch_infos = dict.fromkeys(self.ifos)
         processed_glitch = dict.fromkeys(self.ifos)
@@ -288,18 +372,21 @@ class Process():
                 st = start_id
                 ed = end_id
             # Process glitch.
-            proc_ts = []
+            proc_glitch = []
             for segment in glitch_segments[ifo][st:ed]:
                 ts = self.get_ts(ifo, segment)
                 asd = self.get_asd(ifo, segment)
-                asd = asd.interpolate(1/ts.duration.value)
-                ts = ts.whiten(asd=asd)
-                ts = ts.bandpass(flow, fhigh)
-                ts = ts.resample(resample)
-                ts = ts.crop(segment.start + crop_length, segment.end - crop_length)
-                proc_ts.append(ts)
+                proc_ts = self.process(
+                    ts=ts,
+                    asd=asd,
+                    flow=self.flow,
+                    fhigh=self.fhigh,
+                    resample=self.resample,
+                    crop_length=self.crop_length,
+                )
+                proc_glitch.append(proc_ts)
             
-            processed_glitch[ifo] = proc_ts
+            processed_glitch[ifo] = proc_glitch
             # Get glitch info.
             starts = [seg[0] for seg in glitch_segments[ifo][st:ed]]
             ends = [seg[1] for seg in glitch_segments[ifo][st:ed]]
@@ -357,72 +444,6 @@ class Process():
                 )
                 glitch_dset.attrs['sample_rate'] = sample_rate
                 glitch_dset.attrs['channel'] = f"{ifo}:GLITCH"
-                w.create_dataset(
-                    f"t0_{ifo}",
-                    shape=t0_data.shape,
-                    dtype=t0_data.dtype,
-                    data=t0_data,
-                )
-
-        return
-
-    def get_processed_background(
-            self,
-            background_segments: dict,
-            start_id: int=None,
-            end_id: int=None,
-            window_length: float=4,
-            flow: float=30,
-            fhigh: float=1500,
-            resample: float=4096,
-            crop_length: float=1,
-    ):
-        processed_background = dict.fromkeys(self.ifos)
-        for ifo in self.ifos:
-            seg_length = len(background_segments[ifo])
-            if start_id == None:
-                st = 0
-            if end_id > seg_length:
-                ed = seg_length
-            else:
-                st = start_id
-                ed = end_id
-            # Process background.
-            proc_ts = []
-            for segment in background_segments[ifo][st:ed]:
-                ts = self.get_ts(ifo, segment)
-                asd = self.get_asd(ifo, segment)
-                asd = asd.interpolate(1/ts.duration.value)
-                ts = ts.whiten(asd=asd)
-                ts = ts.bandpass(flow, fhigh)
-                ts = ts.resample(resample)
-                ts = ts.crop(segment.start + crop_length, segment.end - crop_length)
-                proc_ts.append(ts)
-            
-            processed_background[ifo] = proc_ts
-
-        return processed_background
-
-    def write_background_data(
-            self,
-            output_file: str,
-            processed_background: dict,
-    ):
-        ifos = list(processed_background.keys())
-        with h5py.File(output_file, 'w') as w:
-            for ifo in ifos:
-                # Time Series Data
-                background_data = np.stack([data.value for data in processed_background[ifo]])
-                t0_data = np.stack([data.t0.value for data in processed_background[ifo]])
-                sample_rate = 1/processed_background[ifo][0].dt.value
-                glitch_dset = w.create_dataset(
-                    ifo,
-                    shape=background_data.shape,
-                    dtype=background_data.dtype,
-                    data=background_data,
-                )
-                glitch_dset.attrs['sample_rate'] = sample_rate
-                glitch_dset.attrs['channel'] = f"{ifo}:BACKGROUND_NOISE"
                 w.create_dataset(
                     f"t0_{ifo}",
                     shape=t0_data.shape,
