@@ -84,4 +84,4 @@ s3:
   host_base: https://s3-west.nrp-nautilus.io
   bucket: cchou
   common_prefix: O3_data/
-  upload_file:
+  upload_dir: 'test'

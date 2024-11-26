@@ -23,15 +23,13 @@ def main():
 
     # Loading strain and asd into data cache.
     # background_interval = config['data']['background']['sample_interval']
-    # print("Downloading data from s3 bucket...")
-    # s3 = S3_session(config['s3'])
-    # bucket = config['s3']['bucket']
+    print("Downloading data from s3 bucket...")
+    s3 = S3_session(config['s3'])
     # for ifo in ifos:
     #     s3.fetch_data(
     #         ifo=ifo,
     #         start=background_interval[ifo]['start'],
     #         end=background_interval[ifo]['end'],
-    #         bucket=bucket,
     #         data_cache=data_cache,
     #     )
 
@@ -191,6 +189,12 @@ def main():
         )
 
     # Uploading processed data to s3 buckets.
+    file_name = output_file
+    upload_dir = config['s3']['upload_dir']
+    s3.upload(
+        file_name=file_name,
+        upload_dir=upload_dir,
+    )
 
     # Gathering data on s3 buckets.
 

@@ -77,7 +77,6 @@ class S3_session(boto3.Session):
             ifo: str,
             start: int,
             end: int,
-            bucket: str,
             data_cache: str=None,
     ):
         file_list = self.read_file_dir(ifo)
@@ -101,7 +100,7 @@ class S3_session(boto3.Session):
                 os.mkdir(data_cache+'/'+ifo)
             file_name = data_cache+'/'+ifo+'/'+file.split('/')[-1]
             self.s3client.download_file(
-                bucket,
+                self.bucket,
                 file,
                 file_name,
             )
@@ -116,15 +115,17 @@ class S3_session(boto3.Session):
         ExtraArgs = {
             'ACL': 'public-read',
         }
-
         try:
-            key = f"{upload_dir}/{file_name}"
-            self.s3client.upload_file(
+            upload_file_name = file_name.split('/')[-1]
+            key = f"{upload_dir}/{upload_file_name}"
+            print(f"Uploading {key} to {self.bucket}/{key}...")
+            response = self.s3client.upload_file(
                 Filename=file_name,
                 Bucket=self.bucket,
                 Key=key,
                 ExtraArgs=ExtraArgs,
             ) 
+            print(f"Done.")
         except Exception as e:
             print(str(e))
             return 1
