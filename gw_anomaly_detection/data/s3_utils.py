@@ -107,3 +107,26 @@ class S3_session(boto3.Session):
             )
 
         return 0
+
+    def upload(
+            self,
+            file_name: str,
+            upload_dir: str,
+    ):
+        ExtraArgs = {
+            'ACL': 'public-read',
+        }
+
+        try:
+            key = f"{upload_dir}/{file_name}"
+            self.s3client.upload_file(
+                Filename=file_name,
+                Bucket=self.bucket,
+                Key=key,
+                ExtraArgs=ExtraArgs,
+            ) 
+        except Exception as e:
+            print(str(e))
+            return 1
+
+        return 0 

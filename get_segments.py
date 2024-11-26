@@ -10,8 +10,7 @@ def generate_total_segments(
     glitch_info_files = config['data']['glitch']['glitch_info_files']
     total_interval = config['data']['total_interval']
     glitch_window_length = config['data']['glitch']['glitch_window_length']
-    min_window_length = config['data']['background']['min_window_length']
-    window_length = min_window_length
+    window_length = config['data']['background']['window_length']
 
     # Create segment files of the glitches and background noise.
     kinds = ['glitch', 'background']
@@ -28,12 +27,12 @@ def generate_total_segments(
         )
         for kind in kinds:
             output_file = f"segments/O3a/{ifo}-{kind}_segs-{int(start)}-{int(end-start)}.segwizard"
-            segs = SegInfo.get_segments(
+            SegInfo.get_segments(
                 kind=kind,
                 output_file=output_file,
                 output_file_format='segwizard',
                 glitch_window_length=glitch_window_length,
-                min_window_length=min_window_length,
+                window_length=window_length,
             )
 
     return
@@ -54,7 +53,7 @@ def generate_glitch_samples(
         output_file = f"segments/O3a/{ifo}-{kind}_samples-{start}-{end-start}.segwizard"
 
         SegInfo = SegmentInfo()
-        sample_segs = SegInfo.get_glitch_samples(
+        SegInfo.get_glitch_samples(
             start=start,
             end=end,
             segment_files=segment_files,

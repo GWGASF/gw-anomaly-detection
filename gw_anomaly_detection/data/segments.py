@@ -4,6 +4,38 @@ import numpy as np
 from gwpy.segments import Segment
 from gwpy.segments import SegmentList
 
+def read_segment_files(
+        segment_files: list,
+):
+    output_segs = []
+    for file in segment_files:
+        with open(file, 'r') as f:
+            for line in f.readlines()[1:]:
+                start = float(line.split("\t")[1])
+                end = float(line.split("\t")[2])
+                seg = Segment(start, end)
+                output_segs.append(seg)
+
+    return SegmentList(output_segs)
+
+def whole_segment(
+        segment_list: list=None,
+        segment_file: list=None,
+):
+    if segment_list == None and segment_file == None:
+        raise RuntimeError("Please provide a segment list or a segment file.")
+    if segment_list != None and segment_file != None:
+        raise RuntimeError("Please don't use segment list and segment file at the same time.")
+    if segment_list != None:
+        seglist = segment_list
+    if segment_file != None:
+        seglist = read_segment_files(segment_file)
+
+    starts = [seg[0] for seg in seglist]
+    ends = [seg[1] for seg in seglist]
+    interval = (min(starts), max(ends))
+    return interval
+
 class SegmentInfo():
     def __init__(
             self,
@@ -11,40 +43,6 @@ class SegmentInfo():
         """ The information about the science segments and glitch triggers from Omicron.
         """
         self.get_segs = None
-
-    def read_segment_files(
-            self,
-            segment_files: list,
-    ):
-        output_segs = []
-        for file in segment_files:
-            with open(file, 'r') as f:
-                for line in f.readlines()[1:]:
-                    start = float(line.split("\t")[1])
-                    end = float(line.split("\t")[2])
-                    seg = Segment(start, end)
-                    output_segs.append(seg)
-
-        return SegmentList(output_segs)
-
-    def whole_segment(
-            self,
-            segment_list: list=None,
-            segment_file: list=None,
-    ):
-        if segment_list == None and segment_file == None:
-            raise RuntimeError("Please provide a segment list or a segment file.")
-        if segment_list != None and segment_file != None:
-            raise RuntimeError("Please don't use segment list and segment file at the same time.")
-        if segment_list != None:
-            seglist = segment_list
-        if segment_file != None:
-            seglist = self.read_segment_files(segment_file)
-
-        starts = [seg[0] for seg in seglist]
-        ends = [seg[1] for seg in seglist]
-        interval = (min(starts), max(ends))
-        return interval
 
     def load_segment_info(
             self,
@@ -55,7 +53,7 @@ class SegmentInfo():
             glitch_window_length: float=4,
         ) -> None:
         # Get science segments with start and end time.
-        self.loaded_segs = self.read_segment_files(segment_files)
+        self.loaded_segs = read_segment_files(segment_files)
 
         self.target_seg = Segment(start, end)
         self.selected_segs = SegmentList([])
@@ -84,7 +82,7 @@ class SegmentInfo():
             output_file: str=None,
             output_file_format: str=None,
             glitch_window_length: float=4,
-            min_window_length: float=4,
+            window_length: float=4,
     ):
         """ Get the segments containing the glitches or the segments without glitch.
         """
@@ -119,7 +117,7 @@ class SegmentInfo():
                     seg_id += 1
 
             for seg in bg_segs:
-                if (seg.end - seg.start) >= (min_window_length + glitch_window_length):
+                if (seg.end - seg.start) >= (window_length + glitch_window_length):
                     cropped_seg = Segment(seg.start + glitch_window_length/2, seg.end - glitch_window_length/2)
                     output_segs.append(cropped_seg)
 
@@ -133,7 +131,7 @@ class SegmentInfo():
             except Exception as e:
                 print(str(e))
 
-        return output_segs
+        return
 
     def get_glitch_samples(
             self,
@@ -147,7 +145,7 @@ class SegmentInfo():
             raise RuntimeError("Please get segments first or provide a segment file in order to sample from those segments.")
         if segment_files != None:
             try:
-                try_segs = self.read_segment_files(segment_files)
+                try_segs = read_segment_files(segment_files)
                 self.get_segs = try_segs
             except Exception as e:
                 print(str(e))
@@ -181,7 +179,7 @@ class SegmentInfo():
             except Exception as e:
                 print(str(e))
 
-        return sample_segs
+        return
 
     def get_background_samples(
             self,
@@ -197,7 +195,7 @@ class SegmentInfo():
             raise RuntimeError("Please get segments first or provide a segment file in order to sample from those segments.")
         if segment_files != None:
             try:
-                try_segs = self.read_segment_files(segment_files)
+                try_segs = read_segment_files(segment_files)
                 self.get_segs = try_segs
             except Exception as e:
                 print(str(e))
@@ -233,4 +231,4 @@ class SegmentInfo():
             except Exception as e:
                 print(str(e))
 
-        return sample_segs
+        return

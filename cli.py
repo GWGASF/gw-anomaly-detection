@@ -1,6 +1,7 @@
 #!/bin/python
 import yaml
-from gw_anomaly_detection.data.segments import SegmentInfo
+from gw_anomaly_detection.data.segments import read_segment_files
+from gw_anomaly_detection.data.segments import whole_segment
 from gw_anomaly_detection.data.s3_utils import S3_session
 from gw_anomaly_detection.data.waveforms import Waveforms
 from gw_anomaly_detection.data.process import Process
@@ -11,11 +12,14 @@ def main():
         config = yaml.safe_load(file)
 
     ifos = config['data']['ifos']
+    kind = config['data']['kind']
     total_interval = config['data']['total_interval']
     data_cache = config['data']['data_cache']
     asd_cache = config['data']['asd_cache']
-    kind = config['data']['kind']
-    seg_info = SegmentInfo()
+    flow = config['data']['processing']['flow']
+    fhigh = config['data']['processing']['fhigh']
+    resample = config['data']['processing']['resample']
+    crop_length = config['data']['processing']['crop_length']
 
     # Loading strain and asd into data cache.
     # background_interval = config['data']['background']['sample_interval']
@@ -31,39 +35,6 @@ def main():
     #         data_cache=data_cache,
     #     )
 
-    # Processing background noise
-    if kind == "background":
-        print("Background.")
-        ifos = config['data']['background']['ifos']
-        segment_files = config['data']['background']['segment_files']
-        background_segments = dict.fromkeys(ifos)
-        for ifo in ifos:
-            background_segments[ifo] = seg_info.read_segment_files(segment_files[ifo])
-            interval = seg_info.whole_segment(segment_file=segment_files[ifo])
-            print(f"Number of background segments from {ifo}: {len(background_segments[ifo])}, interval: {interval}.")
-
-        start_id = config['data']['background']['start_id']
-        end_id = config['data']['background']['end_id']
-        min_window_length = config['data']['background']['min_window_length']
-        output_file = config['data']['background']['output_file']
-        # Processing data.
-        proc = Process(
-            ifos=ifos,
-            data_cache=data_cache,
-            asd_cache=asd_cache,
-        )
-        processed_background = proc.get_processed_background(
-            background_segments=background_segments,
-            start_id=start_id,
-            end_id=end_id,
-            window_length=min_window_length,
-        )
-        # Write data to hdf5 files.
-        proc.write_background_data(
-            output_file=output_file,
-            processed_background=processed_background,
-        )
-
     # Processing glitch.
     if kind == "glitch":
         print(f"Glitch.")
@@ -71,8 +42,8 @@ def main():
         segment_files = config['data']['glitch']['segment_files']
         glitch_segments = dict.fromkeys(ifos)
         for ifo in ifos:
-            glitch_segments[ifo] = seg_info.read_segment_files(segment_files[ifo])
-            interval = seg_info.whole_segment(segment_file=segment_files[ifo])
+            glitch_segments[ifo] = read_segment_files(segment_files[ifo])
+            interval = whole_segment(segment_file=segment_files[ifo])
             print(f"Number of glitch segments from {ifo}: {len(glitch_segments[ifo])}, interval: {interval}.")
 
         start_id = config['data']['glitch']['start_id']
@@ -85,6 +56,10 @@ def main():
             ifos=ifos,
             data_cache=data_cache,
             asd_cache=asd_cache,
+            flow=flow,
+            fhigh=fhigh,
+            resample=resample,
+            crop_length=crop_length,
         )
         processed_glitch, glitch_infos = proc.get_processed_glitch(
             glitch_segments=glitch_segments,
@@ -100,6 +75,42 @@ def main():
             glitch_infos=glitch_infos,
         )
 
+    # Processing background noise
+    if kind == "background":
+        print("Background.")
+        ifos = config['data']['background']['ifos']
+        segment_files = config['data']['background']['segment_files']
+        background_segments = dict.fromkeys(ifos)
+        for ifo in ifos:
+            background_segments[ifo] = read_segment_files(segment_files[ifo])
+            interval = whole_segment(segment_file=segment_files[ifo])
+            print(f"Number of background segments from {ifo}: {len(background_segments[ifo])}, interval: {interval}.")
+
+        start_id = config['data']['background']['start_id']
+        end_id = config['data']['background']['end_id']
+        window_length = config['data']['background']['window_length']
+        output_file = config['data']['background']['output_file']
+        # Processing data.
+        proc = Process(
+            ifos=ifos,
+            data_cache=data_cache,
+            asd_cache=asd_cache,
+            flow=flow,
+            fhigh=fhigh,
+            resample=resample,
+            crop_length=crop_length,
+        )
+        processed_background = proc.get_processed_background(
+            background_segments=background_segments,
+            start_id=start_id,
+            end_id=end_id,
+        )
+        # Write data to hdf5 files.
+        proc.write_background_data(
+            output_file=output_file,
+            processed_background=processed_background,
+        )
+
     # Processing injection data.
     if kind == "injection":
         print(f"Injection.")
@@ -107,8 +118,8 @@ def main():
         segment_files = config['data']['injection']['segment_files']
         background_segments = dict.fromkeys(ifos)
         for ifo in ifos:
-            background_segments[ifo] = seg_info.read_segment_files(segment_files[ifo])
-            interval = seg_info.whole_segment(segment_file=segment_files[ifo])
+            background_segments[ifo] = read_segment_files(segment_files[ifo])
+            interval = whole_segment(segment_file=segment_files[ifo])
             print(f"Number of background segments from {ifo}: {len(background_segments[ifo])}, interval: {interval}.")
 
         start_id = config['data']['injection']['start_id']
@@ -121,18 +132,9 @@ def main():
         keep_waveform = config['data']['injection']['keep_waveform']
         output_file = config['data']['injection']['output_file']
         window_length = config['data']['injection']['window_length']
-        flow = config['data']['processing']['flow']
-        fhigh = config['data']['processing']['fhigh']
-        resample = config['data']['processing']['resample']
-        crop_length = config['data']['processing']['crop_length']
 
-        number = end_id - start_id
-        proc = Process(
-            ifos=ifos,
-            data_cache=data_cache,
-            asd_cache=asd_cache,
-        )
         # Generating Waveform.
+        number = end_id - start_id
         wav = Waveforms(
             ifos=ifos,
             window_length=window_length,
@@ -144,6 +146,15 @@ def main():
             qm_file=qm_file,
         )
         # Rescaling and Injection.
+        proc = Process(
+            ifos=ifos,
+            data_cache=data_cache,
+            asd_cache=asd_cache,
+            flow=flow,
+            fhigh=fhigh,
+            resample=resample,
+            crop_length=crop_length,
+        )
         injected_ts, rescaled_waveforms, snrs = proc.inject(
             waveforms=waveforms,
             target_snr_low=target_snr_low,
@@ -154,28 +165,20 @@ def main():
         )
         # Processing.
         timeseries = injected_ts
-        processed_data = proc.get_proccessed_data(
+        processed_data = proc.get_proccessed_injection(
             timeseries=timeseries,
             background_segments=background_segments,
             start_id=start_id,
             end_id=end_id,
-            flow=flow,
-            fhigh=fhigh,
-            resample=resample,
-            crop_length=crop_length,
         )
         # Write data to hdf5 files.
         if keep_waveform:
             timeseries = rescaled_waveforms
-            processed_waveforms = proc.get_proccessed_data(
+            processed_waveforms = proc.get_proccessed_injection(
                 timeseries=timeseries,
                 background_segments=background_segments,
                 start_id=start_id,
                 end_id=end_id,
-                flow=flow,
-                fhigh=fhigh,
-                resample=resample,
-                crop_length=crop_length,
             )
         else:
             processed_waveforms = None
