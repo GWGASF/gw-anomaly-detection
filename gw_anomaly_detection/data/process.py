@@ -1,6 +1,8 @@
 #!/bin/python
+import os
 import glob
 import re
+import h5py
 import numpy as np
 from gwpy.timeseries import TimeSeries
 from gwpy.frequencyseries import FrequencySeries
@@ -11,10 +13,18 @@ class Process():
         ifos: list,
         data_cache: str,
         asd_cache: str,
+        flow: float=30,
+        fhigh: float=1500,
+        resample: float=4096,
+        crop_length: float=1,
     ):
         self.ifos = ifos
         self.data_cache = data_cache
         self.asd_cache = asd_cache
+        self.flow = flow
+        self.fhigh = fhigh
+        self.resample = resample
+        self.crop_length = crop_length
 
     def get_ts(
             self,
@@ -56,6 +66,24 @@ class Process():
 
         asd = FrequencySeries.read(asd_file)
         return asd
+
+    def process(
+            self,
+            ts,
+            asd,
+            flow: float=30,
+            fhigh: float=1500,
+            resample: float=4096,
+            crop_length: float=1,
+    ):
+        asd = asd.interpolate(1/ts.duration.value)
+        start = ts.t0.value
+        end = ts.t0.value + ts.duration.value
+        ts = ts.whiten(asd=asd)
+        ts = ts.bandpass(flow, fhigh)
+        ts = ts.resample(resample)
+        ts = ts.crop(start + crop_length, end - crop_length)
+        return ts
 
     def estimate_snr(
             self,
@@ -118,6 +146,8 @@ class Process():
             self,
             waveforms: list,
             background_segments: dict,
+            start_id: int,
+            end_id: int,
             flow: float=30,
             fhigh: float=1500,
             target_snr_low: float=None,
@@ -127,11 +157,15 @@ class Process():
             target_snr_low = 1
             target_snr_high = 1
 
+        selected_segments = dict.fromkeys(self.ifos)
+        for ifo in self.ifos:
+            selected_segments[ifo] = background_segments[ifo][start_id:end_id]
+
         rescaled_waveforms, rescaled_snrs = self.rescale(
             waveforms=waveforms,
             target_snr_low=target_snr_low,
             target_snr_high=target_snr_high,
-            background_segments=background_segments,
+            background_segments=selected_segments,
             flow=flow,
             fhigh=fhigh,
         )
@@ -140,7 +174,7 @@ class Process():
         for i, waveform in enumerate(rescaled_waveforms):
             inj_ts = dict.fromkeys(self.ifos)
             for ifo in self.ifos:
-                segment = background_segments[ifo][i]
+                segment = selected_segments[ifo][i]
                 ts = self.get_ts(ifo, segment)
                 waveform[ifo].t0 = ts.t0
                 inj_ts[ifo] = ts.inject(waveform[ifo])
@@ -149,35 +183,272 @@ class Process():
 
         return injected_ts, rescaled_waveforms, rescaled_snrs
 
-    def get_proccessed_data(
+    def get_proccessed_injection(
             self,
             timeseries: list,
             background_segments: dict,
-            flow: float=30,
-            fhigh: float=1500,
-            resample: float=4096,
-            crop_length: float=1,
-            method: int=1,
+            start_id: int,
+            end_id: int,
     ):
+        selected_segments = dict.fromkeys(self.ifos)
+        for ifo in self.ifos:
+            selected_segments[ifo] = background_segments[ifo][start_id:end_id]
+
         processed_ts = []
         for i, ts in enumerate(timeseries):
             input_ts = dict.fromkeys(self.ifos)
             proc_ts = dict.fromkeys(self.ifos)
             for ifo in self.ifos:
                 input_ts[ifo] = ts[ifo].copy()
-                segment = background_segments[ifo][i]
+                segment = selected_segments[ifo][i]
                 asd = self.get_asd(ifo, segment)
-                asd = asd.interpolate(1/input_ts[ifo].duration.value)
-                input_ts[ifo] = input_ts[ifo].whiten(asd=asd)
-                input_ts[ifo] = input_ts[ifo].bandpass(flow, fhigh)
-                if method == 1:
-                    input_ts[ifo] = input_ts[ifo].resample(resample)
-                    input_ts[ifo] = input_ts[ifo].crop(segment.start + crop_length, segment.end - crop_length)
-                if method == 2:
-                    input_ts[ifo] = input_ts[ifo].crop(segment.start + crop_length, segment.end - crop_length)
-                    input_ts[ifo] = input_ts[ifo].resample(resample)
-                proc_ts[ifo] = input_ts[ifo]
+                proc_ts[ifo] = self.process(
+                    ts=input_ts[ifo],
+                    asd=asd,
+                    flow=self.flow,
+                    fhigh=self.fhigh,
+                    resample=self.resample,
+                    crop_length=self.crop_length,
+                )
 
             processed_ts.append(proc_ts)
 
         return processed_ts
+
+    def write_injection_data(
+        self,
+        output_file: str,
+        waveform_parameters: list,
+        snrs: list,
+        processed_data: list,
+        processed_waveforms: list=None,
+    ):
+        with h5py.File(output_file, 'w') as w:
+            # Waveform Parameters
+            param_names = list(waveform_parameters[0].keys())
+            param_formats = []
+            for name in param_names:
+                if isinstance(waveform_parameters[0][name], float) or isinstance(waveform_parameters[0][name], int):
+                    param_formats.append('f8')
+                if isinstance(waveform_parameters[0][name], str):
+                    param_formats.append(h5py.string_dtype(encoding="ascii"))
+
+            snr_names = list(snrs[0].keys())
+            snr_formats = ['f8' for i in range(len(snr_names))]
+            names = param_names + snr_names
+            formats = param_formats + snr_formats
+            param_dtype = np.dtype({'names': names, 'formats': formats})
+            param_data = np.array(
+                [tuple(param.values()) + tuple(snr.values())
+                    for param, snr in zip(waveform_parameters, snrs)],
+                    dtype=param_dtype,
+            )
+            w.create_dataset(
+                'waveform_parameters',
+                shape=param_data.shape,
+                dtype=param_dtype,
+                data=param_data,
+            )
+
+            # Time Series Data
+            ifos = list(processed_data[0].keys())
+            proc_data = dict.fromkeys(ifos)
+            t0_data = dict.fromkeys(ifos)
+            for ifo in ifos:
+                proc_data[ifo] = np.array([data[ifo] for data in processed_data])
+                t0_data[ifo] = np.array([data[ifo].t0.value for data in processed_data])
+                sample_rate = processed_data[0][ifo].sample_rate.value
+                proc_dset = w.create_dataset(
+                    ifo,
+                    shape=proc_data[ifo].shape,
+                    dtype=proc_data[ifo].dtype,
+                    data=proc_data[ifo],
+                )
+                proc_dset.attrs['sample_rate'] = sample_rate
+                w.create_dataset(
+                    f"t0_{ifo}",
+                    shape=t0_data[ifo].shape,
+                    dtype=t0_data[ifo].dtype,
+                    data=t0_data[ifo],
+                )
+
+            if processed_waveforms != None:
+                ifos = list(processed_waveforms[0].keys())
+                waveform_data = dict.fromkeys(ifos)
+                for ifo in ifos:
+                    waveform_data[ifo] = np.array([waveform[ifo] for waveform in processed_waveforms])
+                    channel = str(processed_waveforms[0][ifo].channel)
+                    waveform_dset = w.create_dataset(
+                        f"waveform_{ifo}",
+                        shape=waveform_data[ifo].shape,
+                        dtype=waveform_data[ifo].dtype,
+                        data=waveform_data[ifo],
+                    )
+                    waveform_dset.attrs['channel'] = channel
+
+        return
+
+    def get_processed_background(
+            self,
+            background_segments: dict,
+            start_id: int=None,
+            end_id: int=None,
+    ):
+        processed_background = dict.fromkeys(self.ifos)
+        for ifo in self.ifos:
+            seg_length = len(background_segments[ifo])
+            if start_id == None:
+                st = 0
+            if end_id > seg_length:
+                ed = seg_length
+            else:
+                st = start_id
+                ed = end_id
+            # Process background.
+            proc_bg = []
+            for segment in background_segments[ifo][st:ed]:
+                ts = self.get_ts(ifo, segment)
+                asd = self.get_asd(ifo, segment)
+                proc_ts = self.process(
+                    ts=ts,
+                    asd=asd,
+                    flow=self.flow,
+                    fhigh=self.fhigh,
+                    resample=self.resample,
+                    crop_length=self.crop_length,
+                )
+                proc_bg.append(proc_ts)
+            
+            processed_background[ifo] = proc_bg
+
+        return processed_background
+
+    def write_background_data(
+            self,
+            output_file: str,
+            processed_background: dict,
+    ):
+        ifos = list(processed_background.keys())
+        with h5py.File(output_file, 'w') as w:
+            for ifo in ifos:
+                # Time Series Data
+                background_data = np.stack([data.value for data in processed_background[ifo]])
+                t0_data = np.stack([data.t0.value for data in processed_background[ifo]])
+                sample_rate = 1/processed_background[ifo][0].dt.value
+                glitch_dset = w.create_dataset(
+                    ifo,
+                    shape=background_data.shape,
+                    dtype=background_data.dtype,
+                    data=background_data,
+                )
+                glitch_dset.attrs['sample_rate'] = sample_rate
+                glitch_dset.attrs['channel'] = f"{ifo}:BACKGROUND_NOISE"
+                w.create_dataset(
+                    f"t0_{ifo}",
+                    shape=t0_data.shape,
+                    dtype=t0_data.dtype,
+                    data=t0_data,
+                )
+
+        return
+
+    def get_processed_glitch(
+            self,
+            glitch_segments: dict,
+            start_id: int=None,
+            end_id: int=None,
+            glitch_info_files: dict=None,
+            glitch_window_length: float=4,
+    ):
+        glitch_infos = dict.fromkeys(self.ifos)
+        processed_glitch = dict.fromkeys(self.ifos)
+        for ifo in self.ifos:
+            seg_length = len(glitch_segments[ifo])
+            if start_id == None:
+                st = 0
+            if end_id > seg_length:
+                ed = seg_length
+            else:
+                st = start_id
+                ed = end_id
+            # Process glitch.
+            proc_glitch = []
+            for segment in glitch_segments[ifo][st:ed]:
+                ts = self.get_ts(ifo, segment)
+                asd = self.get_asd(ifo, segment)
+                proc_ts = self.process(
+                    ts=ts,
+                    asd=asd,
+                    flow=self.flow,
+                    fhigh=self.fhigh,
+                    resample=self.resample,
+                    crop_length=self.crop_length,
+                )
+                proc_glitch.append(proc_ts)
+            
+            processed_glitch[ifo] = proc_glitch
+            # Get glitch info.
+            starts = [seg[0] for seg in glitch_segments[ifo][st:ed]]
+            ends = [seg[1] for seg in glitch_segments[ifo][st:ed]]
+            interval = (min(starts), max(ends))
+            select_infos = []
+            for file in glitch_info_files[ifo]:
+                with h5py.File(file, 'r') as f:
+                    infos = f['glitch_info']
+                    for info in infos:
+                        trig_time = info['time']
+                        after_start =  trig_time - glitch_window_length/2 >= interval[0]
+                        before_end =  trig_time + glitch_window_length/2 <= interval[1]
+                        if after_start and before_end:
+                            select_infos.append(info)
+
+            glitch_infos[ifo] = select_infos
+
+        return processed_glitch, glitch_infos
+
+    def write_glitch_data(
+            self,
+            output_file: str,
+            processed_glitch: dict,
+            glitch_infos: dict,
+    ):
+        ifos = list(processed_glitch.keys())
+        with h5py.File(output_file, 'w') as w:
+            for ifo in ifos:
+                # Glitch Info
+                info_names = list(glitch_infos[ifo][0].dtype.names)
+                info_formats = []
+                for name in info_names:
+                    if isinstance(glitch_infos[ifo][0][name], float) or isinstance(glitch_infos[ifo][0][name], int):
+                            info_formats.append('f8')
+                    if isinstance(glitch_infos[ifo][0][name], bytes):
+                        info_formats.append(h5py.string_dtype(encoding="ascii"))
+            
+                info_dtype = np.dtype({'names': info_names, 'formats': info_formats})
+                info_data = np.stack(glitch_infos[ifo])
+                w.create_dataset(
+                    f"{ifo}_glitch_info",
+                    shape=info_data.shape,
+                    dtype=info_data.dtype,
+                    data=info_data,
+                )
+                # Time Series Data
+                glitch_data = np.stack([data.value for data in processed_glitch[ifo]])
+                t0_data = np.stack([data.t0.value for data in processed_glitch[ifo]])
+                sample_rate = 1/processed_glitch[ifo][0].dt.value
+                glitch_dset = w.create_dataset(
+                    ifo,
+                    shape=glitch_data.shape,
+                    dtype=glitch_data.dtype,
+                    data=glitch_data,
+                )
+                glitch_dset.attrs['sample_rate'] = sample_rate
+                glitch_dset.attrs['channel'] = f"{ifo}:GLITCH"
+                w.create_dataset(
+                    f"t0_{ifo}",
+                    shape=t0_data.shape,
+                    dtype=t0_data.dtype,
+                    data=t0_data,
+                )
+
+        return
