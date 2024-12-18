@@ -5,6 +5,7 @@ from gw_anomaly_detection.data.segments import whole_segment
 from gw_anomaly_detection.data.s3_utils import S3_session
 from gw_anomaly_detection.data.waveforms import Waveforms
 from gw_anomaly_detection.data.process import Process
+import argparse
 
 def main():
     # Loading data_config.yaml
@@ -16,10 +17,20 @@ def main():
     total_interval = config['data']['total_interval']
     data_cache = config['data']['data_cache']
     asd_cache = config['data']['asd_cache']
-    flow = config['data']['processing']['flow']
-    fhigh = config['data']['processing']['fhigh']
+    # flow = config['data']['processing']['flow']
+    # fhigh = config['data']['processing']['fhigh']
     resample = config['data']['processing']['resample']
     crop_length = config['data']['processing']['crop_length']
+    
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('--flow', type=int, default = config['data']['processing']['flow'])
+    parser.add_argument('--fhigh', type=int, default = config['data']['processing']['fhigh'])
+
+    args = parser.parse_args()
+    
+    flow = args.flow
+    fhigh = args.fhigh
 
     # Loading strain and asd into data cache.
     # background_interval = config['data']['background']['sample_interval']

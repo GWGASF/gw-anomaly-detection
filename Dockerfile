@@ -13,6 +13,7 @@ RUN apt-get update \
 COPY . /opt
 
 # Install python packages
+RUN poetry lock
 RUN poetry install
 
 # Setup an app user so the container doesn't run as the root user
