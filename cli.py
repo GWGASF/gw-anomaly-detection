@@ -36,13 +36,13 @@ def main():
     # background_interval = config['data']['background']['sample_interval']
     print("Downloading data from s3 bucket...")
     s3 = S3_session(config['s3'])
-    # for ifo in ifos:
-    #     s3.fetch_data(
-    #         ifo=ifo,
-    #         start=background_interval[ifo]['start'],
-    #         end=background_interval[ifo]['end'],
-    #         data_cache=data_cache,
-    #     )
+    for ifo in ifos:
+        s3.fetch_data(
+            ifo=ifo,
+            start=background_interval[ifo]['start'],
+            end=background_interval[ifo]['end'],
+            data_cache=data_cache,
+        )
 
     # Processing glitch.
     if kind == "glitch":
