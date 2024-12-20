@@ -20,4 +20,7 @@ RUN poetry install
 RUN useradd app
 USER app
 
+RUN mkdir /home/app/data_cache
+RUN mkdir /home/app/test_data
+
 # CMD ["python", "hello.py"]

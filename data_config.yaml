@@ -11,8 +11,8 @@ data:
     L1:
       start: 1238166018
       end: 1238772909
-  data_cache: "/home/chiajui/data_cache"
-  asd_cache: "/home/chiajui/gw-anomaly-detection/asds"
+  data_cache: "/home/app/data_cache"
+  asd_cache: "/opt/asds"
   processing:
     window_length: 4
     flow: 30
@@ -35,7 +35,7 @@ data:
     start_id: 0
     end_id: 3
     window_length: 4
-    output_file: "/home/chiajui/test_data/bg_data.hdf5"
+    output_file: "/home/app/test_data/bg_data.hdf5"
   glitch:
     ifos: ["H1", "L1"]
     sample_interval:
@@ -54,7 +54,7 @@ data:
       H1: ["./glitch_info/O3a/H1-glitch_info.hdf5"]
       L1: ["./glitch_info/O3a/L1-glitch_info.hdf5"]
     glitch_window_length: 4
-    output_file: "/home/chiajui/test_data/glitch_data.hdf5"
+    output_file: "/home/app/test_data/glitch_data.hdf5"
   injection:
     ifos: ["H1", "L1"]
     number_of_samples: 5000
@@ -77,7 +77,7 @@ data:
     target_snr_low: 12
     target_snr_high: 24
     keep_waveform: True
-    output_file: "/home/chiajui/test_data/injection_data.hdf5"
+    output_file: "/home/app/test_data/injection_data.hdf5"
 s3:
   access_key: XRIYL1052YCQ125N75UM
   secret_key: XES9mLNbxAWKZC1AUcYFlGd7ByyXXSYw5yB3UrwM
