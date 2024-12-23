@@ -17,20 +17,20 @@ def main():
     total_interval = config['data']['total_interval']
     data_cache = config['data']['data_cache']
     asd_cache = config['data']['asd_cache']
-    # flow = config['data']['processing']['flow']
-    # fhigh = config['data']['processing']['fhigh']
+    flow = config['data']['processing']['flow']
+    fhigh = config['data']['processing']['fhigh']
     resample = config['data']['processing']['resample']
     crop_length = config['data']['processing']['crop_length']
     
-    parser = argparse.ArgumentParser()
+    # parser = argparse.ArgumentParser()
 
-    parser.add_argument('--flow', type=int, default = config['data']['processing']['flow'])
-    parser.add_argument('--fhigh', type=int, default = config['data']['processing']['fhigh'])
+    # parser.add_argument('--flow', type=int, default = config['data']['processing']['flow'])
+    # parser.add_argument('--fhigh', type=int, default = config['data']['processing']['fhigh'])
 
-    args = parser.parse_args()
+    # args = parser.parse_args()
     
-    flow = args.flow
-    fhigh = args.fhigh
+    # flow = args.flow
+    # fhigh = args.fhigh
 
     # Loading strain and asd into data cache.
     background_interval = config['data']['background']['sample_interval']
@@ -97,6 +97,13 @@ def main():
 
         start_id = config['data']['background']['start_id']
         end_id = config['data']['background']['end_id']
+	
+	parser.add_argument('--sid', type=int, default = start_id)
+    	parser.add_argument('--eid', type=int, default = end_id)
+	args = parser.parse_args()
+	start_id = args.sid
+	end_id = args.eid
+
         window_length = config['data']['background']['window_length']
         output_file = config['data']['background']['output_file']
         # Processing data.
