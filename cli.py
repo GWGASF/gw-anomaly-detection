@@ -98,11 +98,11 @@ def main():
         start_id = config['data']['background']['start_id']
         end_id = config['data']['background']['end_id']
 	
-	parser.add_argument('--sid', type=int, default = start_id)
+	    parser.add_argument('--sid', type=int, default = start_id)
     	parser.add_argument('--eid', type=int, default = end_id)
-	args = parser.parse_args()
-	start_id = args.sid
-	end_id = args.eid
+	    args = parser.parse_args()
+	    start_id = args.sid
+	    end_id = args.eid
 
         window_length = config['data']['background']['window_length']
         output_file = config['data']['background']['output_file']
