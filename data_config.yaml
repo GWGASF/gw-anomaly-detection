@@ -33,7 +33,7 @@ data:
       H1: ["./segments/O3a/H1-background_samples-1238172987-23806.segwizard"]
       L1: ["./segments/O3a/L1-background_samples-1238205073-23812.segwizard"]
     start_id: 0
-    end_id: 3
+    end_id: 1000
     window_length: 4
     output_file: "/home/app/test_data/bg_data.hdf5"
   glitch:
