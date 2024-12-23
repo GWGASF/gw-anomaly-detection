@@ -1,5 +1,6 @@
 #!/bin/python
 import yaml
+import os
 from gw_anomaly_detection.data.segments import read_segment_files
 from gw_anomaly_detection.data.segments import whole_segment
 from gw_anomaly_detection.data.s3_utils import S3_session
@@ -104,8 +105,11 @@ def main():
 	    start_id = args.sid
 	    end_id = args.eid
 
+        output_file_suffix = "_ids_{}-{}.hdf5".format(str(start_id), str(end_id))
+
         window_length = config['data']['background']['window_length']
-        output_file = config['data']['background']['output_file']
+        output_file = os.path.join(config['data']['background']['output_file_dir'], config['data']['background']['output_file']+output_file_suffix)
+
         # Processing data.
         proc = Process(
             ifos=ifos,
