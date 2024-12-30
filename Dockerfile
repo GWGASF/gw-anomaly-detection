@@ -10,14 +10,17 @@ RUN apt-get update \
  && pip install poetry
 
 # Copy in the sourrce code
-COPY . /opt
+COPY gw_anomaly_detection/ gw_anomaly_detection/
+COPY poetry.lock /opt/
+COPY pyproject.toml /opt/
+COPY README.md /opt/
 
 # Install python packages
 RUN poetry lock
 RUN poetry install
 
 # Setup an app user so the container doesn't run as the root user
-RUN useradd app
+# RUN useradd app
 RUN mkdir -p /home/app/data_cache
 RUN mkdir -p /home/app/test_data
 
