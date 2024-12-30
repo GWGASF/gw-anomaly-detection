@@ -1,6 +1,5 @@
 FROM python:3.10
-WORKDIR /opt
-SHELL ["/bin/bash", "-c"]
+SHELL ["/bin/bash", "-l", "-c"]
 
 # Install the application dependencies
 RUN apt-get update \
@@ -10,30 +9,33 @@ RUN apt-get update \
  # && pip install --upgrade pip \
  # && pip install poetry
 
-# Install micromamba
-RUN mkdir -p /opt/micromamba \
- && cd /opt/micromamba \
- && curl -Ls https://micro.mamba.pm/api/micromamba/linux-64/latest | tar -xvj bin/micromamba \ 
- && export MAMABA_ROOT_PREFIX=/opt/micromamba \
- && eval "$(./bin/micromamba shell hook -s posix)" \
- && ./bin/micromamba shell init -s bash -r /opt/micromamba \
- && source $HOME/.bashrc
+# Setup an app user so the container doesn't run as the root user
+RUN useradd -ms /bin/bash app
+USER app
+WORKDIR /home/app/opt
 
-# Set conda-forge as the first channel
-# RUN /opt/micromamba/bin/micromamba config append channels conda-forge \
- # && /opt/micromamba/bin/micromamba config set channel_priority strict
+# Install micromamba
+RUN cd /home/app \
+ && curl -Ls https://micro.mamba.pm/api/micromamba/linux-64/latest | tar -xvj bin/micromamba \ 
+ && export MAMABA_ROOT_PREFIX=~/micromamba \
+ && eval "$(./bin/micromamba shell hook -s posix)" \
+ && ./bin/micromamba shell init -s bash -r /home/app/micromamba \
+ && ./bin/micromamba config append channels conda-forge \
+ && ./bin/micromamba config set channel_priority strict
 
 # Copy in the sourrce code
-# COPY . /opt
+RUN mkdir -p /home/app/opt
+COPY . /home/app/opt
 
 # Install python packages using poetry
 # RUN poetry lock
 # RUN poetry install
 
 # Install python Packages using micromamba
+RUN /home/app/bin/micromamba create -y -p /home/app/micromamba/env -f /home/app/opt/conda-lock.yml
 
-# Setup an app user so the container doesn't run as the root user
-# RUN useradd app
-# USER app
+# Add the command to activate the conda environment
+RUN echo "micromamba activate /home/app/micromamba/env" >> /home/app/.bashrc
 
-# CMD ["python", "hello.py"]
+# Set entrypoint to bash
+ENTRYPOINT ["/bin/bash", "-l", "-c"]
