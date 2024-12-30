@@ -113,7 +113,7 @@ def main():
         output_file_suffix = "_ids_{}-{}.hdf5".format(str(start_id), str(end_id))
 
         window_length = config['data']['background']['window_length']
-        output_file = os.path.join(config['data']['background']['output_file_dir'], config['data']['background']['output_file']+output_file_suffix)
+        output_file = os.path.join(config['data']['background']['output_file_path'], config['data']['background']['output_file']+output_file_suffix)
 
         # Processing data.
         proc = Process(
