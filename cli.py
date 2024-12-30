@@ -9,6 +9,11 @@ from gw_anomaly_detection.data.process import Process
 import argparse
 
 def main():
+
+	script_path = os.path.abspath(__file__)
+	script_directory = os.path.dirname(script_path)
+	os.chdir(script_directory)
+
     # Loading data_config.yaml
     with open("./data_config.yaml", "r") as file:
         config = yaml.safe_load(file)
@@ -95,15 +100,15 @@ def main():
             background_segments[ifo] = read_segment_files(segment_files[ifo])
             interval = whole_segment(segment_file=segment_files[ifo])
             print(f"Number of background segments from {ifo}: {len(background_segments[ifo])}, interval: {interval}.")
-                        
-        start_id = config['data']['background']['start_id']
-        end_id = config['data']['background']['end_id']
-
-	    parser.add_argument('--sid', type=int, default = start_id)
-    	parser.add_argument('--eid', type=int, default = end_id)
-	    args = parser.parse_args()
-	    start_id = args.sid
-	    end_id = args.eid
+		
+		start_id = config['data']['background']['start_id']
+		end_id = config['data']['background']['end_id']
+		parser.add_argument('--sid', type=int, default = start_id)
+		parser.add_argument('--eid', type=int, default = end_id)
+	    
+		args = parser.parse_args()
+		start_id = args.sid
+		end_id = args.eid
 
         output_file_suffix = "_ids_{}-{}.hdf5".format(str(start_id), str(end_id))
 
