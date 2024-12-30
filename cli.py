@@ -28,7 +28,7 @@ def main():
     resample = config['data']['processing']['resample']
     crop_length = config['data']['processing']['crop_length']
     
-    # parser = argparse.ArgumentParser()
+    parser = argparse.ArgumentParser()
 
     # parser.add_argument('--flow', type=int, default = config['data']['processing']['flow'])
     # parser.add_argument('--fhigh', type=int, default = config['data']['processing']['fhigh'])
