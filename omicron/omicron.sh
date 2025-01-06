@@ -1,0 +1,1 @@
+omicron 1238171648 1238175744 parameters.txt strict
