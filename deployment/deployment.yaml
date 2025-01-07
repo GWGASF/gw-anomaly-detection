@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gw-anomaly-detection
+  name: gw-anomaly-detection-data
   labels:
-    k8s-app: gw-anomaly-detection
+    k8s-app: gw-anomaly-detection-data
 spec:
   replicas: 1
   selector:
     matchLabels:
-      k8s-app: gw-anomaly-detection
+      k8s-app: gw-anomaly-detection-data
   template:
     metadata:
       labels:
-        k8s-app: gw-anomaly-detection
+        k8s-app: gw-anomaly-detection-data
     spec:
       containers:
         - name: test
