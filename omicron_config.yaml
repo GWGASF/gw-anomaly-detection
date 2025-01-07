@@ -1,0 +1,15 @@
+omicron:
+  sample_rate: 16384
+  format: "gwf"
+  H1: 
+    start: 1238172987
+    end: 1238181179
+    channel:
+      H1:GWOSC-16KHZ_R1_STRAIN
+  L1:
+    start: 1238205073
+    end: 1238228885
+    channel:
+      L1:GWOSC-16KHZ_R1_STRAIN
+  trigger_dir: /home/jerry/omicron/triggers
+  output_dir: /home/jerry/GW/gw-anomaly-detection/glitch_info

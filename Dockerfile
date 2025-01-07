@@ -38,4 +38,4 @@ RUN /home/app/bin/micromamba create -y -p /home/app/micromamba/env -f /home/app/
 RUN echo "micromamba activate /home/app/micromamba/env" >> /home/app/.bashrc
 
 # Set entrypoint to bash
-ENTRYPOINT ["/bin/bash"]
+# ENTRYPOINT ["/bin/bash"]
