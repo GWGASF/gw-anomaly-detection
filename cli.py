@@ -1,23 +1,16 @@
 #!/bin/python
 import yaml
 import os
+import multiprocess
+import argparse
 from gw_anomaly_detection.data.segments import read_segment_files
 from gw_anomaly_detection.data.segments import whole_segment
 from gw_anomaly_detection.data.s3_utils import S3_session
 from gw_anomaly_detection.data.waveforms import Waveforms
 from gw_anomaly_detection.data.process import Process
-import argparse
 
-def main():
 
-    script_path = os.path.abspath(__file__)
-    script_directory = os.path.dirname(script_path)
-    os.chdir(script_directory)
-
-    # Loading data_config.yaml
-    with open("./data_config.yaml", "r") as file:
-        config = yaml.safe_load(file)
-
+def full_process(config):
     ifos = config['data']['ifos']
     kind = config['data']['kind']
     total_interval = config['data']['total_interval']
@@ -27,8 +20,6 @@ def main():
     fhigh = config['data']['processing']['fhigh']
     resample = config['data']['processing']['resample']
     crop_length = config['data']['processing']['crop_length']
-    
-    parser = argparse.ArgumentParser()
 
     # parser.add_argument('--flow', type=int, default = config['data']['processing']['flow'])
     # parser.add_argument('--fhigh', type=int, default = config['data']['processing']['fhigh'])
@@ -101,14 +92,8 @@ def main():
             interval = whole_segment(segment_file=segment_files[ifo])
             print(f"Number of background segments from {ifo}: {len(background_segments[ifo])}, interval: {interval}.")
 
-        start_id = config['data']['background']['start_id']
-        end_id = config['data']['background']['end_id']
-        parser.add_argument('--sid', type=int, default = start_id)
-        parser.add_argument('--eid', type=int, default = end_id)
-
-        args = parser.parse_args()
-        start_id = args.sid
-        end_id = args.eid
+        start_id = config['data']['glitch']['start_id']
+        end_id = config['data']['glitch']['end_id']
 
         output_file_suffix = "_ids_{}-{}.hdf5".format(str(start_id), str(end_id))
 
@@ -226,4 +211,44 @@ def main():
     # Gathering data on s3 buckets.
 
 if __name__ == "__main__":
-    main()
+    
+    script_path = os.path.abspath(__file__)
+    script_directory = os.path.dirname(script_path)
+    os.chdir(script_directory)
+
+    # Loading data_config.yaml
+    with open("./data_config.yaml", "r") as file:
+        config = yaml.safe_load(file)
+
+    # start_id = config['data']['background']['start_id']
+    # end_id = config['data']['background']['end_id']
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--sid', type=int, default = config['data']['background']['start_id'])
+    parser.add_argument('--eid', type=int, default = config['data']['background']['end_id'])
+
+    args = parser.parse_args()
+    config['data']['background']['start_id'] = args.sid
+    config['data']['background']['end_id'] = args.eid
+   
+    processes = []
+    num_processes = config['Process_num']
+
+    total_id_num = config['data']['background']['end_id'] - config['data']['background']['start_id']
+    interval = total_id_num // num_processes
+    # remainder = total_id_num % num_processes
+
+    # For simplicity, assume remainder equals to 0
+    assert total_id_num % num_processes == 0
+
+
+    for i in range(num_processes):
+        config_cached = config.copy()
+        config_cached['data']['background']['start_id'] = config['data']['background']['start_id'] + i * interval
+        config_cached['data']['background']['end_id'] = config['data']['background']['start_id'] + (i + 1) * interval
+        p = multiprocessing.Process(target=full_process, args = (config_cached))
+        processes.append(p)
+        p.start()
+
+    for p in processes:
+        p.join()
