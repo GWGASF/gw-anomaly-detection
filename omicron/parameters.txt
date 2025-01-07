@@ -11,7 +11,7 @@ PARAMETER  SNRTHRESHOLD     5.0
 PARAMETER  PSDLENGTH        124
 PARAMETER  TIMING           64 4
 
-OUTPUT     DIRECTORY        /home/jerry/GW/gw-anomaly-detection/omicron/triggers
+OUTPUT     DIRECTORY        /home/jerry/omicron/triggers
 OUTPUT     PRODUCTS         triggers
 OUTPUT     VERBOSITY        1
 OUTPUT     FORMAT           hdf5

@@ -1,5 +1,6 @@
 #!/bin/python
 import yaml
+from gwpy.timeseries import TimeSeries
 from gw_anomaly_detection.data.segments import read_segment_files
 from gw_anomaly_detection.data.segments import whole_segment
 from gw_anomaly_detection.data.s3_utils import S3_session
@@ -43,6 +44,17 @@ def main():
     #         end=background_interval[ifo]['end'],
     #         data_cache=data_cache,
     #     )
+
+    print("Downloading data from https://gwosc.org...")
+    for ifo in ifos:
+        ts = TimeSeries.fetch_open_data(
+            ifo=ifo,
+            start=background_interval[ifo]['start'],
+            end=background_interval[ifo]['end'],
+            sample_rate=16384,
+            format='gwf',
+            host='https://gwosc.org',
+        )
 
     # Processing glitch.
     if kind == "glitch":

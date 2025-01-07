@@ -32,10 +32,10 @@ COPY . /home/app/opt
 # RUN poetry install
 
 # Install python Packages using micromamba
-RUN /home/app/bin/micromamba create -y -p /home/app/micromamba/env -f /home/app/opt/conda-lock.yml
+RUN /home/app/bin/micromamba create -y -p /home/app/micromamba/env -f /home/app/opt/conda-lock-data.yml
 
 # Add the command to activate the conda environment
 RUN echo "micromamba activate /home/app/micromamba/env" >> /home/app/.bashrc
 
 # Set entrypoint to bash
-ENTRYPOINT ["/bin/bash", "-l", "-c"]
+ENTRYPOINT ["/bin/bash"]
