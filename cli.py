@@ -3,6 +3,7 @@ import yaml
 import os
 import multiprocessing
 import argparse
+import copy
 from gw_anomaly_detection.data.segments import read_segment_files
 from gw_anomaly_detection.data.segments import whole_segment
 from gw_anomaly_detection.data.s3_utils import S3_session
@@ -254,7 +255,7 @@ if __name__ == "__main__":
 
 
     for i in range(num_processes):
-        config_cached = full_config.copy()
+        config_cached = copy.deepcopy(full_config)
         config_cached['data'][process_type]['start_id'] = full_config['data'][process_type]['start_id'] + i * interval
         config_cached['data'][process_type]['end_id'] = full_config['data'][process_type]['start_id'] + (i + 1) * interval
         p = multiprocessing.Process(target=full_process, args = (config_cached, s3))
