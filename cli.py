@@ -219,7 +219,7 @@ if __name__ == "__main__":
     config['data']['background']['start_id'] = args.sid
     config['data']['background']['end_id'] = args.eid
 
-    print(config['data']['background']['end_id'] = args.eid)
+    print(config['data']['background']['end_id'])
 
     # Loading strain and asd into data cache.
     background_interval = config['data']['background']['sample_interval']
