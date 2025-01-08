@@ -10,7 +10,7 @@ from gw_anomaly_detection.data.waveforms import Waveforms
 from gw_anomaly_detection.data.process import Process
 
 
-def full_process(config):
+def full_process(config, s3):
     ifos = config['data']['ifos']
     kind = config['data']['kind']
     total_interval = config['data']['total_interval']
@@ -28,18 +28,6 @@ def full_process(config):
     
     # flow = args.flow
     # fhigh = args.fhigh
-
-    # Loading strain and asd into data cache.
-    background_interval = config['data']['background']['sample_interval']
-    print("Downloading data from s3 bucket...")
-    s3 = S3_session(config['s3'])
-    for ifo in ifos:
-        s3.fetch_data(
-            ifo=ifo,
-            start=background_interval[ifo]['start'],
-            end=background_interval[ifo]['end'],
-            data_cache=data_cache,
-        )
 
     # Processing glitch.
     if kind == "glitch":
@@ -230,6 +218,21 @@ if __name__ == "__main__":
     args = parser.parse_args()
     config['data']['background']['start_id'] = args.sid
     config['data']['background']['end_id'] = args.eid
+
+    print(config['data']['background']['end_id'] = args.eid)
+
+    # Loading strain and asd into data cache.
+    background_interval = config['data']['background']['sample_interval']
+    print("Downloading data from s3 bucket...")
+    s3 = S3_session(config['s3'])
+    for ifo in ifos:
+        s3.fetch_data(
+            ifo=ifo,
+            start=background_interval[ifo]['start'],
+            end=background_interval[ifo]['end'],
+            data_cache=data_cache,
+        )
+
    
     processes = []
     num_processes = config['Process_num']
@@ -237,7 +240,6 @@ if __name__ == "__main__":
     total_id_num = config['data']['background']['end_id'] - config['data']['background']['start_id']
     interval = total_id_num // num_processes
     # remainder = total_id_num % num_processes
-
     # For simplicity, assume remainder equals to 0
     assert total_id_num % num_processes == 0
 
@@ -246,7 +248,7 @@ if __name__ == "__main__":
         config_cached = config.copy()
         config_cached['data']['background']['start_id'] = config['data']['background']['start_id'] + i * interval
         config_cached['data']['background']['end_id'] = config['data']['background']['start_id'] + (i + 1) * interval
-        p = multiprocessing.Process(target=full_process, args = (config_cached,))
+        p = multiprocessing.Process(target=full_process, args = (config_cached, s3))
         processes.append(p)
         p.start()
 
