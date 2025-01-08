@@ -131,7 +131,7 @@ def full_process(config, s3):
         output_file = config['data']['injection']['output_file']
         window_length = config['data']['injection']['window_length']
 
-        output_file_suffix = "_ids_{}-{}.hdf5".format(str(start_id), str(end_id))
+        output_file_suffix = "_type_{}_ids_{}-{}.hdf5".format(waveform, str(start_id), str(end_id))
 
         # window_length = config['data']['background']['window_length']
         output_file = os.path.join(config['data']['injection']['output_file_path'], config['data']['injection']['output_file']+output_file_suffix)
