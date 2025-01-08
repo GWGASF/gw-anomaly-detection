@@ -1,7 +1,7 @@
 Process_num: 4
 data:
   ifos: ["H1", "L1"]
-  kind: "background"
+  kind: "injection"
   segment_files:
     H1: ["./segments/O3a/H1-science_segs.segwizard"]
     L1: ["./segments/O3a/L1-science_segs.segwizard"]
@@ -72,14 +72,15 @@ data:
       L1: ["./segments/O3a/L1-injection_samples-1238205073-23812.segwizard"]
     start_id: 0
     end_id: 3
-    waveform: 'bbh'
+    waveform: 'ccsn'
     qm_file: './ccsn_source/Pan_2021/SR.h5'
     sampling_frequency: 16384
     window_length: 4
     target_snr_low: 12
     target_snr_high: 24
     keep_waveform: True
-    output_file: "/home/app/test_data/injection_data.hdf5"
+    output_file_path: "/home/app/test_data"
+    output_file: "injection_data"
 s3:
   access_key: XRIYL1052YCQ125N75UM
   secret_key: XES9mLNbxAWKZC1AUcYFlGd7ByyXXSYw5yB3UrwM

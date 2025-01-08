@@ -131,6 +131,11 @@ def full_process(config, s3):
         output_file = config['data']['injection']['output_file']
         window_length = config['data']['injection']['window_length']
 
+        output_file_suffix = "_ids_{}-{}.hdf5".format(str(start_id), str(end_id))
+
+        # window_length = config['data']['background']['window_length']
+        output_file = os.path.join(config['data']['injection']['output_file_path'], config['data']['injection']['output_file']+output_file_suffix)
+
         # Generating Waveform.
         number = end_id - start_id
         wav = Waveforms(
@@ -208,18 +213,20 @@ if __name__ == "__main__":
     with open("./data_config.yaml", "r") as file:
         full_config = yaml.safe_load(file)
 
+    process_type = full_config['data']['kind']
+
     # start_id = full_config['data']['background']['start_id']
     # end_id = full_config['data']['background']['end_id']
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--sid', type=int, default = full_config['data']['background']['start_id'])
-    parser.add_argument('--eid', type=int, default = full_config['data']['background']['end_id'])
+    parser.add_argument('--sid', type=int, default = full_config['data'][process_type]['start_id'])
+    parser.add_argument('--eid', type=int, default = full_config['data'][process_type]['end_id'])
 
     args = parser.parse_args()
-    full_config['data']['background']['start_id'] = args.sid
-    full_config['data']['background']['end_id'] = args.eid
+    full_config['data'][process_type]['start_id'] = args.sid
+    full_config['data'][process_type]['end_id'] = args.eid
 
-    print(full_config['data']['background']['end_id'])
+    print(full_config['data'][process_type]['end_id'])
 
     # Loading strain and asd into data cache.
     background_interval = full_config['data']['background']['sample_interval']
@@ -239,7 +246,7 @@ if __name__ == "__main__":
     processes = []
     num_processes = full_config['Process_num']
 
-    total_id_num = full_config['data']['background']['end_id'] - full_config['data']['background']['start_id']
+    total_id_num = full_config['data'][process_type]['end_id'] - full_config['data'][process_type]['start_id']
     interval = total_id_num // num_processes
     # remainder = total_id_num % num_processes
     # For simplicity, assume remainder equals to 0
@@ -248,8 +255,8 @@ if __name__ == "__main__":
 
     for i in range(num_processes):
         config_cached = full_config.copy()
-        config_cached['data']['background']['start_id'] = full_config['data']['background']['start_id'] + i * interval
-        config_cached['data']['background']['end_id'] = full_config['data']['background']['start_id'] + (i + 1) * interval
+        config_cached['data'][process_type]['start_id'] = full_config['data'][process_type]['start_id'] + i * interval
+        config_cached['data'][process_type]['end_id'] = full_config['data'][process_type]['start_id'] + (i + 1) * interval
         p = multiprocessing.Process(target=full_process, args = (config_cached, s3))
         processes.append(p)
         p.start()
