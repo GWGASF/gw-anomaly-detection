@@ -246,7 +246,7 @@ if __name__ == "__main__":
         config_cached = config.copy()
         config_cached['data']['background']['start_id'] = config['data']['background']['start_id'] + i * interval
         config_cached['data']['background']['end_id'] = config['data']['background']['start_id'] + (i + 1) * interval
-        p = multiprocessing.Process(target=full_process, args = (config_cached))
+        p = multiprocessing.Process(target=full_process, args = (config_cached,))
         processes.append(p)
         p.start()
 
