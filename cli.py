@@ -1,7 +1,7 @@
 #!/bin/python
 import yaml
 import os
-import multiprocess
+import multiprocessing
 import argparse
 from gw_anomaly_detection.data.segments import read_segment_files
 from gw_anomaly_detection.data.segments import whole_segment
