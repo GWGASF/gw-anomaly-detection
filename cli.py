@@ -223,6 +223,8 @@ if __name__ == "__main__":
 
     # Loading strain and asd into data cache.
     background_interval = config['data']['background']['sample_interval']
+    data_cache = config['data']['data_cache']
+    ifos = config['data']['ifos']
     print("Downloading data from s3 bucket...")
     s3 = S3_session(config['s3'])
     for ifo in ifos:
