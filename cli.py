@@ -214,20 +214,29 @@ if __name__ == "__main__":
     with open("./data_config.yaml", "r") as file:
         full_config = yaml.safe_load(file)
 
-    process_type = full_config['data']['kind']
+    # process_type = full_config['data']['kind']
 
     # start_id = full_config['data']['background']['start_id']
     # end_id = full_config['data']['background']['end_id']
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--sid', type=int, default = full_config['data'][process_type]['start_id'])
-    parser.add_argument('--eid', type=int, default = full_config['data'][process_type]['end_id'])
+
+    parser.add_argument('--ptype', type=str, choices=['glitch','background', 'injection'], default = full_config['data']['kind'])
+    parser.add_argument('--itype', type=int, default = full_config['data']['injection']['waveform'])
 
     args = parser.parse_args()
-    full_config['data'][process_type]['start_id'] = args.sid
-    full_config['data'][process_type]['end_id'] = args.eid
+    full_config['data']['kind'] = args.ptype
+    full_config['data']['injection']['waveform'] = args.itype
 
-    print(full_config['data'][process_type]['end_id'])
+    parser.add_argument('--sid', type=int, default = full_config['data'][full_config['data']['kind']]['start_id'])
+    parser.add_argument('--eid', type=int, default = full_config['data'][full_config['data']['kind']]['end_id'])
+
+
+    args = parser.parse_args()
+    full_config['data'][full_config['data']['kind']]['start_id'] = args.sid
+    full_config['data'][full_config['data']['kind']]['end_id'] = args.eid
+
+    # print(full_config['data'][process_type]['end_id'])
 
     # Loading strain and asd into data cache.
     background_interval = full_config['data']['background']['sample_interval']
@@ -247,7 +256,7 @@ if __name__ == "__main__":
     processes = []
     num_processes = full_config['Process_num']
 
-    total_id_num = full_config['data'][process_type]['end_id'] - full_config['data'][process_type]['start_id']
+    total_id_num = full_config['data'][full_config['data']['kind']]['end_id'] - full_config['data'][full_config['data']['kind']]['start_id']
     interval = total_id_num // num_processes
     # remainder = total_id_num % num_processes
     # For simplicity, assume remainder equals to 0
@@ -256,8 +265,8 @@ if __name__ == "__main__":
 
     for i in range(num_processes):
         config_cached = copy.deepcopy(full_config)
-        config_cached['data'][process_type]['start_id'] = full_config['data'][process_type]['start_id'] + i * interval
-        config_cached['data'][process_type]['end_id'] = full_config['data'][process_type]['start_id'] + (i + 1) * interval
+        config_cached['data'][full_config['data']['kind']]['start_id'] = full_config['data'][full_config['data']['kind']]['start_id'] + i * interval
+        config_cached['data'][full_config['data']['kind']]['end_id'] = full_config['data'][full_config['data']['kind']]['start_id'] + (i + 1) * interval
         p = multiprocessing.Process(target=full_process, args = (config_cached, s3))
         processes.append(p)
         p.start()
