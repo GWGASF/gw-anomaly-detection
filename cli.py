@@ -36,25 +36,25 @@ def main():
     # Loading strain and asd into data cache.
     s3 = S3_session(config['s3'])
     background_interval = config['data']['background']['sample_interval']
-    # print("Downloading data from s3 bucket...")
-    # for ifo in ifos:
-    #     s3.fetch_data(
-    #         ifo=ifo,
-    #         start=background_interval[ifo]['start'],
-    #         end=background_interval[ifo]['end'],
-    #         data_cache=data_cache,
-    #     )
-
-    print("Downloading data from https://gwosc.org...")
+    print("Downloading data from s3 bucket...")
     for ifo in ifos:
-        ts = TimeSeries.fetch_open_data(
+        s3.fetch_data(
             ifo=ifo,
             start=background_interval[ifo]['start'],
             end=background_interval[ifo]['end'],
-            sample_rate=16384,
-            format='gwf',
-            host='https://gwosc.org',
+            data_cache=data_cache,
         )
+
+    # print("Downloading data from https://gwosc.org...")
+    # for ifo in ifos:
+    #     ts = TimeSeries.fetch_open_data(
+    #         ifo=ifo,
+    #         start=background_interval[ifo]['start'],
+    #         end=background_interval[ifo]['end'],
+    #         sample_rate=16384,
+    #         format='gwf',
+    #         host='https://gwosc.org',
+    #     )
 
     # Processing glitch.
     if kind == "glitch":

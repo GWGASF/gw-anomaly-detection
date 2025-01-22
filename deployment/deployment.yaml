@@ -16,12 +16,28 @@ spec:
     spec:
       containers:
         - name: test
-          image: gitlab-registry.nrp-nautilus.io/chiajuichou/gw-anomaly-detection:data
+          image: dfredin/gwgasf:testing
           resources:
             limits:
-              memory: 500Mi
-              cpu: 500m
+              memory: 10Gi
+              cpu: 5000m
+              ephemeral-storage: 10Gi
             requests:
-              memory: 100Mi
-              cpu: 50m
-          command: ["sh", "-c", "sleep infinity"]
+              memory: 5Gi
+              cpu: 1500m
+              ephemeral-storage: 5Gi
+          env:
+            - name: KIND
+              value: "background"
+            - name: NUM_SAMPLES
+              value: "5000"
+            - name: START_ID
+              value: "0"
+            - name: END_ID
+              value: "20"
+            - name: INJ_WAVEFORM
+              value: "bbh"
+          # command: ["sh", "-c", "sleep infinity"]
+          # command: ["sh", "-c", "/home/app/micromamba/env/bin/envsubst < /home/app/opt/data_config.yaml > /home/app/opt/data_config.yaml.tmp && mv /home/app/opt/data_config.yaml.tmp /home/app/opt/data_config.yaml && sleep infinity"]
+          # command: ["sh", "-c", "/home/app/micromamba/env/bin/envsubst < /home/app/opt/data_config.yaml > /home/app/opt/data_config.yaml.tmp && mv /home/app/opt/data_config.yaml.tmp /home/app/opt/data_config.yaml && python cli.py"]
+          command: ["sh", "-c", "/home/app/micromamba/env/bin/envsubst < /home/app/opt/data_config.yaml > /home/app/opt/data_config.yaml.tmp && mv /home/app/opt/data_config.yaml.tmp /home/app/opt/data_config.yaml && /home/app/micromamba/env/bin/python /home/app/opt/cli.py"]

@@ -1,6 +1,6 @@
 data:
   ifos: ["H1", "L1"]
-  kind: "background"
+  kind: "${KIND}"
   segment_files:
     H1: ["./segments/O3a/H1-science_segs.segwizard"]
     L1: ["./segments/O3a/L1-science_segs.segwizard"]
@@ -11,8 +11,8 @@ data:
     L1:
       start: 1238166018
       end: 1238772909
-  data_cache: "/home/jerry/data_cache"
-  asd_cache: "/home/jerry/GW/gw-anomaly-detection/asds"
+  data_cache: "O3_data"
+  asd_cache: "/home/app/opt/asds"
   processing:
     window_length: 4
     flow: 30
@@ -21,7 +21,7 @@ data:
     crop_length: 1
   background:
     ifos: ["H1", "L1"]
-    number_of_samples: 5000
+    number_of_samples: ${NUM_SAMPLES}
     sample_interval:
       H1: 
         start: 1238172987
@@ -32,10 +32,10 @@ data:
     segment_files:
       H1: ["./segments/O3a/H1-background_samples-1238172987-23806.segwizard"]
       L1: ["./segments/O3a/L1-background_samples-1238205073-23812.segwizard"]
-    start_id: 0
-    end_id: 3
+    start_id: ${START_ID}
+    end_id: ${END_ID}
     window_length: 4
-    output_file: "/home/jerry/test_data/bg_data.hdf5"
+    output_file: "/home/app/opt/test_data/bg_data_ids_${START_ID}-${END_ID}.hdf5"
   glitch:
     ifos: ["H1", "L1"]
     sample_interval:
@@ -48,16 +48,16 @@ data:
     segment_files:
       H1: ["./segments/O3a/H1-glitch_samples-1238172987-23806.segwizard"]
       L1: ["./segments/O3a/L1-glitch_samples-1238205073-23812.segwizard"]
-    start_id: 0
-    end_id: 3
+    start_id: ${START_ID}
+    end_id: ${END_ID}
     glitch_info_files:
       H1: ["./glitch_info/O3a/H1-glitch_info.hdf5"]
       L1: ["./glitch_info/O3a/L1-glitch_info.hdf5"]
     glitch_window_length: 4
-    output_file: "/home/jerry/test_data/glitch_data.hdf5"
+    output_file: "/home/app/opt/test_data/glitch_data_ids_${START_ID}-${END_ID}.hdf5"
   injection:
     ifos: ["H1", "L1"]
-    number_of_samples: 5000
+    number_of_samples: ${NUM_SAMPLES}
     sample_interval:
       H1: 
         start: 1238172987
@@ -68,16 +68,16 @@ data:
     segment_files:
       H1: ["./segments/O3a/H1-injection_samples-1238172987-23806.segwizard"]
       L1: ["./segments/O3a/L1-injection_samples-1238205073-23812.segwizard"]
-    start_id: 0
-    end_id: 3
-    waveform: 'bbh'
+    start_id: ${START_ID}
+    end_id: ${END_ID}
+    waveform: "${INJ_WAVEFORM}"
     qm_file: './ccsn_source/Pan_2021/SR.h5'
     sampling_frequency: 16384
     window_length: 4
     target_snr_low: 12
     target_snr_high: 24
     keep_waveform: True
-    output_file: "/home/jerry/test_data/injection_data.hdf5"
+    output_file: "/home/app/opt/test_data/injection_data_type_bbh_ids_${START_ID}-${END_ID}.hdf5"
 s3:
   access_key: XRIYL1052YCQ125N75UM
   secret_key: XES9mLNbxAWKZC1AUcYFlGd7ByyXXSYw5yB3UrwM
