@@ -18,6 +18,7 @@ COPY README.md /opt/
 # Install python packages
 RUN poetry lock
 RUN poetry install
+RUN poetry self add poetry-plugin-shell
 
 # Setup an app user so the container doesn't run as the root user
 # RUN useradd app
