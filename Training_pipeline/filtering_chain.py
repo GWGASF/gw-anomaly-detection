@@ -97,7 +97,7 @@ class WSC_1det_struct(nn.Module):
 
         return x
 
-def trainAE_struct(dataset, struct, save_path):
+def trainAE_struct(dataset, struct, config_dict):
     
     nTotal = len(dataset);
     nTrain = int(rTrain * nTotal)
@@ -171,88 +171,90 @@ def trainAE_struct(dataset, struct, save_path):
             
     return autoencoder.cpu().eval()
 
-def trainWSC_2class(dataset0_to_be_examined, dataset1_to_be_examined, struct, save_path):
-# dataset0: bkg set from AE
-# dataset1: identified signal from AE
 
-    wsc = WSC_1det_struct(struct).to(device)
-    trainable_params_WSC = sum(p.numel() for p in wsc.parameters() if p.requires_grad)
-    Nsize = 20
-    if len(dataset0_to_be_examined) > Nsize * trainable_params_WSC:
-        dataset0 = dataset0_to_be_examined[np.random.choice(len(dataset0_to_be_examined), Nsize * trainable_params_WSC, replace = False)]
-    else:
-        dataset0 = dataset0_to_be_examined
+# For WSC_2class, need maintenance
+# def trainWSC_2class(dataset0_to_be_examined, dataset1_to_be_examined, struct, save_path):
+# # dataset0: bkg set from AE
+# # dataset1: identified signal from AE
+
+#     wsc = WSC_1det_struct(struct).to(device)
+#     trainable_params_WSC = sum(p.numel() for p in wsc.parameters() if p.requires_grad)
+#     Nsize = 20
+#     if len(dataset0_to_be_examined) > Nsize * trainable_params_WSC:
+#         dataset0 = dataset0_to_be_examined[np.random.choice(len(dataset0_to_be_examined), Nsize * trainable_params_WSC, replace = False)]
+#     else:
+#         dataset0 = dataset0_to_be_examined
     
-    if len(dataset1_to_be_examined) > Nsize * trainable_params_WSC:
-        dataset1 = dataset1_to_be_examined[np.random.choice(len(dataset1_to_be_examined), Nsize * trainable_params_WSC, replace = False)]
-    else:
-        dataset1 = dataset1_to_be_examined
+#     if len(dataset1_to_be_examined) > Nsize * trainable_params_WSC:
+#         dataset1 = dataset1_to_be_examined[np.random.choice(len(dataset1_to_be_examined), Nsize * trainable_params_WSC, replace = False)]
+#     else:
+#         dataset1 = dataset1_to_be_examined
 
-    logger.info('{}, bkg events and {} signal events passed to WSC for training. '.format(len(dataset0), len(dataset1)))
+#     logger.info('{}, bkg events and {} signal events passed to WSC for training. '.format(len(dataset0), len(dataset1)))
 
-    nTotal0, nTotal1 = len(dataset0), len(dataset1);
-    nTrain0, nTrain1 = int(rTrain * nTotal0), int(rTrain * nTotal1)
-    nTest0 , nTest1  = int(rTest * nTotal0) , int(rTest * nTotal1)
+#     nTotal0, nTotal1 = len(dataset0), len(dataset1);
+#     nTrain0, nTrain1 = int(rTrain * nTotal0), int(rTrain * nTotal1)
+#     nTest0 , nTest1  = int(rTest * nTotal0) , int(rTest * nTotal1)
 
-    X_train = np.concatenate((dataset0[:nTrain0], dataset1[:nTrain1]))
-    X_test = np.concatenate((dataset0[-nTest0:], dataset1[-nTest1:]))
-    X_validation = np.concatenate((dataset0[nTrain0:-nTest0], dataset1[nTrain1:-nTest1]))
+#     X_train = np.concatenate((dataset0[:nTrain0], dataset1[:nTrain1]))
+#     X_test = np.concatenate((dataset0[-nTest0:], dataset1[-nTest1:]))
+#     X_validation = np.concatenate((dataset0[nTrain0:-nTest0], dataset1[nTrain1:-nTest1]))
     
-    Y_train = np.concatenate((np.zeros((nTrain0, 1)), np.ones((nTrain1, 1)))).flatten().astype(int)
-    Y_test = np.concatenate((np.zeros((nTest0, 1)), np.ones((nTest1, 1)))).flatten().astype(int)
-    Y_validation = np.concatenate((np.zeros((dataset0[nTrain0:-nTest0].shape[0], 1)), np.ones((dataset1[nTrain1:-nTest1].shape[0], 1)))).flatten().astype(int)
+#     Y_train = np.concatenate((np.zeros((nTrain0, 1)), np.ones((nTrain1, 1)))).flatten().astype(int)
+#     Y_test = np.concatenate((np.zeros((nTest0, 1)), np.ones((nTest1, 1)))).flatten().astype(int)
+#     Y_validation = np.concatenate((np.zeros((dataset0[nTrain0:-nTest0].shape[0], 1)), np.ones((dataset1[nTrain1:-nTest1].shape[0], 1)))).flatten().astype(int)
 
-    train_dataset = TensorDataset(torch.FloatTensor(X_train).to(device), torch.FloatTensor(Y_train).to(device))
-    validation_dataset = TensorDataset(torch.FloatTensor(X_validation).to(device), torch.FloatTensor(Y_validation).to(device))
+#     train_dataset = TensorDataset(torch.FloatTensor(X_train).to(device), torch.FloatTensor(Y_train).to(device))
+#     validation_dataset = TensorDataset(torch.FloatTensor(X_validation).to(device), torch.FloatTensor(Y_validation).to(device))
 
-    trainDataLoader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True, drop_last=True)
-    validationDataLoader = DataLoader(dataset=validation_dataset, batch_size=batch_size, shuffle = True, drop_last=True)
+#     trainDataLoader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True, drop_last=True)
+#     validationDataLoader = DataLoader(dataset=validation_dataset, batch_size=batch_size, shuffle = True, drop_last=True)
 
-    # wsc = WSClassifier_3class().to(device)
-    optimizer = optim.Adam(wsc.parameters(), lr=0.00005)
-    loss_func = nn.BCEWithLogitsLoss(pos_weight=torch.FloatTensor([nTrain0/nTrain1])).to(device)
+#     # wsc = WSClassifier_3class().to(device)
+#     optimizer = optim.Adam(wsc.parameters(), lr=0.00005)
+#     loss_func = nn.BCEWithLogitsLoss(pos_weight=torch.FloatTensor([nTrain0/nTrain1])).to(device)
     
-    loss_train = np.empty(epochs)
-    loss_validation = np.empty(epochs)
+#     loss_train = np.empty(epochs)
+#     loss_validation = np.empty(epochs)
 
-    for epoch in range(epochs):
-        wsc.train()
-        for batchidx, (x, y) in enumerate(trainDataLoader):
-            yprime = wsc(x).flatten()
-            loss = loss_func(yprime, y)
+#     for epoch in range(epochs):
+#         wsc.train()
+#         for batchidx, (x, y) in enumerate(trainDataLoader):
+#             yprime = wsc(x).flatten()
+#             loss = loss_func(yprime, y)
 
-            optimizer.zero_grad()
-            loss.backward()
-            optimizer.step()
+#             optimizer.zero_grad()
+#             loss.backward()
+#             optimizer.step()
             
-        wsc.eval()
-        with torch.no_grad():
-            val_loss = 0
-            for batchidx, (x, y) in enumerate(validationDataLoader):
-                yprime = wsc(x).flatten()
-                lossVal = loss_func(yprime, y)
-                val_loss += lossVal.item()
+#         wsc.eval()
+#         with torch.no_grad():
+#             val_loss = 0
+#             for batchidx, (x, y) in enumerate(validationDataLoader):
+#                 yprime = wsc(x).flatten()
+#                 lossVal = loss_func(yprime, y)
+#                 val_loss += lossVal.item()
 
-            val_loss /= len(validationDataLoader)
+#             val_loss /= len(validationDataLoader)
 
-        loss_train[epoch] = loss.item()
-        loss_validation[epoch] = val_loss
+#         loss_train[epoch] = loss.item()
+#         loss_validation[epoch] = val_loss
         
-    wsc.cpu().eval()
+#     wsc.cpu().eval()
     
-    _, ax = plt.subplots(1, 2, figsize=(14, 5))
-    ax[0].plot(loss_train)
-    ax[0].plot(loss_validation)
-    foo = ax[1].hist(nn.Sigmoid()(wsc(torch.FloatTensor(X_train))).detach().numpy().flatten(), range=(0, 1), bins=20, density=True, histtype="step")
-    foo = ax[1].hist(nn.Sigmoid()(wsc(torch.FloatTensor(X_test ))).detach().numpy().flatten(), range=(0, 1), bins=20, density=True, histtype="step")
+#     _, ax = plt.subplots(1, 2, figsize=(14, 5))
+#     ax[0].plot(loss_train)
+#     ax[0].plot(loss_validation)
+#     foo = ax[1].hist(nn.Sigmoid()(wsc(torch.FloatTensor(X_train))).detach().numpy().flatten(), range=(0, 1), bins=20, density=True, histtype="step")
+#     foo = ax[1].hist(nn.Sigmoid()(wsc(torch.FloatTensor(X_test ))).detach().numpy().flatten(), range=(0, 1), bins=20, density=True, histtype="step")
     
-    plt.savefig(save_path)
-    plt.close()
-    logger.info("training figure saved to "+save_path)
+#     plt.savefig(save_path)
+#     plt.close()
+#     logger.info("training figure saved to "+save_path)
     
-    return wsc.cpu().eval()
+#     return wsc.cpu().eval()
 
-def trainSeriesSupC_struct(datasets, struct, save_path):
+def trainSeriesSupC_struct(datasets, struct, config_dict):
 # datasets: multiple datasets, datasets[0, 1, ...] are for the 1st, 2nd, ... class
 # datasets should have the keys to be the integres 0, 1, 2, ...
 

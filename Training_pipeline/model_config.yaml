@@ -1,0 +1,114 @@
+Full_pipeline:
+  Training_scheme:
+    device: 'cuda:0'
+    Output_dir: 
+
+Weakly_Supervised:
+  Model_params:
+    Class_type: [0,0,1,1,1]
+    Model_struct_before_final_layer: [202, 64, 16]
+
+
+  Training_scheme:
+    Early_stopping_applied: True
+    Total_epochs: 500
+    Batch_size: 384
+    Learning_rate: 0.00002
+    Least_epochs: 100
+    Epochs_interval: 20
+    # device: 'cuda:0'
+    Output_file: 
+
+
+Filtering_Chain:
+
+  class_to_use: 4
+
+  GlitchH_class:
+    Model_params:
+      Class_name: 'GlitchH'
+      # Known_class_num: 4
+      Model_struct_before_final_layer: [101, 10, 20, 10]
+
+
+    Training_scheme:
+      Early_stopping_applied: True
+      Total_epochs: 500
+      Batch_size: 384
+      Learning_rate: 0.00002
+      Least_epochs: 100
+      Epochs_interval: 20
+
+      Output_dir:
+
+  GlitchL_class:
+
+  Class1:
+    Model_params:
+      Class_name: 'GlitchL'
+      # Known_class_num: 4
+      Model_struct_before_final_layer: [101, 10, 10]
+
+
+    Training_scheme:
+      Early_stopping_applied: True
+      Total_epochs: 500
+      Batch_size: 384
+      Learning_rate: 0.00002
+      Least_epochs: 100
+      Epochs_interval: 20
+
+      Output_dir: 
+
+  Class2:
+    Model_params:
+      Class_name: 'BBH'
+      # Known_class_num: 4
+      Model_struct_before_final_layer: [202, 20, 20]
+
+
+    Training_scheme:
+      Early_stopping_applied: True
+      Total_epochs: 500
+      Batch_size: 384
+      Learning_rate: 0.00002
+      Least_epochs: 100
+      Epochs_interval: 20
+
+      Output_dir: 
+
+  Class3:
+    Model_params:
+      Class_name: 'SGHF'
+      # Known_class_num: 4
+      Model_struct_before_final_layer: [202, 40]
+
+
+    Training_scheme:
+      Early_stopping_applied: True
+      Total_epochs: 500
+      Batch_size: 384
+      Learning_rate: 0.00002
+      Least_epochs: 100
+      Epochs_interval: 20
+
+      Output_dir: 
+
+
+  Class4:
+
+    Model_params:
+      Class_name: 'SGLF'
+      # Known_class_num: 4
+      Model_struct_before_final_layer: [202, 40]
+
+
+    Training_scheme:
+      Early_stopping_applied: True
+      Total_epochs: 500
+      Batch_size: 384
+      Learning_rate: 0.00002
+      Least_epochs: 100
+      Epochs_interval: 20
+
+      Output_dir: 
