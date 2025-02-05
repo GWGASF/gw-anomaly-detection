@@ -17,22 +17,34 @@ Weakly_Supervised:
     Least_epochs: 100
     Epochs_interval: 20
     # device: 'cuda:0'
-    Output_file: 
+    Ratio_train: 0.8
+    Ratio_test: 0.1
+    Ratio_validation: 0.2
+
+    Output_dir: None
+    Output_file_infix: 'Final_WSC_'
+    Output_file_suffix: 'default'
 
 
 Filtering_Chain:
 
-  class_to_use: 4
+  Class_to_use: 4
+  Output_dir:
+  Output_file_infix: 'Filtering_chain_'
+  Output_file_suffix: 'default'
 
   GlitchH_class:
     Model_params:
-      Class_name: 'GlitchH'
+      Class_name: 'glitch_H'
       # Known_class_num: 4
-      Model_struct_before_final_layer: [101, 10, 20, 10]
+      Model_struct_half: [101, 10, 20, 10]
 
 
     Training_scheme:
       Early_stopping_applied: True
+      Use_cache: True
+      Train_wsc: False
+      Generate_cache: False
       Total_epochs: 500
       Batch_size: 384
       Learning_rate: 0.00002
@@ -42,12 +54,32 @@ Filtering_Chain:
       Output_dir:
 
   GlitchL_class:
+    Model_params:
+      Class_name: 'glitch_L'
+      # Known_class_num: 4
+      Model_struct_half: [101, 10, 10]
+
+
+    Training_scheme:
+      Early_stopping_applied: True
+      Use_cache: True
+      Train_wsc: False
+      Generate_cache: False
+      Total_epochs: 500
+      Batch_size: 384
+      Learning_rate: 0.00002
+      Least_epochs: 100
+      Epochs_interval: 20
+
+      Output_dir:
 
   Class1:
     Model_params:
-      Class_name: 'GlitchL'
+      Class_name: 'noise'
+      Use_cache: True
+      Generate_cache: False
       # Known_class_num: 4
-      Model_struct_before_final_layer: [101, 10, 10]
+      Model_struct_half: [202, 40, 20]
 
 
     Training_scheme:
@@ -64,7 +96,7 @@ Filtering_Chain:
     Model_params:
       Class_name: 'BBH'
       # Known_class_num: 4
-      Model_struct_before_final_layer: [202, 20, 20]
+      Model_struct_half: [202, 20, 20]
 
 
     Training_scheme:
@@ -81,7 +113,7 @@ Filtering_Chain:
     Model_params:
       Class_name: 'SGHF'
       # Known_class_num: 4
-      Model_struct_before_final_layer: [202, 40]
+      Model_struct_half: [202, 40]
 
 
     Training_scheme:
@@ -100,7 +132,7 @@ Filtering_Chain:
     Model_params:
       Class_name: 'SGLF'
       # Known_class_num: 4
-      Model_struct_before_final_layer: [202, 40]
+      Model_struct_half: [202, 40]
 
 
     Training_scheme:

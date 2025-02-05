@@ -62,6 +62,18 @@ class WSC_1det_struct(nn.Module):
         return x
 
 
+def return_model_with_least_valloss(model_list):
+    # This function returns the model with the least valloss in the model_list
+    # valloss_list = np.empty((0))
+    # epoch_list = np.empty((0))
+    # extracting the epochs the model is using
+    # print(model_list.keys())
+    epoch_list = [int(re.search(r'(\d+)valloss', item).group(1)) for item in model_list.keys() if isinstance(item, str) and 'valloss' in item]
+    valloss_list = [model_list[key] for key in [item for item in model_list.keys() if isinstance(item, str) and 'valloss' in item]]
+    # print(epoch_list[valloss_list.index(min(valloss_list))])
+    return(model_list[epoch_list[valloss_list.index(min(valloss_list))]])
+
+
 # device here need a method to do an overall definition
 def trainSeriesSupC_struct(datasets, struct, config_dict):
 # datasets: multiple datasets, datasets[0, 1, ...] are for the 1st, 2nd, ... class
@@ -78,6 +90,13 @@ def trainSeriesSupC_struct(datasets, struct, config_dict):
     least_epochs = config_dict['Training_scheme']['Least_epochs']
     epochs_interval = config_dict['Training_scheme']['Epochs_interval']
     # device = config_dict['Training_scheme']['Epochs_interval']
+    
+    rTrain = config_dict['Training_scheme']['Ratio_train']
+    rTest = config_dict['Training_scheme']['Ratio_test']
+    
+    fig_save_path = os.path.join(config_dict['Training_scheme']['Output_dir'], config_dict['Training_scheme']['Output_file_infix']+config_dict['Training_scheme']['Output_file_suffix']+'.png')
+    model_save_path = os.path.join(config_dict['Training_scheme']['Output_dir'], config_dict['Training_scheme']['Output_file_infix']+config_dict['Training_scheme']['Output_file_suffix']+'.pt')
+    
     
     model_list = {}
     
@@ -154,22 +173,16 @@ def trainSeriesSupC_struct(datasets, struct, config_dict):
     foo = ax[1].hist(nn.Softmax(dim=1)(wsc(torch.FloatTensor(X_train).to(device))).cpu().detach().numpy().dot([0., 0.]+[1.]*(Nclass-2)), range=(0, 1), bins=20, density=True, histtype="step")
     foo = ax[1].hist(nn.Softmax(dim=1)(wsc(torch.FloatTensor(X_test ).to(device))).cpu().detach().numpy().dot([0., 0.]+[1.]*(Nclass-2)), range=(0, 1), bins=20, density=True, histtype="step")
 
-    plt.show()
-    plt.savefig(save_path)
+    # plt.show()
+    plt.savefig(fig_save_path)
     plt.close()
     
-    return model_list
-
-def return_model_with_least_valloss(model_list):
-    # This function returns the model with the least valloss in the model_list
-    # valloss_list = np.empty((0))
-    # epoch_list = np.empty((0))
-    # extracting the epochs the model is using
-    # print(model_list.keys())
-    epoch_list = [int(re.search(r'(\d+)valloss', item).group(1)) for item in model_list.keys() if isinstance(item, str) and 'valloss' in item]
-    valloss_list = [model_list[key] for key in [item for item in model_list.keys() if isinstance(item, str) and 'valloss' in item]]
-    # print(epoch_list[valloss_list.index(min(valloss_list))])
-    return(model_list[epoch_list[valloss_list.index(min(valloss_list))]])
+    model = return_model_with_least_valloss(model_list)
+    torch.save(model, model_save_path)
+    
+    return 0
 
 
-def 
+# Debugging part
+if __name__ == "__main__":
+    
