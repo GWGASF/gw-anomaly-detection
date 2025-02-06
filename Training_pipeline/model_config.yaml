@@ -36,41 +36,45 @@ Filtering_Chain:
   GlitchH_class:
     Model_params:
       Class_name: 'glitch_H'
-      # Known_class_num: 4
       Model_struct_half: [101, 10, 20, 10]
 
 
     Training_scheme:
-      Early_stopping_applied: True
+      Early_stopping_applied: False
       Use_cache: True
       Train_wsc: False
       Generate_cache: False
-      Total_epochs: 500
-      Batch_size: 384
-      Learning_rate: 0.00002
+      Total_epochs: 60
+      Batch_size: 32
+      Learning_rate: 0.00005
       Least_epochs: 100
       Epochs_interval: 20
-
+      Cut_ratio: 
+      Ratio_train: 0.8
+      Ratio_test: 0.1
+      Ratio_validation: 0.2
       Output_dir:
 
   GlitchL_class:
     Model_params:
       Class_name: 'glitch_L'
-      # Known_class_num: 4
       Model_struct_half: [101, 10, 10]
 
 
     Training_scheme:
-      Early_stopping_applied: True
+      Early_stopping_applied: False
       Use_cache: True
       Train_wsc: False
       Generate_cache: False
-      Total_epochs: 500
-      Batch_size: 384
-      Learning_rate: 0.00002
+      Total_epochs: 60
+      Batch_size: 32
+      Learning_rate: 0.00005
       Least_epochs: 100
       Epochs_interval: 20
-
+      Cut_ratio: 
+      Ratio_train: 0.8
+      Ratio_test: 0.1
+      Ratio_validation: 0.2
       Output_dir:
 
   Class1:
@@ -78,69 +82,89 @@ Filtering_Chain:
       Class_name: 'noise'
       Use_cache: True
       Generate_cache: False
-      # Known_class_num: 4
       Model_struct_half: [202, 40, 20]
 
 
     Training_scheme:
-      Early_stopping_applied: True
-      Total_epochs: 500
-      Batch_size: 384
-      Learning_rate: 0.00002
+      Early_stopping_applied: False
+      Use_cache: True
+      Train_wsc: False
+      Generate_cache: False
+      Total_epochs: 60
+      Batch_size: 32
+      Learning_rate: 0.00005
       Least_epochs: 100
       Epochs_interval: 20
-
-      Output_dir: 
+      Cut_ratio: 
+      Ratio_train: 0.8
+      Ratio_test: 0.1
+      Ratio_validation: 0.2
+      Output_dir:
 
   Class2:
     Model_params:
       Class_name: 'BBH'
-      # Known_class_num: 4
       Model_struct_half: [202, 20, 20]
 
 
     Training_scheme:
-      Early_stopping_applied: True
-      Total_epochs: 500
-      Batch_size: 384
-      Learning_rate: 0.00002
+      Early_stopping_applied: False
+      Use_cache: True
+      Train_wsc: False
+      Generate_cache: False
+      Total_epochs: 60
+      Batch_size: 32
+      Learning_rate: 0.00005
       Least_epochs: 100
       Epochs_interval: 20
-
-      Output_dir: 
+      Cut_ratio: 
+      Ratio_train: 0.8
+      Ratio_test: 0.1
+      Ratio_validation: 0.2
+      Output_dir:
 
   Class3:
     Model_params:
       Class_name: 'SGHF'
-      # Known_class_num: 4
       Model_struct_half: [202, 40]
 
 
     Training_scheme:
-      Early_stopping_applied: True
-      Total_epochs: 500
-      Batch_size: 384
-      Learning_rate: 0.00002
+      Early_stopping_applied: False
+      Use_cache: True
+      Train_wsc: False
+      Generate_cache: False
+      Total_epochs: 60
+      Batch_size: 32
+      Learning_rate: 0.00005
       Least_epochs: 100
       Epochs_interval: 20
-
-      Output_dir: 
+      Cut_ratio: 
+      Ratio_train: 0.8
+      Ratio_test: 0.1
+      Ratio_validation: 0.2
+      Output_dir:
 
 
   Class4:
 
     Model_params:
       Class_name: 'SGLF'
-      # Known_class_num: 4
       Model_struct_half: [202, 40]
 
 
     Training_scheme:
-      Early_stopping_applied: True
-      Total_epochs: 500
-      Batch_size: 384
-      Learning_rate: 0.00002
+      Early_stopping_applied: False
+      Use_cache: True
+      Train_wsc: False
+      Generate_cache: False
+      Total_epochs: 60
+      Batch_size: 32
+      Learning_rate: 0.00005
       Least_epochs: 100
       Epochs_interval: 20
-
-      Output_dir: 
+      Cut_ratio: 
+      Ratio_train: 0.8
+      Ratio_test: 0.1
+      Ratio_validation: 0.2
+      Output_dir:
