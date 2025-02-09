@@ -28,7 +28,7 @@ Weakly_Supervised:
 
 Filtering_Chain:
 
-  Class_to_use: 4
+  Class_to_use: 5
   Output_dir: None
   Output_file_infix: 'Filtering_chain_'
   Output_file_suffix: 'default'
@@ -49,7 +49,8 @@ Filtering_Chain:
       Learning_rate: 0.00005
       Least_epochs: 100
       Epochs_interval: 20
-      Cut_ratio: 0.632
+      # Cut_ratio: 0.132
+      Cut_ratio: 1
       Ratio_train: 0.8
       Ratio_test: 0.1
       Ratio_validation: 0.2
@@ -73,7 +74,8 @@ Filtering_Chain:
       Learning_rate: 0.00005
       Least_epochs: 100
       Epochs_interval: 20
-      Cut_ratio: 0.740
+      # Cut_ratio: 0.240
+      Cut_ratio: 1
       Ratio_train: 0.8
       Ratio_test: 0.1
       Ratio_validation: 0.2
@@ -94,7 +96,7 @@ Filtering_Chain:
       Generate_cache: False
       Total_epochs: 60
       Batch_size: 32
-      Learning_rate: 0.00005
+      Learning_rate: 0.001
       Least_epochs: 100
       Epochs_interval: 20
       Cut_ratio: 0.001

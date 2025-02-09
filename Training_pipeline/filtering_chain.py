@@ -647,10 +647,19 @@ if __name__ == "__main__":
         config = yaml.safe_load(file)
         
     dataset_trial = torch.load('/home/app/test_data/trial.json', weights_only=False)
-    dataset_trial[5] = dataset_trial[4].copy()
+    dataset_trial[6] = dataset_trial[4].copy()
+    
+    dataset_trial[5] = dataset_trial[4]
+    dataset_trial[4] = dataset_trial[3]
+    dataset_trial[3] = dataset_trial[2]
+    dataset_trial[2] = dataset_trial[1]
+    dataset_trial[1] = dataset_trial[0][10000:]
+    dataset_trial[0] = dataset_trial[0][:10000]
     
     print(dataset_trial.keys())
     
+    for key in dataset_trial.keys():
+        np.random.shuffle(dataset_trial[key])
     
     config['Filtering_Chain']['Output_dir'] = config['Full_pipeline']['Training_scheme']['Output_dir']
     
