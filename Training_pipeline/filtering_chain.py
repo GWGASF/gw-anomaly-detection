@@ -19,6 +19,7 @@ import itertools
 import logging
 import os
 import sys
+import yaml
 
 class AE_1det_struct(nn.Module):
     def __init__(self, 
@@ -122,6 +123,9 @@ def trainAE_struct(dataset, struct, config_dict):
     train_dataset = TensorDataset(trainData)
     test_dataset = TensorDataset(testData)
     validation_dataset = TensorDataset(validationData)
+
+    print(trainData.shape)
+    print(validationData.shape)
 
     trainDataLoader = DataLoader(dataset=train_dataset, batch_size=batch_size, shuffle=True, drop_last=True)
     validationDataLoader = DataLoader(dataset=validation_dataset, batch_size=batch_size, shuffle=True, drop_last=True)
@@ -360,7 +364,7 @@ def Series_training(training_set_ae, config_dict):
     
     classnum = config_dict['Class_to_use']
     classkey = ['GlitchH_class', 'GlitchL_class'] + ['Class'+str(i+1) for i in range(classnum - 1)]
-    classname = [name for name in config_dict[classkey]['Model_params']['Class_name']]
+    classname = [config_dict[key]['Model_params']['Class_name'] for key in classkey]
     
     # Right now the cache part can only working for the AE
     use_cache = [config_dict[key]['Training_scheme']['Use_cache'] for key in classkey]
@@ -368,6 +372,11 @@ def Series_training(training_set_ae, config_dict):
     train_wsc = [config_dict[key]['Training_scheme']['Train_wsc'] for key in classkey]
     ae_struct = [config_dict[key]['Model_params']['Model_struct_half'] for key in classkey]
     cutAE_ratio = [config_dict[key]['Training_scheme']['Cut_ratio'] for key in classkey]
+    
+    for key in classkey:
+        config_dict[key]['Training_scheme']['Output_dir'] = config_dict['Output_dir']
+        config_dict[key]['Training_scheme']['Output_file_infix'] = config_dict['Output_file_infix'] + config_dict[key]['Model_params']['Class_name'] + '_'
+        config_dict[key]['Training_scheme']['Output_file_suffix'] = config_dict['Output_file_suffix']
     
     # fig_save_path_list = [os.path.join(config_dict[key]['Training_scheme']['Output_dir'], config_dict[key]['Training_scheme']['Output_file_infix']+config_dict[key]['Training_scheme']['Output_file_suffix']+'.png') for key in classkey]
     model_chain_save_path = os.path.join(config_dict['Output_dir'], config_dict['Output_file_infix']+config_dict['Output_file_suffix']+'.json')
@@ -398,12 +407,12 @@ def Series_training(training_set_ae, config_dict):
     if use_cache[0]:
         aes['glitch_H'] = models['glitch_H']
     else:
-        aes['glitch_H'] = trainAE_struct(training_set_ae[0][:,:101], ae_struct[0], config_dict[classkey[0]])
+        aes['glitch_H'] = trainAE_struct(training_set_ae[0][:,:101], ae_struct[0], config_dict[classkey[0]]['Training_scheme'])
     
     if use_cache[1]:
         aes['glitch_L'] = models['glitch_L']
     else:
-        aes['glitch_L'] = trainAE_struct(training_set_ae[1][:,101:], ae_struct[1], config_dict[classkey[1]])
+        aes['glitch_L'] = trainAE_struct(training_set_ae[1][:,101:], ae_struct[1], config_dict[classkey[1]]['Training_scheme'])
         
     
     if train_wsc[0]:
@@ -457,7 +466,7 @@ def Series_training(training_set_ae, config_dict):
         if use_cache[iCS]:
             aes[classname[iCS]] = models[classname[iCS]]
         else:
-            aes[classname[iCS]] = trainAE_struct(training_set_ae[iCS], ae_struct[iCS], config_dict[classkey[iCS]])
+            aes[classname[iCS]] = trainAE_struct(training_set_ae[iCS], ae_struct[iCS], config_dict[classkey[iCS]]['Training_scheme'])
         
         if train_wsc[iCS]:
             exit('Training WSC for {} is not implemented yet.'.format(classname[iCS]))
@@ -506,10 +515,10 @@ def Series_training(training_set_ae, config_dict):
             dcd = aes[classname[iCS]](torch.FloatTensor(training_set_ae[iCS]))[1].detach().numpy()
             err_score = np.mean((training_set_ae[iCS] - dcd)**2, axis=1)
             err_score.sort()
-            cutAE[iCS] = err_score[-int(cutAE[iCS]*len(err_score))]
+            cutAE[iCS] = err_score[-int(cutAE_ratio[iCS]*len(err_score))]
 
             for iStep in np.arange(iCS+1, classnum+2):
-                dcd = models[classname[iCS]](torch.FloatTensor(training_set_ae[iStep]))[1].detach().numpy()
+                dcd = aes[classname[iCS]](torch.FloatTensor(training_set_ae[iStep]))[1].detach().numpy()
                 err_score = np.mean((training_set_ae[iStep]-dcd)**2, axis=1)
                 passidx = err_score > cutAE[iCS]
                 training_set_ae[iStep] = training_set_ae[iStep][passidx]  
@@ -632,3 +641,19 @@ def Series_training(training_set_ae, config_dict):
 
 #     logger.info("output models synced, end training for cut scheme No.{}. ".format(cnt))
 
+if __name__ == "__main__":
+    device = 'cpu'
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'model_config.yaml'), 'r') as file:
+        config = yaml.safe_load(file)
+        
+    dataset_trial = torch.load('/home/app/test_data/trial.json', weights_only=False)
+    dataset_trial[5] = dataset_trial[4].copy()
+    
+    print(dataset_trial.keys())
+    
+    
+    config['Filtering_Chain']['Output_dir'] = config['Full_pipeline']['Training_scheme']['Output_dir']
+    
+    
+    Series_training(dataset_trial, config_dict=config['Filtering_Chain'])
+   

@@ -11,25 +11,13 @@ from torch.utils.data import DataLoader
 from torch.utils.data import TensorDataset
 from torch import nn, optim
 import scipy.io as sio
-# import pandas as pd
-import datetime
 import os
-# import readligo as rl
-# from gwpy.timeseries import TimeSeries
-import math
-import random
 
 import copy
 
 import torch.nn.functional as F
-import pickle
-import itertools
 import re
-
-import pandas as pd
-from openpyxl import Workbook
-from openpyxl.chart import LineChart, Reference
-from sklearn.mixture import GaussianMixture
+import yaml
 
 
 class WSC_1det_struct(nn.Module):
@@ -75,7 +63,7 @@ def return_model_with_least_valloss(model_list):
 
 
 # device here need a method to do an overall definition
-def trainSeriesSupC_struct(datasets, struct, config_dict):
+def trainSeriesSupC_struct(datasets, config_dict):
 # datasets: multiple datasets, datasets[0, 1, ...] are for the 1st, 2nd, ... class
 # datasets should have the keys to be the integres 0, 1, 2, ...
 # config dict is the dictionary containing the configuration of the training. The structure is like the one under 'Weakly_Supervised' tag.
@@ -93,6 +81,7 @@ def trainSeriesSupC_struct(datasets, struct, config_dict):
     
     rTrain = config_dict['Training_scheme']['Ratio_train']
     rTest = config_dict['Training_scheme']['Ratio_test']
+    struct = config_dict['Model_params']['Model_struct_before_final_layer'] + [len(config_dict['Model_params']['Class_type'])]
     
     fig_save_path = os.path.join(config_dict['Training_scheme']['Output_dir'], config_dict['Training_scheme']['Output_file_infix']+config_dict['Training_scheme']['Output_file_suffix']+'.png')
     model_save_path = os.path.join(config_dict['Training_scheme']['Output_dir'], config_dict['Training_scheme']['Output_file_infix']+config_dict['Training_scheme']['Output_file_suffix']+'.pt')
@@ -185,4 +174,16 @@ def trainSeriesSupC_struct(datasets, struct, config_dict):
 
 # Debugging part
 if __name__ == "__main__":
+    device = 'cpu'
+    with open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'model_config.yaml'), 'r') as file:
+        config = yaml.safe_load(file)
+        
+    dataset_trial = torch.load('/home/app/test_data/trial.json', weights_only=False)
+    
+    
+    print(dataset_trial.keys())
+    
+    config['Weakly_Supervised']['Training_scheme']['Output_dir'] = config['Full_pipeline']['Training_scheme']['Output_dir']
+    
+    trainSeriesSupC_struct(dataset_trial, config_dict=config['Weakly_Supervised'])
     

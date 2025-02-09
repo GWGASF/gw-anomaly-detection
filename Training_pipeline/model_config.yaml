@@ -1,7 +1,7 @@
 Full_pipeline:
   Training_scheme:
     device: 'cuda:0'
-    Output_dir: 
+    Output_dir: '/home/app/test_data'
 
 Weakly_Supervised:
   Model_params:
@@ -11,7 +11,7 @@ Weakly_Supervised:
 
   Training_scheme:
     Early_stopping_applied: True
-    Total_epochs: 500
+    Total_epochs: 200
     Batch_size: 384
     Learning_rate: 0.00002
     Least_epochs: 100
@@ -29,7 +29,7 @@ Weakly_Supervised:
 Filtering_Chain:
 
   Class_to_use: 4
-  Output_dir:
+  Output_dir: None
   Output_file_infix: 'Filtering_chain_'
   Output_file_suffix: 'default'
 
@@ -41,7 +41,7 @@ Filtering_Chain:
 
     Training_scheme:
       Early_stopping_applied: False
-      Use_cache: True
+      Use_cache: False
       Train_wsc: False
       Generate_cache: False
       Total_epochs: 60
@@ -49,11 +49,13 @@ Filtering_Chain:
       Learning_rate: 0.00005
       Least_epochs: 100
       Epochs_interval: 20
-      Cut_ratio: 
+      Cut_ratio: 0.632
       Ratio_train: 0.8
       Ratio_test: 0.1
       Ratio_validation: 0.2
       Output_dir:
+      Output_file_infix:
+      Output_file_suffix:
 
   GlitchL_class:
     Model_params:
@@ -63,7 +65,7 @@ Filtering_Chain:
 
     Training_scheme:
       Early_stopping_applied: False
-      Use_cache: True
+      Use_cache: False
       Train_wsc: False
       Generate_cache: False
       Total_epochs: 60
@@ -71,23 +73,23 @@ Filtering_Chain:
       Learning_rate: 0.00005
       Least_epochs: 100
       Epochs_interval: 20
-      Cut_ratio: 
+      Cut_ratio: 0.740
       Ratio_train: 0.8
       Ratio_test: 0.1
       Ratio_validation: 0.2
       Output_dir:
+      Output_file_infix:
+      Output_file_suffix:
 
   Class1:
     Model_params:
       Class_name: 'noise'
-      Use_cache: True
-      Generate_cache: False
       Model_struct_half: [202, 40, 20]
 
 
     Training_scheme:
       Early_stopping_applied: False
-      Use_cache: True
+      Use_cache: False
       Train_wsc: False
       Generate_cache: False
       Total_epochs: 60
@@ -95,11 +97,13 @@ Filtering_Chain:
       Learning_rate: 0.00005
       Least_epochs: 100
       Epochs_interval: 20
-      Cut_ratio: 
+      Cut_ratio: 0.001
       Ratio_train: 0.8
       Ratio_test: 0.1
       Ratio_validation: 0.2
       Output_dir:
+      Output_file_infix:
+      Output_file_suffix:
 
   Class2:
     Model_params:
@@ -109,7 +113,7 @@ Filtering_Chain:
 
     Training_scheme:
       Early_stopping_applied: False
-      Use_cache: True
+      Use_cache: False
       Train_wsc: False
       Generate_cache: False
       Total_epochs: 60
@@ -117,11 +121,13 @@ Filtering_Chain:
       Learning_rate: 0.00005
       Least_epochs: 100
       Epochs_interval: 20
-      Cut_ratio: 
+      Cut_ratio: 0.9
       Ratio_train: 0.8
       Ratio_test: 0.1
       Ratio_validation: 0.2
       Output_dir:
+      Output_file_infix:
+      Output_file_suffix:
 
   Class3:
     Model_params:
@@ -131,7 +137,7 @@ Filtering_Chain:
 
     Training_scheme:
       Early_stopping_applied: False
-      Use_cache: True
+      Use_cache: False
       Train_wsc: False
       Generate_cache: False
       Total_epochs: 60
@@ -139,11 +145,13 @@ Filtering_Chain:
       Learning_rate: 0.00005
       Least_epochs: 100
       Epochs_interval: 20
-      Cut_ratio: 
+      Cut_ratio: 0.63
       Ratio_train: 0.8
       Ratio_test: 0.1
       Ratio_validation: 0.2
       Output_dir:
+      Output_file_infix:
+      Output_file_suffix:
 
 
   Class4:
@@ -155,7 +163,7 @@ Filtering_Chain:
 
     Training_scheme:
       Early_stopping_applied: False
-      Use_cache: True
+      Use_cache: False
       Train_wsc: False
       Generate_cache: False
       Total_epochs: 60
@@ -163,8 +171,10 @@ Filtering_Chain:
       Learning_rate: 0.00005
       Least_epochs: 100
       Epochs_interval: 20
-      Cut_ratio: 
+      Cut_ratio: 0.63
       Ratio_train: 0.8
       Ratio_test: 0.1
       Ratio_validation: 0.2
       Output_dir:
+      Output_file_infix:
+      Output_file_suffix:
