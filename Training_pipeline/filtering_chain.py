@@ -1,7 +1,5 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import time
-import h5py
 from scipy.stats import norm
 
 import torch
@@ -11,14 +9,7 @@ from torch import nn, optim
 import scipy.io
 
 import torch.nn.functional as F
-
-import copy
-import pickle
-import itertools
-
-import logging
 import os
-import sys
 import yaml
 
 class AE_1det_struct(nn.Module):
@@ -400,7 +391,7 @@ def Series_training(training_set_ae, config_dict):
     # If we have cached filtering chain, load it. 
     # Better have a cached dir, not the output one to avoid confusion
     if os.path.exists(model_chain_save_path):
-        models = torch.load(model_chain_save_path)
+        models = torch.load(model_chain_save_path, weights_only=False)
     
     # Glitch part comes first
     
