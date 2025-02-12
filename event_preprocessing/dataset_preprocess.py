@@ -39,8 +39,8 @@ def make_training_separated_and_normalized_datasets(config_dict):
 
     # dataDir = "../../../../Data_cached"
     # list_dataset = ['glitch_L', 'glitch_H', 'noise_L', 'noise_H']
-    dataset = {};
-    dataset_fft = {};
+    dataset = {}
+    dataset_fft = {}
 
     # dataset['glitch_L'] = np.load(dataDir+"/real_glitches_snrlt5_60132_4000Hz_25ms.npz")["strain_time_data"][:12500];
     # dataset['glitch_H'] = np.load(dataDir+"/real_glitches_H_snrlt5_59732_4000Hz_25ms.npz")["strain_time_data"][:12500];
@@ -48,7 +48,7 @@ def make_training_separated_and_normalized_datasets(config_dict):
     # dataset['noise_H'] = np.concatenate((np.load(dataDir+'/Noise_processing/Processed_noise_sets/noise_sets_v1.npy'), np.load('E://GWNMMAD_data/Tw_dataset/Datasets/background.npz')['data']), axis = 0)[:187500,0,:]
     
     dataset = cut_events_from_waveforms(config_dict_)
-        
+    list_dataset = dataset.keys()
     
     # for ds in dataset.keys():
     #     np.random.shuffle(dataset[ds])
@@ -76,8 +76,8 @@ def make_training_separated_and_normalized_datasets(config_dict):
     return dataset_final
 
 
-def training_create_dataset(config_dict, dataset):
-    if 
+def training_create_dataset(config_dict):
+    
     return 
 
 def testing_create_dataset():
