@@ -3,11 +3,11 @@ Full_pipeline:
     device: 'cuda:0'
     Output_dir: '/home/app/test_data'
 
+
 Weakly_Supervised:
   Model_params:
     Class_type: [0,0,1,1,1]
     Model_struct_before_final_layer: [202, 64, 16]
-
 
   Training_scheme:
     Early_stopping_applied: True

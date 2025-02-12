@@ -11,13 +11,16 @@ def read_from_files(file_path):
     return injected_waveforms, raw_waveforms, inject_params
 
 
-def cut_events_from_waveforms(waveforms, cutting_config):
+def cut_events_from_waveforms(cutting_config):
     
     EVENT_PER_SEGMENT = 
     segment_freq = 
     segment_length = 
+    file_path = 
     
-    noise_events = np.empty((len(waveforms),EVENT_PER_SEGMENT,2,200))
+    waveforms = read_from_files(file_path)
+    
+    cutted_events = np.empty((len(waveforms),EVENT_PER_SEGMENT,2,200))
 
     for i in range(len(waveforms)):
     # for i in range(1):
@@ -27,36 +30,39 @@ def cut_events_from_waveforms(waveforms, cutting_config):
             
             cache = waveforms[i][:,starting_time[0]:ending_time[0]]
         
-            noise_events[i,j] = cache.copy()
+            cutted_events[i,j] = cache.copy()
     
-    return noise_events
+    return cutted_events
 
     
-def create_single_datasets():
+def make_training_separated_and_normalized_datasets(config_dict):
 
-    dataDir = "../../../../Data_cached"
-    list_dataset = ['glitch_L', 'glitch_H', 'noise_L', 'noise_H']
+    # dataDir = "../../../../Data_cached"
+    # list_dataset = ['glitch_L', 'glitch_H', 'noise_L', 'noise_H']
     dataset = {};
     dataset_fft = {};
 
-    dataset['glitch_L'] = np.load(dataDir+"/real_glitches_snrlt5_60132_4000Hz_25ms.npz")["strain_time_data"][:12500];
-    dataset['glitch_H'] = np.load(dataDir+"/real_glitches_H_snrlt5_59732_4000Hz_25ms.npz")["strain_time_data"][:12500];
-    dataset['noise_L'] = np.concatenate((np.load(dataDir+'/Noise_processing/Processed_noise_sets/noise_sets_v1.npy'), np.load('E://GWNMMAD_data/Tw_dataset/Datasets/background.npz')['data']), axis = 0)[:187500,1,:]
-    dataset['noise_H'] = np.concatenate((np.load(dataDir+'/Noise_processing/Processed_noise_sets/noise_sets_v1.npy'), np.load('E://GWNMMAD_data/Tw_dataset/Datasets/background.npz')['data']), axis = 0)[:187500,0,:]
-
-    for ds in list_dataset:
-        np.random.shuffle(dataset[ds])
+    # dataset['glitch_L'] = np.load(dataDir+"/real_glitches_snrlt5_60132_4000Hz_25ms.npz")["strain_time_data"][:12500];
+    # dataset['glitch_H'] = np.load(dataDir+"/real_glitches_H_snrlt5_59732_4000Hz_25ms.npz")["strain_time_data"][:12500];
+    # dataset['noise_L'] = np.concatenate((np.load(dataDir+'/Noise_processing/Processed_noise_sets/noise_sets_v1.npy'), np.load('E://GWNMMAD_data/Tw_dataset/Datasets/background.npz')['data']), axis = 0)[:187500,1,:]
+    # dataset['noise_H'] = np.concatenate((np.load(dataDir+'/Noise_processing/Processed_noise_sets/noise_sets_v1.npy'), np.load('E://GWNMMAD_data/Tw_dataset/Datasets/background.npz')['data']), axis = 0)[:187500,0,:]
+    
+    dataset = cut_events_from_waveforms(config_dict_)
+        
+    
+    # for ds in dataset.keys():
+    #     np.random.shuffle(dataset[ds])
 
     # dataset['noise_L'] = dataset['noise_L'][:410000]
     # dataset['noise_H'] = dataset['noise_H'][:410000]
 
-    listSNR = ['5-12','12-24','24-48','48-96']
-    for dt in ['BBH', 'SGLF', 'SGHF']:
-        for snr in listSNR:
-            foo = np.load(dataDir+f'/Noise_processing/For_WSC_pipeline/{dt}_events_v1_snr_{snr_dict[snr]}.npy')[:22500]
-            dataset[dt+'_L_'+snr] = foo[:, 1]
-            dataset[dt+'_H_'+snr] = foo[:, 0]
-            list_dataset += [dt+'_L_'+snr, dt+'_H_'+snr]
+    # listSNR = ['5-12','12-24','24-48','48-96']
+    # for dt in ['BBH', 'SGLF', 'SGHF']:
+    #     for snr in listSNR:
+    #         foo = np.load(dataDir+f'/Noise_processing/For_WSC_pipeline/{dt}_events_v1_snr_{snr_dict[snr]}.npy')[:22500]
+    #         dataset[dt+'_L_'+snr] = foo[:, 1]
+    #         dataset[dt+'_H_'+snr] = foo[:, 0]
+    #         list_dataset += [dt+'_L_'+snr, dt+'_H_'+snr]
             # np.random.shuffle(dataset[dt+'_L_'+snr])
             # np.random.shuffle(dataset[dt+'_H_'+snr])
 
@@ -66,8 +72,14 @@ def create_single_datasets():
         dataset_fft[ds] /= np.linalg.norm([dataset_fft[ds]], axis=2).T
         
     dataset_final = dataset_fft
-
-
-def create_dataset():
     
+    return dataset_final
+
+
+def training_create_dataset(config_dict, dataset):
+    if 
     return 
+
+def testing_create_dataset():
+    
+    return

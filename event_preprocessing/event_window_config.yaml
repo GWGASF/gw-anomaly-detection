@@ -1,0 +1,15 @@
+Training_set_config:
+
+  General_config:
+    Event_per_segment: 10
+    Segment_frequency: 4096
+    segment_length: 8192
+
+  Detectors: ['H1', 'L1']
+
+  Dataset_type: ['glitch', 'noise', 'bbh', 'lfsg', 'hfsg']
+
+
+Testing_set_config:
+  Smoothing_window: 
+  
