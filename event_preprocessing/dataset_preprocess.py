@@ -18,7 +18,8 @@ def cut_events_from_waveforms(cutting_config):
     segment_length = 
     file_path = 
     
-    waveforms = read_from_files(file_path)
+    waveforms, _, _ = read_from_files(file_path)
+    # I have no ideas of how to use the SNR right now
     
     cutted_events = np.empty((len(waveforms),EVENT_PER_SEGMENT,2,200))
 
@@ -76,10 +77,41 @@ def make_training_separated_and_normalized_datasets(config_dict):
     return dataset_final
 
 
+
+
 def training_create_dataset(config_dict):
     
-    return 
+    dataset = {}
+    full_dataset_raw = make_training_separated_and_normalized_datasets(config_dict)
+    
+    dtype_list = full_dataset_raw.keys()
+    idxflag = 0
+    
+    if 'glitch' in dtype_list:
+        # if glitch is presented, set it to the first one, and separated it to be glitch H and glitch L.
+        assert 'noise' in dtype_list
+        # Still need to do something here, to make sure it follows the sequence of detectors
+        num_of_glitches = len(full_dataset_raw['glitch'])
+        dataset[idxflag] = np.concatenate((full_dataset_raw['glitch'][:,[0],:], full_dataset_raw['noise'][:num_of_glitches,[1],:]), axis = 1)
+        dataset[idxflag+1] = np.concatenate((full_dataset_raw['noise'][:num_of_glitches,[0],:], full_dataset_raw['glitch'][:,[1],:]), axis = 1)
+        
+        full_dataset_raw['noise'] = full_dataset_raw['noise'][num_of_glitches:]
+        dtype_list.remove('glitch')
+        idxflag += 2
+        
+    for dtype in dtype_list:
+        dataset[idxflag] = full_dataset_raw[dtype]
+        idxflag += 1
+    
+    torch.save()
+    
+    return dataset
 
 def testing_create_dataset():
     
+    
+    
     return
+
+if __name__ == "__main__":
+    

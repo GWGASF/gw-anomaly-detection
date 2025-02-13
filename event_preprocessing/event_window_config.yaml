@@ -9,7 +9,13 @@ Training_set_config:
 
   Dataset_type: ['glitch', 'noise', 'bbh', 'lfsg', 'hfsg']
 
+  Cache_path: '/home/app/test_data/training_dataset_cached'
+
 
 Testing_set_config:
+
+  Scan_type: 'full_scan'
+  
+
   Smoothing_window: 
   
