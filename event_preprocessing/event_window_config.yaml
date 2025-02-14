@@ -5,11 +5,17 @@ Training_set_config:
     Segment_frequency: 4096
     segment_length: 8192
 
+  Dataset_dir: "/home/app/test_data"
+
+  Dataset_path: None
+
   Detectors: ['H1', 'L1']
 
   Dataset_type: ['glitch', 'noise', 'bbh', 'lfsg', 'hfsg']
 
-  Cache_path: '/home/app/test_data/training_dataset_cached'
+  cutting_window: {'glitch':[-0.03, 0.03],'noise':[-1,1], 'bbh':[-0.08, 0.01], 'lfsg':[-0.05, 0.05], 'hfsg':[-0.05, 0.05]}
+
+  Cache_path: '/home/app/test_data/training_dataset_cached.json'
 
 
 Testing_set_config:
