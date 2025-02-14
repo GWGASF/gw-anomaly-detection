@@ -6,11 +6,11 @@ data:
     L1: ["./segments/O3a/L1-science_segs.segwizard"]
   total_interval:
     H1: 
-      start: 1238166018
-      end: 1238856499
+      start: ${TOT_START_INT}
+      end: ${TOT_END_INT}
     L1:
-      start: 1238166018
-      end: 1238772909
+      start: ${TOT_START_INT}
+      end: ${TOT_END_INT}
   data_cache: "O3_data"
   asd_cache: "/home/app/opt/asds"
   processing:
@@ -24,11 +24,11 @@ data:
     number_of_samples: ${NUM_SAMPLES}
     sample_interval:
       H1: 
-        start: 1238172987
-        end: 1238196793
+        start: ${START_INT}
+        end: ${END_INT}
       L1:
-        start: 1238205073
-        end: 1238228885
+        start: ${START_INT}
+        end: ${END_INT}
     segment_files:
       H1: ["./segments/O3a/H1-background_samples-1238172987-23806.segwizard"]
       L1: ["./segments/O3a/L1-background_samples-1238205073-23812.segwizard"]
@@ -40,11 +40,11 @@ data:
     ifos: ["H1", "L1"]
     sample_interval:
       H1: 
-        start: 1238172987
-        end: 1238196793
+        start: ${START_INT}
+        end: ${END_INT}
       L1:
-        start: 1238205073
-        end: 1238228885
+        start: ${START_INT}
+        end: ${END_INT}
     segment_files:
       H1: ["./segments/O3a/H1-glitch_samples-1238172987-23806.segwizard"]
       L1: ["./segments/O3a/L1-glitch_samples-1238205073-23812.segwizard"]
@@ -60,11 +60,11 @@ data:
     number_of_samples: ${NUM_SAMPLES}
     sample_interval:
       H1: 
-        start: 1238172987
-        end: 1238196793
+        start: ${START_INT}
+        end: ${END_INT}
       L1:
-        start: 1238205073
-        end: 1238228885
+        start: ${START_INT}
+        end: ${END_INT}
     segment_files:
       H1: ["./segments/O3a/H1-injection_samples-1238172987-23806.segwizard"]
       L1: ["./segments/O3a/L1-injection_samples-1238205073-23812.segwizard"]
@@ -77,11 +77,11 @@ data:
     target_snr_low: 12
     target_snr_high: 24
     keep_waveform: True
-    output_file: "/home/app/opt/test_data/injection_data_type_bbh_ids_${START_ID}-${END_ID}.hdf5"
+    output_file: "/home/app/opt/test_data/injection_data_type_${INJ_WAVEFORM}_ids_${START_ID}-${END_ID}.hdf5"
 s3:
   access_key: XRIYL1052YCQ125N75UM
   secret_key: XES9mLNbxAWKZC1AUcYFlGd7ByyXXSYw5yB3UrwM
   host_base: https://s3-west.nrp-nautilus.io
-  bucket: cchou
+  bucket: "${BUCKET}"
   common_prefix: O3_data/
-  upload_dir: 'test'
+  upload_dir: "${UPLOAD_DIR}"

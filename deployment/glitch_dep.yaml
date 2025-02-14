@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gw-anomaly-detection-data-glitch
+  labels:
+    k8s-app: gw-anomaly-detection-data-glitch
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: gw-anomaly-detection-data-glitch
+  template:
+    metadata:
+      labels:
+        k8s-app: gw-anomaly-detection-data-glitch
+    spec:
+      containers:
+        - name: test-glitch
+          image: dfredin/gwgasf:testingdata
+          resources:
+            limits:
+              memory: 20Gi
+              cpu: 10000m
+              ephemeral-storage: 20Gi
+            requests:
+              memory: 5Gi
+              cpu: 2500m
+              ephemeral-storage: 5Gi
+          env:
+            - name: KIND
+              value: "glitch"
+            - name: NUM_SAMPLES
+              value: "100000"
+            - name: START_ID
+              value: "2000"
+            - name: END_ID
+              value: "3000"
+            - name: INJ_WAVEFORM
+              value: "bbh"
+            - name: BUCKET
+              value: "cchou"
+            - name: UPLOAD_DIR
+              value: "testing"
+          command: ["sh", "-c", "/home/app/micromamba/env/bin/envsubst < /home/app/opt/data_config.yaml > /home/app/opt/data_config.yaml.tmp && mv /home/app/opt/data_config.yaml.tmp /home/app/opt/data_config.yaml && /home/app/micromamba/env/bin/python /home/app/opt/cli.py"]
