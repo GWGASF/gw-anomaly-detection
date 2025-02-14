@@ -7,6 +7,9 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/*
 
 # Setup an app user so the container doesn't run as the root user
+# RUN useradd app
+# RUN mkdir -p /home/app/data_cache
+# RUN mkdir -p /home/app/test_data
 RUN useradd -ms /bin/bash app
 
 # Copy source code and set ownership in one step
