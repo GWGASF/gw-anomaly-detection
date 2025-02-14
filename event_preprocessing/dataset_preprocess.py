@@ -54,7 +54,7 @@ def cut_events_from_waveforms(cutting_config):
     for i in range(len(waveforms)):
     # for i in range(1):
         for j in range(EVENT_PER_SEGMENT):
-            starting_time = int(np.random.uniform(BBH_WINDOW_LEFT * segment_freq, BBH_WINDOW_RIGHT * segment_freq - segment_length))
+            starting_time = int(np.random.uniform(cutting_window_left * segment_freq, cutting_window_right * segment_freq - segment_length))
             ending_time = starting_time + 200
             
             cache = waveforms[i][:,midp + starting_time:midp + ending_time[0]]
