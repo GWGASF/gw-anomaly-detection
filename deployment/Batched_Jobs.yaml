@@ -1,0 +1,54 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: jobslfsg
+spec:
+  template:
+    spec:
+      containers:
+      - name: demo
+        image: gitlab-registry.nrp-nautilus.io/umata/gw-anomaly-detection:lib_1
+        command:
+        - "poetry"
+        args:
+        - "run"
+        - "python"
+        - "/opt/repo/gw-anomaly-detection/cli.py"
+        - "--sid"
+        - "0"
+        - "--eid"
+        - "5000"
+        - "--ptype"
+        - "injection"
+        - "--itype"
+        - "lfsg"
+        volumeMounts:
+        - name: git-repo
+          mountPath: /opt/repo
+        resources:
+          limits:
+            memory: 32Gi
+            cpu: "6"
+            # nvidia.com/gpu: "1"
+          requests:
+            memory: 32Gi
+            cpu: "4"
+            # nvidia.com/gpu: "1"    
+      initContainers:
+      - name: init-clone-repo
+        image: alpine/git
+        args:
+          - clone
+          - --single-branch
+          - -b
+          - dev-data
+          - https://gitlab.nrp-nautilus.io/Umata/gw-anomaly-detection.git
+          - /opt/repo/gw-anomaly-detection
+        volumeMounts:
+          - name: git-repo
+            mountPath: /opt/repo
+      volumes:
+      - name: git-repo
+        emptyDir: {}
+      restartPolicy: Never
+  backoffLimit: 5

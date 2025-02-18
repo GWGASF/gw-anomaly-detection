@@ -18,6 +18,7 @@ boto3 = "^1.35.43"
 toml = "^0.10.2"
 lalsuite = "7.11" # Use 7.11 only on asz018.
 numpy = "<2.0.0"
+multiprocess = "*"
 # torchmetrics = "^1"
 # torchaudio = {version = "^2", source = "torch"}
 
