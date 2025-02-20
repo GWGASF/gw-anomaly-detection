@@ -202,6 +202,46 @@ def full_process(config, s3):
         upload_dir=upload_dir,
     )
 
+    # Processing testing set, just same as the glitch process
+    if kind == "test":
+        print("Test.")
+        ifos = config['data']['test']['ifos']
+        segment_files = config['data']['test']['segment_files']
+        background_segments = dict.fromkeys(ifos)
+        for ifo in ifos:
+            background_segments[ifo] = read_segment_files(segment_files[ifo])
+            interval = whole_segment(segment_file=segment_files[ifo])
+            print(f"Number of testing segments from {ifo}: {len(background_segments[ifo])}, interval: {interval}.")
+
+        start_id = config['data']['background']['start_id']
+        end_id = config['data']['background']['end_id']
+
+        output_file_suffix = "_ids_{}-{}.hdf5".format(str(start_id), str(end_id))
+
+        window_length = config['data']['background']['window_length']
+        output_file = os.path.join(config['data']['background']['output_file_path'], config['data']['background']['output_file']+output_file_suffix)
+
+        # Processing data.
+        proc = Process(
+            ifos=ifos,
+            data_cache=data_cache,
+            asd_cache=asd_cache,
+            flow=flow,
+            fhigh=fhigh,
+            resample=resample,
+            crop_length=crop_length,
+        )
+        processed_background = proc.get_processed_background(
+            background_segments=background_segments,
+            start_id=start_id,
+            end_id=end_id,
+        )
+        # Write data to hdf5 files.
+        proc.write_background_data(
+            output_file=output_file,
+            processed_background=processed_background,
+        )
+    
     # Gathering data on s3 buckets.
 
 if __name__ == "__main__":

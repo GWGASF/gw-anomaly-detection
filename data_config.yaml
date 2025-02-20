@@ -99,6 +99,8 @@ data:
       L1: ["./segments/O3a/L1-test_samples-1238205073-23812.segwizard"]
     window_length: 4
     stride_length: 2
+    start_id: 0
+    end_id: 1000
     output_file_path: "/home/app/test_data"
     output_file: "test_data"
 

@@ -5,6 +5,8 @@ import h5py
 from copy import deepcopy
 import yaml
 
+from gw_anomaly_detection.data.process import Process
+
 def read_from_files(file_path):
     injected_waveforms = np.concatenate((np.array(h5py.File(file_path, 'r')['H1'])[:, np.newaxis, :], np.array(h5py.File(file_path, 'r')['L1'])[:, np.newaxis, :]), axis = 1)
     # raw_waveforms = np.concatenate((np.array(h5py.File(file_path, 'r')['waveform_H1'])[:, np.newaxis, :], np.array(h5py.File(file_path, 'r')['waveform_L1'])[:, np.newaxis, :]), axis = 1)
@@ -43,25 +45,43 @@ def cut_events_from_waveforms(cutting_config):
     segment_freq = cutting_config['General_config']['Segment_frequency']
     segment_length = cutting_config['General_config']['Segment_length']
     file_path = cutting_config['Dataset_path']
-    cutting_window_left = cutting_config['Cutting_window'][0]
-    cutting_window_right = cutting_config['Cutting_window'][1]
+    cutting_type = cutting_config['Cutting_type']
     
     waveforms, _, _ = read_from_directory(file_path)
     # I have no ideas of how to use the SNR right now
     
-    cutted_events = np.empty((len(waveforms),EVENT_PER_SEGMENT,2,200))
-    midp = (waveforms[0].shape)[-1]//2
+    if cutting_type == 'window_cut':
+        cutting_window_left = cutting_config['Cutting_window'][0]
+        cutting_window_right = cutting_config['Cutting_window'][1]
     
-    
-    for i in range(len(waveforms)):
-    # for i in range(1):
-        for j in range(EVENT_PER_SEGMENT):
-            starting_time = int(np.random.uniform(cutting_window_left * segment_freq, cutting_window_right * segment_freq - 200))
-            ending_time = starting_time + 200
-            
-            cache = waveforms[i][:,midp + starting_time:midp + ending_time]
+        cutted_events = np.empty((len(waveforms),EVENT_PER_SEGMENT,2,200))
+        midp = (waveforms[0].shape)[-1]//2
         
-            cutted_events[i,j] = cache.copy()
+        
+        for i in range(len(waveforms)):
+        # for i in range(1):
+            for j in range(EVENT_PER_SEGMENT):
+                starting_time = int(np.random.uniform(cutting_window_left * segment_freq, cutting_window_right * segment_freq - 200))
+                ending_time = starting_time + 200
+                
+                cache = waveforms[i][:,midp + starting_time:midp + ending_time]
+            
+                cutted_events[i,j] = cache.copy()
+    
+    elif cutting_type == 'full_scan':
+        cutted_events = np.empty((len(waveforms),segment_length-199,2,200))
+        # midp = (waveforms[0].shape)[-1]//2
+        
+        
+        for i in range(len(waveforms)):
+        # for i in range(1):
+            for j in range(segment_length-199):
+                starting_time = j
+                ending_time = starting_time + 200
+                
+                cache = waveforms[i][:,starting_time:ending_time]
+            
+                cutted_events[i,j] = cache.copy()
     
     return cutted_events.reshape(-1,2,200)
 
@@ -142,11 +162,21 @@ def training_create_dataset(config_dict):
     
     return dataset
 
-def testing_create_dataset():
+def testing_create_dataset(config_dict):
     
+    scanning_type = config_dict['Scan_type']
+    # smoothing_window = config_dict['Smoothing_window']
+    cache_path = config_dict['Cache_path']
     
+    if scanning_type == 'full_scan':
     
-    return
+        dataset = make_training_separated_and_normalized_datasets(config_dict)['test']
+        
+        dataset /= np.linalg.norm(dataset, axis=-1).reshape(-1,2,1)
+        dataset_fft = abs(np.fft.rfft(dataset))
+        dataset_fft /= np.linalg.norm(dataset_fft, axis=-1).reshape(-1,2,1)
+    
+    return dataset_fft
 
 if __name__ == "__main__":
     with open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'event_window_config.yaml'), 'r') as file:
