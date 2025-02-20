@@ -82,13 +82,21 @@ def trainSeriesSupC_struct(datasets, config_dict):
     struct = config_dict['Model_params']['Model_struct_before_final_layer'] + [len(config_dict['Model_params']['Class_type'])]
     
     fig_save_path = os.path.join(config_dict['Training_scheme']['Output_dir'], config_dict['Training_scheme']['Output_file_infix']+config_dict['Training_scheme']['Output_file_suffix']+'.png')
-    model_save_path = os.path.join(config_dict['Training_scheme']['Output_dir'], config_dict['Training_scheme']['Output_file_infix']+config_dict['Training_scheme']['Output_file_suffix']+'.pt')
+    model_save_path = os.path.join(config_dict['Training_scheme']['Output_dir'], config_dict['Training_scheme']['Output_file_infix']+config_dict['Training_scheme']['Output_file_suffix']+'.pth')
     
     
     model_list = {}
     
     wsc = WSC_1det_struct(struct).to(device)
     nparam = sum(p.numel() for p in wsc.parameters() if p.requires_grad)
+    
+    flag_combine_glitches = True
+    if flag_combine_glitches:
+        dataset_cache = np.concatenate([datasets[0], datasets[1]], axis = 0)
+        datasets[0] = dataset_cache
+        for key in list(range(2,len(datasets))):
+            datasets[key-1] = datasets[key]
+        del datasets[len(datasets)-1]
     
     Nclass = len(datasets)
     wclass = torch.FloatTensor([len(datasets[0])/len(datasets[i]) for i in range(Nclass)]).to(device)
@@ -165,9 +173,9 @@ def trainSeriesSupC_struct(datasets, config_dict):
     plt.close()
     
     model = return_model_with_least_valloss(model_list)
-    torch.save(model, model_save_path)
+    torch.save_dict(model.state_dict(), model_save_path)
     
-    return 0
+    return model
 
 
 # Debugging part

@@ -37,7 +37,7 @@ data:
     start_id: 0
     end_id: 1000
     window_length: 4
-    output_file_path: "/home/app/test_data"
+    output_file_path: "/home/app/test_data/noise"
     output_file: "bg_data"
 
   glitch:
@@ -58,7 +58,7 @@ data:
       H1: ["./glitch_info/O3a/H1-glitch_info.hdf5"]
       L1: ["./glitch_info/O3a/L1-glitch_info.hdf5"]
     glitch_window_length: 4
-    output_file: "/home/app/test_data/glitch_data.hdf5"
+    output_file: "/home/app/test_data/glitch/glitch_data.hdf5"
 
   injection:
     ifos: ["H1", "L1"]
@@ -101,7 +101,7 @@ data:
     stride_length: 2
     start_id: 0
     end_id: 1000
-    output_file_path: "/home/app/test_data"
+    output_file_path: "/home/app/test_data/test"
     output_file: "test_data"
 
 s3:

@@ -164,19 +164,17 @@ def training_create_dataset(config_dict):
 
 def testing_create_dataset(config_dict):
     
-    scanning_type = config_dict['Scan_type']
+    # scanning_type = config_dict['Scan_type']
     # smoothing_window = config_dict['Smoothing_window']
+    
+    # if scanning_type == 'full_scan':
+    
+    dataset = make_training_separated_and_normalized_datasets(config_dict)[config_dict['Dataset_type'][0]]
     cache_path = config_dict['Cache_path']
     
-    if scanning_type == 'full_scan':
+    np.save(cache_path, dataset)
     
-        dataset = make_training_separated_and_normalized_datasets(config_dict)['test']
-        
-        dataset /= np.linalg.norm(dataset, axis=-1).reshape(-1,2,1)
-        dataset_fft = abs(np.fft.rfft(dataset))
-        dataset_fft /= np.linalg.norm(dataset_fft, axis=-1).reshape(-1,2,1)
-    
-    return dataset_fft
+    return dataset
 
 if __name__ == "__main__":
     with open(os.path.join(os.path.dirname(os.path.abspath(__file__)),'event_window_config.yaml'), 'r') as file:

@@ -13,6 +13,8 @@ Training_set_config:
 
   Dataset_type: ['glitch', 'noise', 'bbh', 'lfsg', 'hfsg']
 
+  Cutting_type: 'window_cut'
+
   Cutting_window: {'glitch':[-0.03, 0.03],'noise':[-1,1], 'bbh':[-0.08, 0.01], 'lfsg':[-0.05, 0.05], 'hfsg':[-0.05, 0.05]}
 
   Cache_path: '/home/app/test_data/training_dataset_cached.json'
@@ -20,8 +22,19 @@ Training_set_config:
 
 Testing_set_config:
 
-  Scan_type: 'full_scan'
-  
+  Cutting_type: 'full_scan'
 
-  Smoothing_window: 
+  General_config:
+    Event_per_segment: 10
+    Segment_frequency: 4096
+    Segment_length: 8192
   
+  Dataset_dir: "/home/app/test_data"
+
+  Dataset_path: None
+
+  Detectors: ['H1', 'L1']
+
+  Dataset_type: ['test']
+
+  Cache_path: '/home/app/test_data/testing_dataset_cached.npy'

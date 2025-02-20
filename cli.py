@@ -135,7 +135,9 @@ def full_process(config, s3):
         output_file_suffix = "_type_{}_ids_{}-{}.hdf5".format(waveform, str(start_id), str(end_id))
 
         # window_length = config['data']['background']['window_length']
-        output_file = os.path.join(config['data']['injection']['output_file_path'], config['data']['injection']['output_file']+output_file_suffix)
+        output_file = os.path.join(
+            os.path.join(config['data']['injection']['output_file_path'], config['data']['injection']['waveform'])
+            , config['data']['injection']['output_file']+output_file_suffix)
 
         # Generating Waveform.
         number = end_id - start_id

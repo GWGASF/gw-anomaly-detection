@@ -518,7 +518,7 @@ def Series_training(training_set_ae, config_dict):
          
     torch.save(aes, model_chain_save_path) 
     
-    return 1
+    return training_set_ae[len(training_set_ae)-1]
     
 
 # # logger.info("All pretrained model is loaded for nodes not requireing re-training.")
