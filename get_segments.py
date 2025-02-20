@@ -93,6 +93,45 @@ def generate_samples(
 
     return
 
+def generate_test_samples(
+        config: dict,
+):
+    ifos = config['data']['ifos']
+    segment_files = config['data']['segment_files']
+    glitch_info_files = config['data']['glitch']['glitch_info_files']
+    total_interval = config['data']['total_interval']
+    glitch_window_length = config['data']['glitch']['glitch_window_length']
+    for ifo in ifos:
+        SegInfo = SegmentInfo()
+        start_tot = total_interval[ifo]['start']
+        end_tot = total_interval[ifo]['end']
+        SegInfo.load_segment_info(
+            segment_files=segment_files[ifo],
+            glitch_info_files=glitch_info_files[ifo],
+            start=start_tot,
+            end=end_tot,
+            glitch_window_length=glitch_window_length,
+        )
+        
+        
+        
+        window_length = config['data']['processing']['window_length']
+        stride_length = config['data']['test']['stride_length']
+        start = config['data']['test']['sample_interval'][ifo]['start']
+        end = config['data']['test']['sample_interval'][ifo]['end']
+        output_file = f"segments/O3a/{ifo}-{'test'}_samples-{int(start)}-{int(end-start)}.segwizard"
+        
+        SegInfo.get_test_samples(
+            start=start,
+            end=end,
+            output_file=output_file,
+            output_file_format='segwizard',
+            window_length=window_length,
+            stride_length = stride_length,
+        )
+
+    return
+
 
 def main():
     # Loading data_config.yaml
@@ -120,6 +159,13 @@ def main():
         kind="injection",
         config=config,
     )
+    
+    # Get testing samples.
+    generate_test_samples(
+        config=config
+    )
 
 if __name__ == "__main__":
     main()
+    
+    

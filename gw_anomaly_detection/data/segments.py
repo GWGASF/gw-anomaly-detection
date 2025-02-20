@@ -232,3 +232,44 @@ class SegmentInfo():
                 print(str(e))
 
         return
+
+    def get_test_samples(
+            self,
+            start: float,
+            end: float,
+            output_file: str=None,
+            output_file_format: str=None,
+            window_length: float=4,
+            stride_length: float=2,
+    ):
+        test_interval_seg = Segment(start, end)
+        test_selected_segs = SegmentList([])
+        
+        # Pick out segments from raw science mode files
+        for seg in self.selected_segs:
+            if test_interval_seg.intersects(seg):
+                test_selected_segs.append(test_interval_seg & seg)
+        
+        # Get the test samples
+        test_selected_samples = SegmentList([])
+        for seg in test_selected_segs:
+            sample_st = seg.start
+            seg_ed = seg.end
+            while (seg_ed - sample_st) > window_length:
+                seg_cached = Segment(sample_st, sample_st + window_length)
+                test_selected_samples.append(seg_cached)
+                sample_st += stride_length
+            seg_cached = Segment(seg_ed - window_length, seg_ed)
+            test_selected_samples.append(seg_cached)
+
+        self.test_selected_samples = test_selected_samples
+
+        # Write the segment file.
+        if (output_file != None) and (output_file_format != None):
+            try:
+                test_selected_samples.write(output_file, format=output_file_format)
+                print(f"Sample segment file written to {output_file}")
+            except Exception as e:
+                print(str(e))
+        
+        return

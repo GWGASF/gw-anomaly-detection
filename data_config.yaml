@@ -20,6 +20,7 @@ data:
     fhigh: 1500
     resample: 4096
     crop_length: 1
+
   background:
     ifos: ["H1", "L1"]
     number_of_samples: 5000
@@ -38,6 +39,7 @@ data:
     window_length: 4
     output_file_path: "/home/app/test_data"
     output_file: "bg_data"
+
   glitch:
     ifos: ["H1", "L1"]
     sample_interval:
@@ -57,6 +59,7 @@ data:
       L1: ["./glitch_info/O3a/L1-glitch_info.hdf5"]
     glitch_window_length: 4
     output_file: "/home/app/test_data/glitch_data.hdf5"
+
   injection:
     ifos: ["H1", "L1"]
     number_of_samples: 5000
@@ -81,6 +84,24 @@ data:
     keep_waveform: True
     output_file_path: "/home/app/test_data"
     output_file: "injection_data"
+
+  test:
+    ifos: ["H1", "L1"]
+    sample_interval:
+      H1: 
+        start: 1238172987
+        end: 1238196793
+      L1:
+        start: 1238197374
+        end: 1238200188
+    segment_files:
+      H1: ["./segments/O3a/H1-test-samples-1238172987-23806.segwizard"]
+      L1: ["./segments/O3a/L1-test_samples-1238205073-23812.segwizard"]
+    window_length: 4
+    stride_length: 2
+    output_file_path: "/home/app/test_data"
+    output_file: "test_data"
+
 s3:
   access_key: XRIYL1052YCQ125N75UM
   secret_key: XES9mLNbxAWKZC1AUcYFlGd7ByyXXSYw5yB3UrwM
