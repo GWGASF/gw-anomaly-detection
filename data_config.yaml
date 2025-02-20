@@ -92,8 +92,8 @@ data:
         start: 1238172987
         end: 1238196793
       L1:
-        start: 1238197374
-        end: 1238200188
+        start: 1238205073
+        end: 1238228885
     segment_files:
       H1: ["./segments/O3a/H1-test-samples-1238172987-23806.segwizard"]
       L1: ["./segments/O3a/L1-test_samples-1238205073-23812.segwizard"]
