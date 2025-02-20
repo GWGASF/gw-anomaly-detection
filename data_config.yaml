@@ -1,4 +1,3 @@
-Process_num: 4
 data:
   ifos: ["H1", "L1"]
   kind: "${KIND}"
@@ -7,11 +6,11 @@ data:
     L1: ["./segments/O3a/L1-science_segs.segwizard"]
   total_interval:
     H1: 
-      start: ${TOT_START_INT}
-      end: ${TOT_END_INT}
+      start: ${H1_TOT_START_INT}
+      end: ${H1_TOT_END_INT}
     L1:
-      start: ${TOT_START_INT}
-      end: ${TOT_END_INT}
+      start: ${L1_TOT_START_INT}
+      end: ${L1_TOT_END_INT}
   data_cache: "O3_data"
   asd_cache: "/home/app/opt/asds"
   processing:
@@ -25,50 +24,50 @@ data:
     number_of_samples: ${NUM_SAMPLES}
     sample_interval:
       H1: 
-        start: ${START_INT}
-        end: ${END_INT}
+        start: ${H1_START_INT}
+        end: ${H1_END_INT}
       L1:
-        start: ${START_INT}
-        end: ${END_INT}
+        start: ${L1_START_INT}
+        end: ${L1_END_INT}
     segment_files:
-      H1: ["./segments/O3a/H1-background_samples-1238172987-23806.segwizard"]
-      L1: ["./segments/O3a/L1-background_samples-1238205073-23812.segwizard"]
+      H1: ["./segments/O3a/H1-background_samples-${BG_H1_SEGMENT}.segwizard"]
+      L1: ["./segments/O3a/L1-background_samples-${BG_L1_SEGMENT}.segwizard"]
     start_id: ${START_ID}
     end_id: ${END_ID}
     window_length: 4
-    output_file: "/home/app/opt/test_data/bg_data_ids_${START_ID}-${END_ID}.hdf5"
+    output_file: "/home/app/opt/processed_data/bg_data_ids_${START_ID}-${END_ID}.hdf5"
   glitch:
     ifos: ["H1", "L1"]
     sample_interval:
       H1: 
-        start: ${START_INT}
-        end: ${END_INT}
+        start: ${H1_START_INT}
+        end: ${H1_END_INT}
       L1:
-        start: ${START_INT}
-        end: ${END_INT}
+        start: ${L1_START_INT}
+        end: ${L1_END_INT}
     segment_files:
-      H1: ["./segments/O3a/H1-glitch_samples-1238172987-23806.segwizard"]
-      L1: ["./segments/O3a/L1-glitch_samples-1238205073-23812.segwizard"]
+      H1: ["./segments/O3a/H1-glitch_samples-${GLITCH_H1_SEGMENT}.segwizard"]
+      L1: ["./segments/O3a/L1-glitch_samples-${GLITCH_L1_SEGMENT}.segwizard"]
     start_id: ${START_ID}
     end_id: ${END_ID}
     glitch_info_files:
       H1: ["./glitch_info/O3a/H1-glitch_info.hdf5"]
       L1: ["./glitch_info/O3a/L1-glitch_info.hdf5"]
     glitch_window_length: 4
-    output_file: "/home/app/opt/test_data/glitch_data_ids_${START_ID}-${END_ID}.hdf5"
+    output_file: "/home/app/opt/processed_data/glitch_data_ids_${START_ID}-${END_ID}.hdf5"
   injection:
     ifos: ["H1", "L1"]
     number_of_samples: ${NUM_SAMPLES}
     sample_interval:
       H1: 
-        start: ${START_INT}
-        end: ${END_INT}
+        start: ${H1_START_INT}
+        end: ${H1_END_INT}
       L1:
-        start: ${START_INT}
-        end: ${END_INT}
+        start: ${L1_START_INT}
+        end: ${L1_END_INT}
     segment_files:
-      H1: ["./segments/O3a/H1-injection_samples-1238172987-23806.segwizard"]
-      L1: ["./segments/O3a/L1-injection_samples-1238205073-23812.segwizard"]
+      H1: ["./segments/O3a/H1-injection_samples-${INJ_H1_SEGMENT}.segwizard"]
+      L1: ["./segments/O3a/L1-injection_samples-${INJ_L1_SEGMENT}.segwizard"]
     start_id: ${START_ID}
     end_id: ${END_ID}
     waveform: "${INJ_WAVEFORM}"
@@ -78,11 +77,11 @@ data:
     target_snr_low: 12
     target_snr_high: 24
     keep_waveform: True
-    output_file: "/home/app/opt/test_data/injection_data_type_${INJ_WAVEFORM}_ids_${START_ID}-${END_ID}.hdf5"
+    output_file: "/home/app/opt/processed_data/injection_data_type_${INJ_WAVEFORM}_ids_${START_ID}-${END_ID}.hdf5"
 s3:
-  access_key: XRIYL1052YCQ125N75UM
-  secret_key: XES9mLNbxAWKZC1AUcYFlGd7ByyXXSYw5yB3UrwM
-  host_base: https://s3-west.nrp-nautilus.io
+  access_key: "${ACCESS_KEY_ID}"
+  secret_key: "${SECRET_ACCESS_KEY}"
+  host_base: "${S3_ENDPOINT}"
   bucket: "${BUCKET}"
   common_prefix: O3_data/
   upload_dir: "${UPLOAD_DIR}"

@@ -1,34 +1,26 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: batch/v1
+kind: Job
 metadata:
-  name: gw-anomaly-detection-data-inj
-  labels:
-    k8s-app: gw-anomaly-detection-data-inj
+  name: gw-anomaly-detection-data-bg
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      k8s-app: gw-anomaly-detection-data-inj
   template:
-    metadata:
-      labels:
-        k8s-app: gw-anomaly-detection-data-inj
     spec:
+      restartPolicy: Never  
       containers:
-        - name: test-inj
+        - name: test-bg
           image: dfredin/gwgasf:testing
           resources:
             limits:
-              memory: 20Gi
+              memory: 250Gi
               cpu: 10000m
-              ephemeral-storage: 20Gi
+              ephemeral-storage: 200Gi
             requests:
-              memory: 5Gi
+              memory: 50Gi
               cpu: 2500m
-              ephemeral-storage: 5Gi
+              ephemeral-storage: 50Gi
           env:
             - name: KIND
-              value: "injection"
+              value: "background"
             - name: NUM_SAMPLES
               value: "100000"
             - name: START_ID
@@ -52,23 +44,23 @@ spec:
             - name: H1_START_INT
               value: "1238172987"
             - name: H1_END_INT
-              value: "1238619975"
+              value: "1238239667"
             - name: L1_START_INT
               value: "1238205073"
             - name: L1_END_INT
-              value: "1238620404"
+              value: "1238277350"
             - name: BG_H1_SEGMENT
-              value: "1238172987-446988"
+              value: "1238172987-66680"
             - name: BG_L1_SEGMENT
-              value: "1238205073-415331"
+              value: "1238205073-72277"
             - name: GLITCH_H1_SEGMENT
-              value: "1238172987-446988"
+              value: "1238172987-66680"
             - name: GLITCH_L1_SEGMENT
-              value: "1238205073-415331"
+              value: "1238205073-72277"
             - name: INJ_H1_SEGMENT
-              value: "1238172987-446988"
+              value: "1238172987-66680"
             - name: INJ_L1_SEGMENT
-              value: "1238205073-415331"
+              value: "1238205073-72277"
             - name: ACCESS_KEY_ID
               value: "XRIYL1052YCQ125N75UM"
             - name: SECRET_ACCESS_KEY

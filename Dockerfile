@@ -7,16 +7,13 @@ RUN apt-get update \
  && rm -rf /var/lib/apt/lists/*
 
 # Setup an app user so the container doesn't run as the root user
-# RUN useradd app
-# RUN mkdir -p /home/app/data_cache
-# RUN mkdir -p /home/app/test_data
 RUN useradd -ms /bin/bash app
 
 # Copy source code and set ownership in one step
 COPY --chown=app:app . /home/app/opt
 
-# Ensure the test_data directory is writable by the app user
-RUN mkdir -p /home/app/opt/test_data && chmod -R 777 /home/app/opt/test_data
+# Ensure the processed_data directory is writable by the app user
+RUN mkdir -p /home/app/opt/processed_data && chmod -R 777 /home/app/opt/processed_data
 
 # Set the working directory
 WORKDIR /home/app/opt
@@ -27,7 +24,7 @@ USER app
 # Install micromamba
 RUN cd /home/app \
  && curl -Ls https://micro.mamba.pm/api/micromamba/linux-64/latest | tar -xvj bin/micromamba \ 
- && export MAMABA_ROOT_PREFIX=~/micromamba \
+ && export MAMBA_ROOT_PREFIX=~/micromamba \
  && eval "$(./bin/micromamba shell hook -s posix)" \
  && ./bin/micromamba shell init -s bash -r /home/app/micromamba \
  && ./bin/micromamba config append channels conda-forge \
@@ -39,5 +36,8 @@ RUN /home/app/bin/micromamba create -y -p /home/app/micromamba/env -f /home/app/
 # Add the command to activate the conda environment
 RUN echo "micromamba activate /home/app/micromamba/env" >> /home/app/.bashrc
 
-# Automatically activate Micromamba and run CLI script
-CMD ["/bin/bash", "-c", "/home/app/bin/micromamba run -p /home/app/micromamba/env python -u /home/app/opt/cli.py"]
+# Ensure entrypoint script is executable
+RUN chmod +x /home/app/opt/entrypoint.sh
+
+# Run entrypoint script by default
+CMD ["/bin/bash", "-l", "/home/app/opt/entrypoint.sh"]
