@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: gw-anomaly-detection-data
+  name: gw-anomaly-detection-data-glitch
   labels:
-    k8s-app: gw-anomaly-detection-data
+    k8s-app: gw-anomaly-detection-data-glitch
 spec:
   replicas: 1
   selector:
     matchLabels:
-      k8s-app: gw-anomaly-detection-data
+      k8s-app: gw-anomaly-detection-data-glitch
   template:
     metadata:
       labels:
-        k8s-app: gw-anomaly-detection-data
+        k8s-app: gw-anomaly-detection-data-glitch
     spec:
       containers:
-        - name: test
+        - name: test-glitch
           image: dfredin/gwgasf:testing
           resources:
             limits:
@@ -28,7 +28,7 @@ spec:
               ephemeral-storage: 5Gi
           env:
             - name: KIND
-              value: "background"
+              value: "glitch"
             - name: NUM_SAMPLES
               value: "100000"
             - name: START_ID
@@ -75,7 +75,4 @@ spec:
               value: "XES9mLNbxAWKZC1AUcYFlGd7ByyXXSYw5yB3UrwM"
             - name: S3_ENDPOINT
               value: "https://s3-west.nrp-nautilus.io"
-          # command: ["sh", "-c", "sleep infinity"]
-          # command: ["sh", "-c", "/home/app/micromamba/env/bin/envsubst < /home/app/opt/data_config.yaml > /home/app/opt/data_config.yaml.tmp && mv /home/app/opt/data_config.yaml.tmp /home/app/opt/data_config.yaml && sleep infinity"]
-          # command: ["sh", "-c", "/home/app/micromamba/env/bin/envsubst < /home/app/opt/data_config.yaml > /home/app/opt/data_config.yaml.tmp && mv /home/app/opt/data_config.yaml.tmp /home/app/opt/data_config.yaml && python cli.py"]
           command: ["sh", "-c", "/home/app/micromamba/env/bin/envsubst < /home/app/opt/data_config.yaml > /home/app/opt/data_config.yaml.tmp && mv /home/app/opt/data_config.yaml.tmp /home/app/opt/data_config.yaml && /home/app/micromamba/env/bin/python /home/app/opt/cli.py"]

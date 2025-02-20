@@ -1,31 +1,23 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: batch/v1
+kind: Job
 metadata:
-  name: gw-anomaly-detection-data
-  labels:
-    k8s-app: gw-anomaly-detection-data
+  name: gw-anomaly-detection-data-bg
 spec:
-  replicas: 1
-  selector:
-    matchLabels:
-      k8s-app: gw-anomaly-detection-data
   template:
-    metadata:
-      labels:
-        k8s-app: gw-anomaly-detection-data
     spec:
+      restartPolicy: Never  
       containers:
-        - name: test
+        - name: test-bg
           image: dfredin/gwgasf:testing
           resources:
             limits:
-              memory: 20Gi
+              memory: 250Gi
               cpu: 10000m
-              ephemeral-storage: 20Gi
+              ephemeral-storage: 200Gi
             requests:
-              memory: 5Gi
+              memory: 50Gi
               cpu: 2500m
-              ephemeral-storage: 5Gi
+              ephemeral-storage: 50Gi
           env:
             - name: KIND
               value: "background"
@@ -52,30 +44,27 @@ spec:
             - name: H1_START_INT
               value: "1238172987"
             - name: H1_END_INT
-              value: "1238619975"
+              value: "1238239667"
             - name: L1_START_INT
               value: "1238205073"
             - name: L1_END_INT
-              value: "1238620404"
+              value: "1238277350"
             - name: BG_H1_SEGMENT
-              value: "1238172987-446988"
+              value: "1238172987-66680"
             - name: BG_L1_SEGMENT
-              value: "1238205073-415331"
+              value: "1238205073-72277"
             - name: GLITCH_H1_SEGMENT
-              value: "1238172987-446988"
+              value: "1238172987-66680"
             - name: GLITCH_L1_SEGMENT
-              value: "1238205073-415331"
+              value: "1238205073-72277"
             - name: INJ_H1_SEGMENT
-              value: "1238172987-446988"
+              value: "1238172987-66680"
             - name: INJ_L1_SEGMENT
-              value: "1238205073-415331"
+              value: "1238205073-72277"
             - name: ACCESS_KEY_ID
               value: "XRIYL1052YCQ125N75UM"
             - name: SECRET_ACCESS_KEY
               value: "XES9mLNbxAWKZC1AUcYFlGd7ByyXXSYw5yB3UrwM"
             - name: S3_ENDPOINT
               value: "https://s3-west.nrp-nautilus.io"
-          # command: ["sh", "-c", "sleep infinity"]
-          # command: ["sh", "-c", "/home/app/micromamba/env/bin/envsubst < /home/app/opt/data_config.yaml > /home/app/opt/data_config.yaml.tmp && mv /home/app/opt/data_config.yaml.tmp /home/app/opt/data_config.yaml && sleep infinity"]
-          # command: ["sh", "-c", "/home/app/micromamba/env/bin/envsubst < /home/app/opt/data_config.yaml > /home/app/opt/data_config.yaml.tmp && mv /home/app/opt/data_config.yaml.tmp /home/app/opt/data_config.yaml && python cli.py"]
           command: ["sh", "-c", "/home/app/micromamba/env/bin/envsubst < /home/app/opt/data_config.yaml > /home/app/opt/data_config.yaml.tmp && mv /home/app/opt/data_config.yaml.tmp /home/app/opt/data_config.yaml && /home/app/micromamba/env/bin/python /home/app/opt/cli.py"]

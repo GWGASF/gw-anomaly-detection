@@ -183,7 +183,7 @@ class Process():
 
         return injected_ts, rescaled_waveforms, rescaled_snrs
 
-    def get_proccessed_injection(
+    def get_processed_injection(
             self,
             timeseries: list,
             background_segments: dict,
@@ -225,6 +225,7 @@ class Process():
     ):
         with h5py.File(output_file, 'w') as w:
             # Waveform Parameters
+            print(f"Storing temporary injection file...")
             param_names = list(waveform_parameters[0].keys())
             param_formats = []
             for name in param_names:
@@ -295,6 +296,7 @@ class Process():
             end_id: int=None,
     ):
         processed_background = dict.fromkeys(self.ifos)
+        print(f"Processing background...")
         for ifo in self.ifos:
             seg_length = len(background_segments[ifo])
             if start_id == None:
@@ -330,6 +332,7 @@ class Process():
     ):
         ifos = list(processed_background.keys())
         with h5py.File(output_file, 'w') as w:
+            print(f"Storing temporary background file...")
             for ifo in ifos:
                 # Time Series Data
                 background_data = np.stack([data.value for data in processed_background[ifo]])
@@ -362,6 +365,7 @@ class Process():
     ):
         glitch_infos = dict.fromkeys(self.ifos)
         processed_glitch = dict.fromkeys(self.ifos)
+        print(f"Processing glitch...")
         for ifo in self.ifos:
             seg_length = len(glitch_segments[ifo])
             if start_id == None:
@@ -414,6 +418,7 @@ class Process():
     ):
         ifos = list(processed_glitch.keys())
         with h5py.File(output_file, 'w') as w:
+            print(f"Storing temporary glitch file...")
             for ifo in ifos:
                 # Glitch Info
                 info_names = list(glitch_infos[ifo][0].dtype.names)

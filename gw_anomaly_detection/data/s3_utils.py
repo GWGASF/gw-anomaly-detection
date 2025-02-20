@@ -118,14 +118,14 @@ class S3_session(boto3.Session):
         try:
             upload_file_name = file_name.split('/')[-1]
             key = f"{upload_dir}/{upload_file_name}"
-            print(f"Uploading {key} to {self.bucket}/{key}...")
+            print(f"s3: Uploading {key} to {self.bucket}/{key}...")
             response = self.s3client.upload_file(
                 Filename=file_name,
                 Bucket=self.bucket,
                 Key=key,
                 ExtraArgs=ExtraArgs,
             ) 
-            print(f"Done.")
+            print(f"s3: Upload Complete.")
         except Exception as e:
             print(str(e))
             return 1

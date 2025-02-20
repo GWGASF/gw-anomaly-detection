@@ -1,27 +1,43 @@
 FROM python:3.10
-WORKDIR /opt
+SHELL ["/bin/bash", "-l", "-c"]
 
 # Install the application dependencies
 RUN apt-get update \
-# && apt-get -y install --no-install-recommends vim \
  && apt-get -y upgrade \
- && rm -rf /var/lib/apt/lists/* \
- && pip install --upgrade pip \
- && pip install poetry
-
-# Copy in the sourrce code
-COPY gw_anomaly_detection/ gw_anomaly_detection/
-COPY poetry.lock /opt/
-COPY pyproject.toml /opt/
-COPY README.md /opt/
-
-# Install python packages
-RUN poetry lock
-RUN poetry install
+ && rm -rf /var/lib/apt/lists/*
 
 # Setup an app user so the container doesn't run as the root user
-# RUN useradd app
-RUN mkdir -p /home/app/data_cache
-RUN mkdir -p /home/app/test_data
+RUN useradd -ms /bin/bash app
 
-# CMD ["python", "hello.py"]
+# Copy source code and set ownership in one step
+COPY --chown=app:app . /home/app/opt
+
+# Ensure the processed_data directory is writable by the app user
+RUN mkdir -p /home/app/opt/processed_data && chmod -R 777 /home/app/opt/processed_data
+
+# Set the working directory
+WORKDIR /home/app/opt
+
+# Switch to the non-root user
+USER app
+
+# Install micromamba
+RUN cd /home/app \
+ && curl -Ls https://micro.mamba.pm/api/micromamba/linux-64/latest | tar -xvj bin/micromamba \ 
+ && export MAMBA_ROOT_PREFIX=~/micromamba \
+ && eval "$(./bin/micromamba shell hook -s posix)" \
+ && ./bin/micromamba shell init -s bash -r /home/app/micromamba \
+ && ./bin/micromamba config append channels conda-forge \
+ && ./bin/micromamba config set channel_priority strict
+
+# Install python Packages using micromamba
+RUN /home/app/bin/micromamba create -y -p /home/app/micromamba/env -f /home/app/opt/conda-lock.yml
+
+# Add the command to activate the conda environment
+RUN echo "micromamba activate /home/app/micromamba/env" >> /home/app/.bashrc
+
+# Ensure entrypoint script is executable
+RUN chmod +x /home/app/opt/entrypoint.sh
+
+# Run entrypoint script by default
+CMD ["/bin/bash", "-l", "/home/app/opt/entrypoint.sh"]

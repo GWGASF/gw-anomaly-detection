@@ -96,7 +96,7 @@ def generate_samples(
 
 def main():
     # Loading data_config.yaml
-    with open("./data_config.yaml", "r") as file:
+    with open("./data_config.yaml.tmp", "r") as file:
         config = yaml.safe_load(file)
 
     # Get background segments and glitch segments in total interval.
