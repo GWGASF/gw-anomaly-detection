@@ -367,6 +367,7 @@ class Process():
             if start_id == None:
                 st = 0
             if end_id > seg_length:
+                st = start_id
                 ed = seg_length
             else:
                 st = start_id

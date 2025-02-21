@@ -45,7 +45,8 @@ def full_process(config, s3):
         end_id = config['data']['glitch']['end_id']
         glitch_info_files = config['data']['glitch']['glitch_info_files']
         glitch_window_length = config['data']['glitch']['glitch_window_length']
-        output_file = config['data']['glitch']['output_file']
+        output_file_suffix = "_ids_{}-{}.hdf5".format(str(start_id), str(end_id))
+        output_file = os.path.join(config['data']['glitch']['output_file_path'], config['data']['glitch']['output_file']+output_file_suffix)
         # Processing data.
         proc = Process(
             ifos=ifos,
@@ -196,14 +197,6 @@ def full_process(config, s3):
             processed_waveforms=processed_waveforms,
         )
 
-    # Uploading processed data to s3 buckets.
-    file_name = output_file
-    upload_dir = config['s3']['upload_dir']
-    s3.upload(
-        file_name=file_name,
-        upload_dir=upload_dir,
-    )
-
     # Processing testing set, just same as the glitch process
     if kind == "test":
         print("Test.")
@@ -243,6 +236,15 @@ def full_process(config, s3):
             output_file=output_file,
             processed_background=processed_background,
         )
+
+    # Uploading processed data to s3 buckets.
+    file_name = output_file
+    upload_dir = config['s3']['upload_dir']
+    s3.upload(
+        file_name=file_name,
+        upload_dir=upload_dir,
+    )
+
     
     # Gathering data on s3 buckets.
 
@@ -281,7 +283,7 @@ if __name__ == "__main__":
     # print(full_config['data'][process_type]['end_id'])
 
     # Loading strain and asd into data cache.
-    background_interval = full_config['data']['background']['sample_interval']
+    background_interval = full_config['data'][full_config['data']['kind']]['sample_interval']
     data_cache = full_config['data']['data_cache']
     ifos = full_config['data']['ifos']
     print("Downloading data from s3 bucket...")
