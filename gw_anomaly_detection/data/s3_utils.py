@@ -99,11 +99,12 @@ class S3_session(boto3.Session):
             if not os.path.exists(data_cache+'/'+ifo):
                 os.mkdir(data_cache+'/'+ifo)
             file_name = data_cache+'/'+ifo+'/'+file.split('/')[-1]
-            self.s3client.download_file(
-                self.bucket,
-                file,
-                file_name,
-            )
+            if not os.path.exists(file_name):
+                self.s3client.download_file(
+                    self.bucket,
+                    file,
+                    file_name,
+                )
 
         return 0
 

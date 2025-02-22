@@ -1,4 +1,4 @@
-Process_num: 4
+Process_num: 16
 data:
   ifos: ["H1", "L1"]
   kind: "injection"
