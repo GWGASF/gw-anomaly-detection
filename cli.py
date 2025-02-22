@@ -274,9 +274,10 @@ if __name__ == "__main__":
 
     parser.add_argument('--sid', type=int, default = full_config['data'][full_config['data']['kind']]['start_id'])
     parser.add_argument('--eid', type=int, default = full_config['data'][full_config['data']['kind']]['end_id'])
-
+    parser.add_argument('--processnum', type=int, default = full_config['Process_num'])
 
     args = parser.parse_args()
+    full_config['Process_num'] = args.processnum
     full_config['data'][full_config['data']['kind']]['start_id'] = args.sid
     full_config['data'][full_config['data']['kind']]['end_id'] = args.eid
 
