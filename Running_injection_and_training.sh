@@ -1,6 +1,6 @@
 #!/bin/bash
 set -e
-
+cd /opt/repo/gw-anomaly-detection
 mkdir -p /home/app/test_data/glitch /home/app/test_data/noise /home/app/test_data/bbh /home/app/test_data/lfsg /home/app/test_data/hfsg /home/app/test_data/test
 
 python /opt/repo/gw-anomaly-detection/get_segments.py
