@@ -100,7 +100,7 @@ def make_training_separated_and_normalized_datasets(config_dict):
     for dtype in config_dict['Dataset_type']:
         config_dic_cached = deepcopy(config_dict)
         config_dic_cached['Dataset_path'] = os.path.join(config_dic_cached['Dataset_dir'], dtype)
-        config_dic_cached['cutting_window'] = config_dict['cutting_window'][dtype]
+        config_dic_cached['Cutting_window'] = config_dict['Cutting_window'][dtype]
         dataset[dtype] = cut_events_from_waveforms(config_dic_cached)
         
     list_dataset = dataset.keys()
