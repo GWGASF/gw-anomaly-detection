@@ -96,7 +96,7 @@ data:
         start: 1238301937
         end: 1238305537
     segment_files:
-      H1: ["./segments/O3a/H1-test-samples-1238301937-3600.segwizard"]
+      H1: ["./segments/O3a/H1-test_samples-1238301937-3600.segwizard"]
       L1: ["./segments/O3a/L1-test_samples-1238301937-3600.segwizard"]
     window_length: 4
     stride_length: 2

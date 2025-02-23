@@ -208,13 +208,13 @@ def full_process(config, s3):
             interval = whole_segment(segment_file=segment_files[ifo])
             print(f"Number of testing segments from {ifo}: {len(background_segments[ifo])}, interval: {interval}.")
 
-        start_id = config['data']['background']['start_id']
-        end_id = config['data']['background']['end_id']
+        start_id = config['data']['test']['start_id']
+        end_id = config['data']['test']['end_id']
 
         output_file_suffix = "_ids_{}-{}.hdf5".format(str(start_id), str(end_id))
 
-        window_length = config['data']['background']['window_length']
-        output_file = os.path.join(config['data']['background']['output_file_path'], config['data']['background']['output_file']+output_file_suffix)
+        window_length = config['data']['test']['window_length']
+        output_file = os.path.join(config['data']['test']['output_file_path'], config['data']['test']['output_file']+output_file_suffix)
 
         # Processing data.
         proc = Process(
