@@ -265,8 +265,8 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser()
 
-    parser.add_argument('--ptype', type=str, choices=['glitch','background', 'injection'], default = full_config['data']['kind'])
-    parser.add_argument('--itype', type=str, choices=['bbh', 'ccsn', 'hfsg', 'lfsg', 'test'], default = full_config['data']['injection']['waveform'])
+    parser.add_argument('--ptype', type=str, choices=['glitch','background', 'injection', 'test'], default = full_config['data']['kind'])
+    parser.add_argument('--itype', type=str, choices=['bbh', 'ccsn', 'hfsg', 'lfsg'], default = full_config['data']['injection']['waveform'])
 
     args = parser.parse_known_args()[0]
     full_config['data']['kind'] = args.ptype
