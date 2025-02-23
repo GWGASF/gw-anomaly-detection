@@ -17,8 +17,8 @@ def read_from_files(file_path):
 
 def read_from_directory(directory_path):
     all_injected_waveforms = []
-    all_raw_waveforms = []
-    all_inject_params = []
+    # all_raw_waveforms = []
+    # all_inject_params = []
 
     for filename in os.listdir(directory_path):
         if filename.endswith(".hdf5"): 
@@ -33,10 +33,10 @@ def read_from_directory(directory_path):
             # all_inject_params.append(inject_params)
     
     all_injected_waveforms = np.concatenate(all_injected_waveforms, axis=0)
-    all_raw_waveforms = np.concatenate(all_raw_waveforms, axis=0)
-    all_inject_params = np.concatenate(all_inject_params, axis=0)
+    # all_raw_waveforms = np.concatenate(all_raw_waveforms, axis=0)
+    # all_inject_params = np.concatenate(all_inject_params, axis=0)
 
-    return all_injected_waveforms, all_raw_waveforms, all_inject_params
+    return all_injected_waveforms, 0,0
 
 
 def cut_events_from_waveforms(cutting_config):
