@@ -163,6 +163,8 @@ def training_create_dataset(config_dict):
     return dataset
 
 def testing_create_dataset(config_dict):
+    # Returnning just the full test dataset
+    # Bring severe memory burden. New method introduced in the filtering_chain.py
     
     # scanning_type = config_dict['Scan_type']
     # smoothing_window = config_dict['Smoothing_window']
