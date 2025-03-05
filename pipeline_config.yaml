@@ -2,6 +2,7 @@ Training_set_config:
 
   General_config:
     Event_per_segment: 10
+    Event_window_length: 200
     Segment_frequency: 4096
     Segment_length: 8192
 
@@ -26,6 +27,7 @@ Testing_set_config:
 
   General_config:
     Event_per_segment: 10
+    Event_window_length: 200
     Segment_frequency: 4096
     Segment_length: 8192
   
@@ -75,6 +77,8 @@ Filtering_Chain:
   Output_dir: None
   Output_file_infix: 'Filtering_chain_'
   Output_file_suffix: 'default'
+
+  Class_list: ['glitch', 'noise', 'BBH', 'SGHF', 'SGLF']
 
   GlitchH_class:
     Model_params:

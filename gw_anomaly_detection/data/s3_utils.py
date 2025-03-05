@@ -117,7 +117,7 @@ class S3_session(boto3.Session):
             'ACL': 'public-read',
         }
         try:
-            upload_file_name = file_name.split('/')[-1]
+            upload_file_name = f"{file_name.split('/')[-1]}/{file_name.split('/')[-2]}"
             key = f"{upload_dir}/{upload_file_name}"
             print(f"Uploading {key} to {self.bucket}/{key}...")
             response = self.s3client.upload_file(

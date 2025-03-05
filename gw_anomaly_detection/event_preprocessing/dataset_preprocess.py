@@ -7,15 +7,15 @@ import yaml
 
 from gw_anomaly_detection.data.process import Process
 
-def read_from_files(file_path):
-    injected_waveforms = np.concatenate((np.array(h5py.File(file_path, 'r')['H1'])[:, np.newaxis, :], np.array(h5py.File(file_path, 'r')['L1'])[:, np.newaxis, :]), axis = 1)
+def read_from_files(file_path, detectors):
+    injected_waveforms = np.concatenate([np.array(h5py.File(file_path, 'r')[detector])[:, np.newaxis, :] for detector in detectors], axis = 1)
     # raw_waveforms = np.concatenate((np.array(h5py.File(file_path, 'r')['waveform_H1'])[:, np.newaxis, :], np.array(h5py.File(file_path, 'r')['waveform_L1'])[:, np.newaxis, :]), axis = 1)
     # inject_params = np.array(h5py.File(file_path, 'r')['waveform_parameters'])
     
     # return injected_waveforms, raw_waveforms, inject_params
     return injected_waveforms
 
-def read_from_directory(directory_path):
+def read_from_directory(directory_path, detectors):
     all_injected_waveforms = []
     # all_raw_waveforms = []
     # all_inject_params = []
@@ -26,7 +26,7 @@ def read_from_directory(directory_path):
             print(f"Processing file: {file_path}")
 
             # injected_waveforms, raw_waveforms, inject_params = read_from_files(file_path)
-            injected_waveforms= read_from_files(file_path)
+            injected_waveforms= read_from_files(file_path, detectors)
 
             all_injected_waveforms.append(injected_waveforms)
             # all_raw_waveforms.append(raw_waveforms)
@@ -46,8 +46,9 @@ def cut_events_from_waveforms(cutting_config):
     segment_length = cutting_config['General_config']['Segment_length']
     file_path = cutting_config['Dataset_path']
     cutting_type = cutting_config['Cutting_type']
+    detectors = cutting_config['Detectors']
     
-    waveforms, _, _ = read_from_directory(file_path)
+    waveforms, _, _ = read_from_directory(file_path, detectors)
     # I have no ideas of how to use the SNR right now
     
     if cutting_type == 'window_cut':

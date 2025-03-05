@@ -565,11 +565,7 @@ def Series_passing(aes, config_dict, config_dict_for_passing):
     classname = [config_dict[key]['Model_params']['Class_name'] for key in classkey]
     
     # Right now the cache part can only work for the AE
-    use_cache = [config_dict[key]['Training_scheme']['Use_cache'] for key in classkey]
-    generate_cache = [config_dict[key]['Training_scheme']['Generate_cache'] for key in classkey]
     train_wsc = [config_dict[key]['Training_scheme']['Train_wsc'] for key in classkey]
-    ae_struct = [config_dict[key]['Model_params']['Model_struct_half'] for key in classkey]
-    cutAE_ratio = [config_dict[key]['Training_scheme']['Cut_ratio'] for key in classkey]
     
     for key in classkey:
         config_dict[key]['Training_scheme']['Output_dir'] = config_dict['Output_dir']
@@ -582,6 +578,7 @@ def Series_passing(aes, config_dict, config_dict_for_passing):
     # Loading and making the testing waveforms
     
     file_path = config_dict_for_passing['Dataset_path']
+    cache_path = config_dict_for_passing['Cache_path']
     waveforms, _, _ = read_from_directory(file_path)
     
     for waveform in waveforms:
@@ -678,6 +675,8 @@ def Series_passing(aes, config_dict, config_dict_for_passing):
                 dataset_filtered = dataset_filtered[passidx]   
 
         dataset = np.append(dataset, dataset_filtered, axis = 0)
+        
+        np.save(cache_path, dataset)
     
     return dataset
 
