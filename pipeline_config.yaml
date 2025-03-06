@@ -79,14 +79,18 @@ Filtering_Chain:
   Output_file_suffix: 'default'
 
   Class_list: ['glitch', 'noise', 'BBH', 'SGHF', 'SGLF']
+  Detectors_list: ['H1', 'L1']
 
-  GlitchH_class:
-    Model_params:
-      Class_name: 'glitch_H'
+  glitch:
+    General:
+      Separated_detectors: True
+
+    Model_params_H1:
+
       Model_struct_half: [101, 10, 20, 10]
 
 
-    Training_scheme:
+    Training_scheme_H1:
       Early_stopping_applied: False
       Use_cache: False
       Train_wsc: False
@@ -105,13 +109,11 @@ Filtering_Chain:
       Output_file_infix:
       Output_file_suffix:
 
-  GlitchL_class:
-    Model_params:
-      Class_name: 'glitch_L'
+    Model_params_L1:
       Model_struct_half: [101, 10, 10]
 
 
-    Training_scheme:
+    Training_scheme_L1:
       Early_stopping_applied: False
       Use_cache: False
       Train_wsc: False
@@ -130,9 +132,12 @@ Filtering_Chain:
       Output_file_infix:
       Output_file_suffix:
 
-  Class1:
+  noise:
+    General:
+      Separated_detectors: False
+
+
     Model_params:
-      Class_name: 'noise'
       Model_struct_half: [202, 40, 20]
 
 
@@ -154,9 +159,12 @@ Filtering_Chain:
       Output_file_infix:
       Output_file_suffix:
 
-  Class2:
+  BBH:
+    General:
+      Separated_detectors: False
+
+      
     Model_params:
-      Class_name: 'BBH'
       Model_struct_half: [202, 20, 20]
 
 
@@ -178,9 +186,12 @@ Filtering_Chain:
       Output_file_infix:
       Output_file_suffix:
 
-  Class3:
+  SGHF:
+    General:
+      Separated_detectors: False
+
+      
     Model_params:
-      Class_name: 'SGHF'
       Model_struct_half: [202, 40]
 
 
@@ -203,10 +214,12 @@ Filtering_Chain:
       Output_file_suffix:
 
 
-  Class4:
+  SGLF:
+    General:
+      Separated_detectors: False
+
 
     Model_params:
-      Class_name: 'SGLF'
       Model_struct_half: [202, 40]
 
 

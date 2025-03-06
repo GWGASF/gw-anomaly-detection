@@ -22,6 +22,8 @@ def main(
     dataset_for_training[len(dataset_for_training)-1] = Series_training(training_set_ae=dataset_for_training, config_dict=config['Filtering_Chain'])
     model = trainSeriesSupC_struct(dataset_for_training, config_dict=config['Weakly_Supervised'])
 
+    # Remember to make copy for the training dataset
+    
     return model
     
 if __name__ == "__main__":
