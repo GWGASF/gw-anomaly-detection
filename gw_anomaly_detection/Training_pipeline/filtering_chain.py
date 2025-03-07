@@ -396,6 +396,7 @@ def Single_node_training(training_set, node_list, config_dict, key, iStep):
         
         training_set_separated = {}
         passidx = {}
+        node_list['cut_vals'][key] = {}
         
         
         for idx, detector in enumerate(detector_list):
@@ -421,13 +422,13 @@ def Single_node_training(training_set, node_list, config_dict, key, iStep):
             dcd = node_list[key + '_' + detector](torch.FloatTensor(training_set_separated[detector][iStep]))[1].detach().numpy()
             err_score = np.mean((training_set_separated[detector][iStep] - dcd)**2, axis=1)
             err_score.sort()
-            node_list['cut_vals'][key] = err_score[-int(cutAE_ratio*len(err_score))]
+            node_list['cut_vals'][key][detector] = err_score[-int(cutAE_ratio*len(err_score))]
             
             for iStep_fil in np.arange(iStep+1, classnum+1):
                 passidx[iStep_fil] = {}
                 dcd = node_list[key + '_' + detector](torch.FloatTensor(training_set_separated[detector][iStep_fil]))[1].detach().numpy()
                 err_score = np.mean((training_set_separated[detector][iStep_fil]-dcd)**2, axis=1)
-                passidx[iStep_fil][detector] = err_score > node_list['cut_vals'][key] 
+                passidx[iStep_fil][detector] = err_score > node_list['cut_vals'][key][detector] 
             
         for iStep_fil in np.arange(iStep+1, classnum+1):
             final_passidx = np.logical_and.reduce(list(passidx[iStep_fil].values()))
@@ -447,6 +448,8 @@ def Series_training(training_set_ae, config_dict):
     # train_wsc = [config_dict[key]['Training_scheme']['Train_wsc'] for key in classkey]
     # ae_struct = [config_dict[key]['Model_params']['Model_struct_half'] for key in classkey]
     # cutAE_ratio = [config_dict[key]['Training_scheme']['Cut_ratio'] for key in classkey]
+    
+    # Consider moving this part to a new file for produce the config set
     
     for key in classkey:
         if not config_dict[key]['General']['Separated_detectors']:
@@ -487,6 +490,8 @@ def Series_training(training_set_ae, config_dict):
     for iStep, key in enumerate(classkey):
         Single_node_training(training_set_ae, aes, config_dict, key, iStep)    
          
+    aes['cut_vals'] = {}     
+    
     torch.save(aes, model_chain_save_path) 
     
     return aes
@@ -520,6 +525,64 @@ def cut_events_from_waveforms_single_fullscan(cutting_config, waveforms):
     
     return cutted_events_fft.reshape(-1,202)
 
+def Single_node_passing(waveform, node_list, config_dict, key):
+    # Function for single training and passing the dataset after the iStep
+    waveform_filtered = waveform.copy()
+    if not config_dict[key]['general']['Separated_detectors']:
+        use_cache = config_dict[key]['Training_scheme']['Use_cache']
+        generate_cache = config_dict[key]['Training_scheme']['Generate_cache']
+        train_wsc = config_dict[key]['Training_scheme']['Train_wsc']
+        ae_struct = config_dict[key]['Model_params']['Model_struct_half']
+        cutAE_ratio = config_dict[key]['Training_scheme']['Cut_ratio']
+        classnum = config_dict['Class_to_use']
+        
+        # No return the passed dataset for training as a result of dict passing strategy
+            
+        if train_wsc:
+            exit('Training WSC for {} is not implemented yet.'.format(key))
+        
+        dcd = node_list[key](torch.FloatTensor(waveform_filtered))[1].detach().numpy()
+        err_score = np.mean((waveform_filtered-dcd)**2, axis=1)
+        passidx = err_score > node_list['cut_vals'][key]
+        waveform_filtered = waveform_filtered[passidx]   
+        
+    else:
+        detector_list = config_dict['Detectors_list']
+        
+        # Split the training sets:
+        
+        num_detectors = len(detector_list)
+        window_length = int(waveform_filtered.shape[-1])
+        
+        waveform_filtered_separated = {}
+        passidx = {}
+        
+        
+        for idx, detector in enumerate(detector_list):
+            use_cache = config_dict[key]['Training_scheme_' + detector]['Use_cache']
+            generate_cache = config_dict[key]['Training_scheme_' + detector]['Generate_cache']
+            train_wsc = config_dict[key]['Training_scheme_' + detector]['Train_wsc']
+            ae_struct = config_dict[key]['Model_params_' + detector]['Model_struct_half']
+            cutAE_ratio = config_dict[key]['Training_scheme_' + detector]['Cut_ratio']
+            classnum = config_dict['Class_to_use']
+            
+            # No return the passed dataset for training as a result of dict passing strategy
+            
+            waveform_filtered_separated[detector] = copy.deepcopy(waveform_filtered)
+            waveform_filtered_separated[detector] = waveform_filtered_separated[detector][:,idx*window_length:(idx+1)*window_length]
+                
+            if train_wsc:
+                exit('Training WSC for {} is not implemented yet.'.format(key + '_' + detector))
+            
+            dcd = node_list[key + '_' + detector](torch.FloatTensor(waveform_filtered_separated[detector]))[1].detach().numpy()
+            err_score = np.mean((waveform_filtered_separated[detector]-dcd)**2, axis=1)
+            passidx[detector] = err_score > node_list['cut_vals'][key][detector] 
+            
+        final_passidx = np.logical_and.reduce(list(passidx.values()))
+        waveform_filtered = waveform_filtered[final_passidx] 
+            
+    return waveform_filtered
+
 def Series_passing(aes, config_dict, config_dict_for_passing):
     
     cutAE = aes['cut_vals']
@@ -552,95 +615,9 @@ def Series_passing(aes, config_dict, config_dict_for_passing):
     for waveform in waveforms:
         dataset_filtered = cut_events_from_waveforms_single_fullscan(config_dict_for_passing, waveform)
         # Glitch part comes first    
-        if train_wsc[0]:
-            
-            exit('Training WSC for glitchH is not implemented yet.')
-            
-            
-            dcd = models['glitch_H'](torch.FloatTensor(training_set_ae[5][:, 101:]))[1].detach().numpy()
-            err_score_H = np.mean((training_set_ae[5][:, 101:]-dcd)**2, axis=1)
-            passidx = err_score_H > cutAE[0]
-            dataset1 = training_set_ae[5][passidx].copy()
-            wscs['glitch_H'] = trainWSC_2class(training_set_ae[0], dataset1[:, 101:], [101, 16, 1], outputDir+"/WSC_training_figures/wsc_glitchH_"+stric+".png")
-
-            dcd = models['glitch_L'](torch.FloatTensor(training_set_ae[5][:, :101]))[1].detach().numpy()
-            err_score_L = np.mean((training_set_ae[5][:, :101]-dcd)**2, axis=1)
-            passidx = err_score_L > cutAE[1]
-            dataset1 = training_set_ae[5][passidx].copy()
-            wscs['glitch_L'] = trainWSC_2class(training_set_ae[1], dataset1[:, :101], [101, 16, 1], outputDir+"/WSC_training_figures/wsc_glitchL_"+stric+".png")
-
-            for iStep in range(2, 6):
-                passidxH = nn.Sigmoid()(wscs['glitch_H'](torch.FloatTensor(training_set_ae[iStep][:, 101:]))).detach().numpy().flatten()>=0.5
-                passidxL = nn.Sigmoid()(wscs['glitch_L'](torch.FloatTensor(training_set_ae[iStep][:, :101]))).detach().numpy().flatten()>=0.5
-                passidx = np.logical_and(passidxH, passidxL)
-                training_set_ae[iStep] = training_set_ae[iStep][passidx]
-        else:    
-            
-            dcd = aes['glitch_H'](torch.FloatTensor(dataset_filtered[:, :101]))[1].detach().numpy()
-            err_score_H = np.mean((dataset_filtered[:, :101]-dcd)**2, axis=1)
-            passH = err_score_H > cutAE[0]
-
-
-            dcd = aes['glitch_L'](torch.FloatTensor(dataset_filtered[:, 101:]))[1].detach().numpy()
-            err_score_L = np.mean((dataset_filtered[:, 101:]-dcd)**2, axis=1)
-            passL = err_score_L > cutAE[1]
-
-            passidx = np.logical_and(passH, passL)
-            dataset_filtered = dataset_filtered[passidx]
-
-        # logger(time.time()-t0)
-        # t0 = time.time()
-
-        for iCS in np.arange(2, classnum+1):
-            
-            if train_wsc[iCS]:
-                exit('Training WSC for {} is not implemented yet.'.format(classname[iCS]))
-                # train AE with passed data
-                
-                # logger.info("Start training the {}-th node in the AE series. ".format(iCS))
-                # if iCS==2: # if noise, find the cut value according to the distribution
-                #     dcd = aes[indCS](torch.FloatTensor(training_set_ae[iCS]))[1].detach().numpy()
-                #     err_score = np.var(training_set_ae[iCS] - dcd, axis=1)
-                #     err_score.sort()
-                #     cutAE[iCS] = err_score[-int(cutAE[iCS]*len(err_score))]
-                
-                # for all dataset, find the cut value according to the distribution
-                dcd = aes[classname[iCS]](torch.FloatTensor(training_set_ae[iCS]))[1].detach().numpy()
-                err_score = np.mean((training_set_ae[iCS] - dcd)**2, axis=1)
-                err_score.sort()
-                cutAE[iCS] = err_score[-int(cutAE[iCS]*len(err_score))]
-
-                # dcd = aes[indCS](torch.FloatTensor(training_set_ae[5]))[1].detach().numpy()
-                # err_score = np.var(training_set_ae[5] - dcd, axis=1)
-                # passidx = err_score > cutAE[iCS]
-
-                # dataset1 = training_set_ae[5][passidx].copy()
-                # wscs[indCS] = trainWSC_2class(training_set_ae[iCS], dataset1, [202, 32, 1], outputDir+"/WSC_training_figures/wsc_"+ind2dt[iCS]+"_"+stric+".png")
-
-                # logger.info("The node in the AE series training completed. ")
-                
-                # filter both the AE training set data and the test set
-                # the AE training set
-                for iStep in np.arange(iCS+1, classnum+1):
-                    # passidx = nn.Sigmoid()(wscs[indCS](torch.FloatTensor(training_set_ae[iStep]))).detach().numpy().flatten()>=0.5
-                    dcd = aes[classname[iCS]](torch.FloatTensor(training_set_ae[iStep]))[1].detach().numpy()
-                    err_score = np.mean((training_set_ae[iStep] - dcd)**2, axis=1)
-                    passidx = err_score > cutAE[iCS]
-                    training_set_ae[iStep] = training_set_ae[iStep][passidx]
-            else:
-                
-                # logger.info("Skip training the {}-th node in the AE series. ".format(iCS))
-                
-                # if iCS==2:
-                #     dcd = models[indCS](torch.FloatTensor(training_set_ae[iCS]))[1].detach().numpy()
-                #     err_score = np.var(training_set_ae[iCS] - dcd, axis=1)
-                #     err_score.sort()
-                #     cutAE[iCS] = err_score[-int(cutAE[iCS]*len(err_score))]
-                
-                dcd = aes[classname[iCS]](torch.FloatTensor(dataset_filtered))[1].detach().numpy()
-                err_score = np.mean((dataset_filtered-dcd)**2, axis=1)
-                passidx = err_score > cutAE[iCS]
-                dataset_filtered = dataset_filtered[passidx]   
+        
+        for key in enumerate(classkey):
+            dataset_filtered = Single_node_passing(dataset_filtered, aes, config_dict, key) 
 
         dataset = np.append(dataset, dataset_filtered, axis = 0)
         
