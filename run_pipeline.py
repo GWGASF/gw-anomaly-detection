@@ -7,6 +7,7 @@ import copy
 from gw_anomaly_detection.event_preprocessing.dataset_preprocess import training_create_dataset
 from gw_anomaly_detection.event_preprocessing.dataset_preprocess import testing_create_dataset
 from gw_anomaly_detection.Training_pipeline.filtering_chain import Series_training
+from gw_anomaly_detection.Training_pipeline.filtering_chain import Series_passing
 from gw_anomaly_detection.Training_pipeline.weakly_supervised_classifier import trainSeriesSupC_struct
 
 def main(
@@ -14,17 +15,17 @@ def main(
 ):
     # print(device)
     dataset_for_training = training_create_dataset(config['Training_set_config'])
-    dataset_for_testing = testing_create_dataset(config['Testing_set_config'])
+    # dataset_for_testing = testing_create_dataset(config['Testing_set_config'])
 
     # Start for training
-    dataset_for_training[len(dataset_for_training)] = dataset_for_testing
+    # dataset_for_training[len(dataset_for_training)] = dataset_for_testing
     print(dataset_for_training.keys())
-    dataset_for_training[len(dataset_for_training)-1] = Series_training(training_set_ae=dataset_for_training, config_dict=config['Filtering_Chain'])
-    model = trainSeriesSupC_struct(dataset_for_training, config_dict=config['Weakly_Supervised'])
+    node_list = Series_training(training_set_ae=dataset_for_training, config_dict=config['Filtering_Chain'])
+    passed_dataset = Series_passing(node_list, config_dict=config['Filtering_Chain'], config_dict_for_passing=config['Testing_set_config'])
 
     # Remember to make copy for the training dataset
     
-    return model
+    return 0
     
 if __name__ == "__main__":
     script_path = os.path.abspath(__file__)
