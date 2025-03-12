@@ -17,7 +17,7 @@ import torch.nn.functional as F
 import re
 import yaml
 
-from config import device
+from gw_anomaly_detection.event_preprocessing.config import device
 
 
 class WSC_1det_struct(nn.Module):

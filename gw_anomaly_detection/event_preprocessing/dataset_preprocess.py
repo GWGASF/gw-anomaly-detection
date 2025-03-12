@@ -5,7 +5,6 @@ import h5py
 from copy import deepcopy
 import yaml
 
-from gw_anomaly_detection.data.process import Process
 
 def read_from_files(file_path, detectors):
     injected_waveforms = np.concatenate([np.array(h5py.File(file_path, 'r')[detector])[:, np.newaxis, :] for detector in detectors], axis = 1)
@@ -145,15 +144,17 @@ def training_create_dataset(config_dict):
     
     if 'glitch' in dtype_list:
         # if glitch is presented, set it to the first one, and separated it to be glitch H and glitch L.
-        assert 'noise' in dtype_list
-        # Still need to do something here, to make sure it follows the sequence of detectors
-        num_of_glitches = len(full_dataset_raw['glitch'])
-        dataset[idxflag] = np.concatenate((full_dataset_raw['glitch'][:,[0],:], full_dataset_raw['noise'][:num_of_glitches,[1],:]), axis = 1).reshape(-1,202)
-        dataset[idxflag+1] = np.concatenate((full_dataset_raw['noise'][:num_of_glitches,[0],:], full_dataset_raw['glitch'][:,[1],:]), axis = 1).reshape(-1,202)
         
-        full_dataset_raw['noise'] = full_dataset_raw['noise'][num_of_glitches:]
-        dtype_list.remove('glitch')
-        idxflag += 2
+        if False:
+            assert 'noise' in dtype_list
+            # Still need to do something here, to make sure it follows the sequence of detectors
+            num_of_glitches = len(full_dataset_raw['glitch'])
+            dataset[idxflag] = np.concatenate((full_dataset_raw['glitch'][:,[0],:], full_dataset_raw['noise'][:num_of_glitches,[1],:]), axis = 1).reshape(-1,202)
+            dataset[idxflag+1] = np.concatenate((full_dataset_raw['noise'][:num_of_glitches,[0],:], full_dataset_raw['glitch'][:,[1],:]), axis = 1).reshape(-1,202)
+            
+            full_dataset_raw['noise'] = full_dataset_raw['noise'][num_of_glitches:]
+            dtype_list.remove('glitch')
+            idxflag += 2
         
     for dtype in dtype_list:
         dataset[idxflag] = full_dataset_raw[dtype].reshape(-1,202)

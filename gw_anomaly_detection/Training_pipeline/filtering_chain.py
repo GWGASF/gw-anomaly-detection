@@ -15,6 +15,7 @@ import yaml
 import copy
 
 from gw_anomaly_detection.event_preprocessing.dataset_preprocess import read_from_directory
+from gw_anomaly_detection.event_preprocessing.config import device
 
 
 class AE_1det_struct(nn.Module):
@@ -378,7 +379,7 @@ def Single_node_training(training_set, node_list, config_dict, key, iStep):
         err_score.sort()
         node_list['cut_vals'][key] = err_score[-int(cutAE_ratio*len(err_score))]
 
-        for iStep_fil in np.arange(iStep+1, classnum+1):
+        for iStep_fil in np.arange(iStep+1, classnum):
             dcd = node_list[key](torch.FloatTensor(training_set[iStep_fil]))[1].detach().numpy()
             err_score = np.mean((training_set[iStep_fil]-dcd)**2, axis=1)
             passidx = err_score > node_list['cut_vals'][key]
@@ -392,7 +393,7 @@ def Single_node_training(training_set, node_list, config_dict, key, iStep):
         # Split the training sets:
         
         num_detectors = len(detector_list)
-        window_length = int(training_set[iStep].shape[-1])
+        window_length = int(training_set[iStep].shape[-1]//num_detectors)
         
         training_set_separated = {}
         passidx = {}
@@ -424,13 +425,13 @@ def Single_node_training(training_set, node_list, config_dict, key, iStep):
             err_score.sort()
             node_list['cut_vals'][key][detector] = err_score[-int(cutAE_ratio*len(err_score))]
             
-            for iStep_fil in np.arange(iStep+1, classnum+1):
+            for iStep_fil in np.arange(iStep+1, classnum):
                 passidx[iStep_fil] = {}
                 dcd = node_list[key + '_' + detector](torch.FloatTensor(training_set_separated[detector][iStep_fil]))[1].detach().numpy()
                 err_score = np.mean((training_set_separated[detector][iStep_fil]-dcd)**2, axis=1)
                 passidx[iStep_fil][detector] = err_score > node_list['cut_vals'][key][detector] 
             
-        for iStep_fil in np.arange(iStep+1, classnum+1):
+        for iStep_fil in np.arange(iStep+1, classnum):
             final_passidx = np.logical_and.reduce(list(passidx[iStep_fil].values()))
             training_set[iStep_fil] = training_set[iStep_fil][final_passidx]  
     
@@ -592,31 +593,36 @@ def Series_passing(aes, config_dict, config_dict_for_passing):
     # Remember the training_set_ae is a dictionary with keys 0, 1, 2, ..., n, the 0 are pure H glitches and 1 are pure L glitches. all in 202 shape. 
     
     classnum = config_dict['Class_to_use']
-    classkey = ['GlitchH_class', 'GlitchL_class'] + ['Class'+str(i+1) for i in range(classnum - 1)]
-    classname = [config_dict[key]['Model_params']['Class_name'] for key in classkey]
+    classkey = config_dict['Class_list']
     
     # Right now the cache part can only work for the AE
     train_wsc = [config_dict[key]['Training_scheme']['Train_wsc'] for key in classkey]
     
     for key in classkey:
-        config_dict[key]['Training_scheme']['Output_dir'] = config_dict['Output_dir']
-        config_dict[key]['Training_scheme']['Output_file_infix'] = config_dict['Output_file_infix'] + config_dict[key]['Model_params']['Class_name'] + '_'
-        config_dict[key]['Training_scheme']['Output_file_suffix'] = config_dict['Output_file_suffix']
-    
+        if not config_dict[key]['General']['Separated_detectors']:
+            config_dict[key]['Training_scheme']['Output_dir'] = config_dict['Output_dir']
+            config_dict[key]['Training_scheme']['Output_file_infix'] = config_dict['Output_file_infix'] + key + '_'
+            config_dict[key]['Training_scheme']['Output_file_suffix'] = config_dict['Output_file_suffix']
+        
+        else:
+            for detector in config_dict['Detectors_list']:
+                config_dict[key]['Training_scheme_' + detector]['Output_dir'] = config_dict['Output_dir']
+                config_dict[key]['Training_scheme_' + detector]['Output_file_infix'] = config_dict['Output_file_infix'] + key + '_' + detector + '_'
+                config_dict[key]['Training_scheme_' + detector]['Output_file_suffix'] = config_dict['Output_file_suffix']
     
     # Modification has to be made on the param of the AE training
     
     # Loading and making the testing waveforms
     
-    file_path = config_dict_for_passing['Dataset_path']
+    file_path = os.path.join(config_dict_for_passing['Dataset_dir'], 'test')
     cache_path = config_dict_for_passing['Cache_path']
-    waveforms, _, _ = read_from_directory(file_path)
+    waveforms, _, _ = read_from_directory(file_path, config_dict['Detectors_list'])
     
     for waveform in waveforms:
         dataset_filtered = cut_events_from_waveforms_single_fullscan(config_dict_for_passing, waveform)
         # Glitch part comes first    
         
-        for key in enumerate(classkey):
+        for key in classkey:
             dataset_filtered = Single_node_passing(dataset_filtered, aes, config_dict, key) 
 
         dataset = np.append(dataset, dataset_filtered, axis = 0)
@@ -632,14 +638,6 @@ if __name__ == "__main__":
         config = yaml.safe_load(file)
         
     dataset_trial = torch.load('/home/app/test_data/trial.json', weights_only=False)
-    dataset_trial[6] = dataset_trial[4].copy()
-    
-    dataset_trial[5] = dataset_trial[4]
-    dataset_trial[4] = dataset_trial[3]
-    dataset_trial[3] = dataset_trial[2]
-    dataset_trial[2] = dataset_trial[1]
-    dataset_trial[1] = dataset_trial[0][10000:]
-    dataset_trial[0] = dataset_trial[0][:10000]
     
     print(dataset_trial.keys())
     
