@@ -357,7 +357,7 @@ def trainAE_struct(dataset, struct, config_dict):
 def Single_node_training(training_set, node_list, config_dict, key, iStep):
     # Function for single training and passing the dataset after the iStep
     
-    if not config_dict[key]['general']['Separated_detectors']:
+    if not config_dict[key]['General']['Separated_detectors']:
         use_cache = config_dict[key]['Training_scheme']['Use_cache']
         generate_cache = config_dict[key]['Training_scheme']['Generate_cache']
         train_wsc = config_dict[key]['Training_scheme']['Train_wsc']
@@ -470,6 +470,7 @@ def Series_training(training_set_ae, config_dict):
     
     
     aes = {}
+    aes['cut_vals'] = {}  
     cutAE = {}
     # models = {}
     # foo = torch.load(modelDir+"/glitch_AE_freq_new.json")
@@ -489,8 +490,7 @@ def Series_training(training_set_ae, config_dict):
     
     for iStep, key in enumerate(classkey):
         Single_node_training(training_set_ae, aes, config_dict, key, iStep)    
-         
-    aes['cut_vals'] = {}     
+            
     
     torch.save(aes, model_chain_save_path) 
     
@@ -528,7 +528,7 @@ def cut_events_from_waveforms_single_fullscan(cutting_config, waveforms):
 def Single_node_passing(waveform, node_list, config_dict, key):
     # Function for single training and passing the dataset after the iStep
     waveform_filtered = waveform.copy()
-    if not config_dict[key]['general']['Separated_detectors']:
+    if not config_dict[key]['General']['Separated_detectors']:
         use_cache = config_dict[key]['Training_scheme']['Use_cache']
         generate_cache = config_dict[key]['Training_scheme']['Generate_cache']
         train_wsc = config_dict[key]['Training_scheme']['Train_wsc']
