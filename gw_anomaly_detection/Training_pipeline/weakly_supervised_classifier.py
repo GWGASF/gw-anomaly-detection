@@ -17,6 +17,8 @@ import torch.nn.functional as F
 import re
 import yaml
 
+from config import device
+
 
 class WSC_1det_struct(nn.Module):
     def __init__(self, 
