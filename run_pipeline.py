@@ -22,7 +22,7 @@ def main(
     print(dataset_for_training.keys())
     node_list = Series_training(training_set_ae=dataset_for_training, config_dict=config['Filtering_Chain'])
     passed_dataset = Series_passing(node_list, config_dict=config['Filtering_Chain'], config_dict_for_passing=config['Testing_set_config'])
-
+    print(passed_dataset.shape)
     # Remember to make copy for the training dataset
     
     return 0
@@ -38,6 +38,7 @@ if __name__ == "__main__":
         
     # Define the device
     device = full_config['Full_pipeline']['Training_scheme']['device']
+    full_config['Filtering_Chain']['Output_dir'] = full_config['Full_pipeline']['Training_scheme']['Output_dir']
         
     main(full_config)
     

@@ -15,7 +15,7 @@ import yaml
 import copy
 
 from gw_anomaly_detection.event_preprocessing.dataset_preprocess import read_from_directory
-from gw_anomaly_detection.event_preprocessing.config import device
+from gw_anomaly_detection.Training_pipeline.config import device
 
 
 class AE_1det_struct(nn.Module):
