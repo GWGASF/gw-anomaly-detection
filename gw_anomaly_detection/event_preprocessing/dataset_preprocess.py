@@ -54,7 +54,7 @@ def cut_events_from_waveforms(cutting_config):
         cutting_window_left = cutting_config['Cutting_window'][0]
         cutting_window_right = cutting_config['Cutting_window'][1]
     
-        cutted_events = np.empty((len(waveforms),EVENT_PER_SEGMENT,2,200))
+        cutted_events = np.empty((len(waveforms),EVENT_PER_SEGMENT,len(detectors),200))
         midp = (waveforms[0].shape)[-1]//2
         
         
@@ -69,7 +69,7 @@ def cut_events_from_waveforms(cutting_config):
                 cutted_events[i,j] = cache.copy()
     
     elif cutting_type == 'full_scan':
-        cutted_events = np.empty((len(waveforms),segment_length-199,2,200))
+        cutted_events = np.empty((len(waveforms),segment_length-199,len(detectors),200))
         # midp = (waveforms[0].shape)[-1]//2
         
         
@@ -83,7 +83,7 @@ def cut_events_from_waveforms(cutting_config):
             
                 cutted_events[i,j] = cache.copy()
     
-    return cutted_events.reshape(-1,2,200)
+    return cutted_events.reshape(-1,len(detectors),200)
 
     
 def make_training_separated_and_normalized_datasets(config_dict):
@@ -122,9 +122,9 @@ def make_training_separated_and_normalized_datasets(config_dict):
             # np.random.shuffle(dataset[dt+'_H_'+snr])
 
     for ds in list_dataset:
-        dataset[ds] /= np.linalg.norm(dataset[ds], axis=-1).reshape(-1,2,1)
+        dataset[ds] /= np.linalg.norm(dataset[ds], axis=-1)[:,:,np.newaxis]
         dataset_fft[ds] = abs(np.fft.rfft(dataset[ds]))
-        dataset_fft[ds] /= np.linalg.norm(dataset_fft[ds], axis=-1).reshape(-1,2,1)
+        dataset_fft[ds] /= np.linalg.norm(dataset_fft[ds], axis=-1)[:,:,np.newaxis]
         
     dataset_final = dataset_fft
     
@@ -157,7 +157,7 @@ def training_create_dataset(config_dict):
             idxflag += 2
         
     for dtype in dtype_list:
-        dataset[idxflag] = full_dataset_raw[dtype].reshape(-1,202)
+        dataset[idxflag] = full_dataset_raw[dtype].reshape(len(full_dataset_raw[dtype], -1))
         idxflag += 1
     
     torch.save(dataset, cache_path)

@@ -504,11 +504,12 @@ def cut_events_from_waveforms_single_fullscan(cutting_config, waveforms):
     segment_length = cutting_config['General_config']['Segment_length']
     file_path = cutting_config['Dataset_path']
     cutting_type = cutting_config['Cutting_type']
+    detectors = cutting_config['Detectors']
     
     # waveforms, _, _ = read_from_directory(file_path)
     # I have no ideas of how to use the SNR right now
     
-    cutted_events = np.empty((segment_length-199,2,200))
+    cutted_events = np.empty((segment_length-199,len(detectors),200))
     # midp = (waveforms[0].shape)[-1]//2
     
     
@@ -520,11 +521,11 @@ def cut_events_from_waveforms_single_fullscan(cutting_config, waveforms):
     
         cutted_events[j] = cache.copy()
     
-    cutted_events /= np.linalg.norm(cutted_events, axis = -1).reshape(-1,2,1)
+    cutted_events /= np.linalg.norm(cutted_events, axis = -1)[:,:,np.newaxis]
     cutted_events_fft = abs(np.fft.rfft(cutted_events))
-    cutted_events_fft /= np.linalg.norm(cutted_events_fft, axis = -1).reshape(-1,2,1)
+    cutted_events_fft /= np.linalg.norm(cutted_events_fft, axis = -1)[:,:,np.newaxis]
     
-    return cutted_events_fft.reshape(-1,202)
+    return cutted_events_fft.reshape(len(cutted_events_fft), -1)
 
 def Single_node_passing(waveform, node_list, config_dict, key):
     # Function for single training and passing the dataset after the iStep
@@ -586,9 +587,10 @@ def Single_node_passing(waveform, node_list, config_dict, key):
 
 def Series_passing(aes, config_dict, config_dict_for_passing):
     
+    detectors = config_dict['Detectors_list']
     cutAE = aes['cut_vals']
     
-    dataset = np.empty((0,202))
+    dataset = np.empty((0,101 * len(detectors)))
     
     # Remember the training_set_ae is a dictionary with keys 0, 1, 2, ..., n, the 0 are pure H glitches and 1 are pure L glitches. all in 202 shape. 
     
