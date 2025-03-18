@@ -92,7 +92,7 @@ def trainSeriesSupC_struct(datasets, config_dict):
     wsc = WSC_1det_struct(struct).to(device)
     nparam = sum(p.numel() for p in wsc.parameters() if p.requires_grad)
     
-    flag_combine_glitches = True
+    flag_combine_glitches = False
     if flag_combine_glitches:
         dataset_cache = np.concatenate([datasets[0], datasets[1]], axis = 0)
         datasets[0] = dataset_cache
@@ -175,7 +175,7 @@ def trainSeriesSupC_struct(datasets, config_dict):
     plt.close()
     
     model = return_model_with_least_valloss(model_list)
-    torch.save_dict(model.state_dict(), model_save_path)
+    torch.save(model.state_dict(), model_save_path)
     
     return model
 
