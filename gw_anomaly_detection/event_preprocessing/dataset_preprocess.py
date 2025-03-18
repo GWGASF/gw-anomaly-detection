@@ -157,7 +157,7 @@ def training_create_dataset(config_dict):
             idxflag += 2
         
     for dtype in dtype_list:
-        dataset[idxflag] = full_dataset_raw[dtype].reshape(len(full_dataset_raw[dtype], -1))
+        dataset[idxflag] = full_dataset_raw[dtype].reshape(len(full_dataset_raw[dtype]), -1)
         idxflag += 1
     
     torch.save(dataset, cache_path)
