@@ -9,7 +9,7 @@ from gw_anomaly_detection.event_preprocessing.dataset_preprocess import testing_
 from gw_anomaly_detection.Training_pipeline.filtering_chain import Series_training
 from gw_anomaly_detection.Training_pipeline.filtering_chain import Series_passing
 from gw_anomaly_detection.Training_pipeline.weakly_supervised_classifier import trainSeriesSupC_struct
-
+import time
 import pynvml
 
 def get_gpu_utilization(gpu_index=0):
@@ -68,6 +68,7 @@ if __name__ == "__main__":
 
         if gpu_utilization < 80:
             config_cached = copy.deepcopy(full_config)
+            os.makedirs(config_cached['Full_pipeline']['Training_scheme']['Output_dir'] + f'/output_{trained_models}', exist_ok = True)
             config_cached['Filtering_Chain']['Output_dir'] = config_cached['Full_pipeline']['Training_scheme']['Output_dir'] + f'/output_{trained_models}'
             config_cached['Weakly_Supervised']['Training_scheme']['Output_dir'] = config_cached['Full_pipeline']['Training_scheme']['Output_dir'] + f'/output_{trained_models}'
             p = multiprocessing.Process(target=main, args=(config_cached,))
@@ -76,7 +77,7 @@ if __name__ == "__main__":
             trained_models += 1
             print(f"Started training model {trained_models}. GPU utilization: {gpu_utilization}%")
 
-        time.sleep(30)
+        time.sleep(20)
 
     for p in processes:
         p.join()
