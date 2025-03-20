@@ -1,0 +1,4 @@
+[submodule "gasf"]
+	path = gasf
+	url = https://gitlab.nrp-nautilus.io/gwgasf/gwgasf.git
+	branch = dan-dev
