@@ -22,6 +22,18 @@ multiprocess = "*"
 # torchmetrics = "^1"
 # torchaudio = {version = "^2", source = "torch"}
 
+matplotlib = ">=3.7.1"
+h5py = ">=3.7.0"
+torch = {version = "2.1.2", source = "torch"}
+torchsummary = ">=1.5.1"
+pyts = "=0.13.0"
+tqdm = ">=4.65.0"
+ipykernel = ">=6.19.2"
+pyyaml = ">=6.0.2"
+s3cmd = ">=2.2.0"
+s3fs = ">=2024.12.0"
+pynvml = ">=12.0.0"
+
 [[tool.poetry.source]]
 name = "torch"
 url = "https://download.pytorch.org/whl/cu121"

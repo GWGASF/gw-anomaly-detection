@@ -12,8 +12,8 @@ data:
     L1:
       start: 1238166018
       end: 1238856499
-  data_cache: "/home/app/data_cache"
-  asd_cache: "/opt/repo/gw-anomaly-detection/asds"
+  data_cache: "/mnt/d/O3_data"
+  asd_cache: "/home/dfredin/repos/gw-anomaly-detection/asds"
   processing:
     window_length: 4
     flow: 30
@@ -37,7 +37,7 @@ data:
     start_id: 0
     end_id: 1000
     window_length: 4
-    output_file_path: "/home/app/test_data/noise"
+    output_file_path: "./test_data/noise"
     output_file: "bg_data"
 
   glitch:
@@ -58,7 +58,7 @@ data:
       H1: ["./glitch_info/O3a/H1-glitch_info.hdf5"]
       L1: ["./glitch_info/O3a/L1-glitch_info.hdf5"]
     glitch_window_length: 4
-    output_file_path: "/home/app/test_data/glitch"
+    output_file_path: "./test_data/glitch"
     output_file: "glitch_data"
 
   injection:
@@ -83,7 +83,7 @@ data:
     target_snr_low: 12
     target_snr_high: 24
     keep_waveform: True
-    output_file_path: "/home/app/test_data"
+    output_file_path: "./test_data"
     output_file: "injection_data"
 
   test:
@@ -102,7 +102,7 @@ data:
     stride_length: 2
     start_id: 0
     end_id: 1796
-    output_file_path: "/home/app/test_data/test"
+    output_file_path: "./test_data/test"
     output_file: "test_data"
 
 s3:
