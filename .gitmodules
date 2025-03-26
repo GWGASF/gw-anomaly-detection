@@ -1,4 +1,4 @@
-[submodule "gasf"]
-	path = gasf
+[submodule "gw_anomaly_detection/gasf"]
+	path = gw_anomaly_detection/gasf
 	url = https://gitlab.nrp-nautilus.io/gwgasf/gwgasf.git
 	branch = dan-dev
