@@ -11,6 +11,6 @@ cd /home/dfredin/repos/gw-anomaly-detection
 # python /home/dfredin/repos/gw-anomaly-detection/cli.py --sid 1500 --eid 2000 --ptype injection --itype hfsg
 # python /home/dfredin/repos/gw-anomaly-detection/cli.py --sid 2000 --eid 2500 --ptype injection --itype lfsg
 
-python /home/dfredin/repos/gw-anomaly-detection/gasf/src/main.py --newgasf --nbbh 5000 --nbg 5000 --nglitch 5000
-python /home/dfredin/repos/gw-anomaly-detection/gasf/src/main.py --train --nbbh 5000 --nbg 5000 --nglitch 5000 --epoch 15 --batch 32
-python /home/dfredin/repos/gw-anomaly-detection/gasf/src/main.py --nbbh 5000 --nbg 5000 --nglitch 5000
+python /home/dfredin/repos/gw-anomaly-detection/gw_anomaly_detection/gasf/src/main.py --newgasf --nbbh 5000 --nbg 5000 --nglitch 5000
+python /home/dfredin/repos/gw-anomaly-detection/gw_anomaly_detection/gasf/src/main.py --train --nbbh 5000 --nbg 5000 --nglitch 5000 --epoch 15 --batch 32
+python /home/dfredin/repos/gw-anomaly-detection/gw_anomaly_detection/gasf/src/main.py --nbbh 5000 --nbg 5000 --nglitch 5000
