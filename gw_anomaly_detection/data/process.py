@@ -38,6 +38,12 @@ class Process():
         end = segment.end
         if format == "hdf5":
             format = "hdf5.gwosc"
+        # print(f"TimeSeries.read() call:")
+        # print(f"  source: {source}")
+        # print(f"  start: {start}")
+        # print(f"  end: {end}")
+
+
         ts = TimeSeries.read(
             source=source,
             start=start,

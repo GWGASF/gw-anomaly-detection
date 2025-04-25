@@ -5,9 +5,7 @@ description = "Detecting anomaly signals in GW data."
 authors = ["Chia-jui Chou <agoodmanjerry@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-packages = [
-  {include = "gw_anomaly_detection"},
-]
+packages = [  {include = "gw_anomaly_detection"},]
 
 [tool.poetry.dependencies]
 python = ">=3.10, <3.11"

@@ -4,6 +4,7 @@ import os
 import multiprocessing
 import argparse
 import copy
+from gw_anomaly_detection.data.fetch_data import fetch_data
 from gw_anomaly_detection.data.segments import read_segment_files
 from gw_anomaly_detection.data.segments import whole_segment
 from gw_anomaly_detection.data.s3_utils import S3_session
@@ -27,8 +28,33 @@ def full_process(config, s3):
 
     # args = parser.parse_args()
     
+    # parser = argparse.ArgumentParser()
+
+    # parser.add_argument('--flow', type=int, default = config['data']['processing']['flow'])
+    # parser.add_argument('--fhigh', type=int, default = config['data']['processing']['fhigh'])
+
+    # args = parser.parse_args()
+    
     # flow = args.flow
     # fhigh = args.fhigh
+
+
+    # Loading strain and asd into data cache.
+    # s3 = S3_session(config['s3'])
+    # background_interval = config['data']['background']['sample_interval']
+    # sample_rate = config['data']['sample_rate']
+    # format = config['data']['format']
+
+    # print("Downloading data from https://gwosc.org...")
+    # for ifo in ifos:
+    #     fetch_data(
+    #         ifo=ifo,
+    #         start=background_interval[ifo]['start'],
+    #         end=background_interval[ifo]['end'],
+    #         sample_rate=sample_rate,
+    #         format=format,
+    #         data_cache=data_cache,
+    #     )
 
     # Processing glitch.
     if kind == "glitch":
@@ -284,7 +310,7 @@ if __name__ == "__main__":
     # print(full_config['data'][process_type]['end_id'])
 
     # Loading strain and asd into data cache.
-    background_interval = full_config['data'][full_config['data']['kind']]['sample_interval']
+    background_interval = full_config['data']['background']['sample_interval']
     data_cache = full_config['data']['data_cache']
     ifos = full_config['data']['ifos']
     print("Downloading data from s3 bucket...")
@@ -296,6 +322,7 @@ if __name__ == "__main__":
             end=background_interval[ifo]['end'],
             data_cache=data_cache,
         )
+
 
    
     processes = []

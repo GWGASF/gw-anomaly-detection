@@ -1,28 +1,42 @@
+# TEST 1
 FROM python:3.10
-WORKDIR /opt
 
-# Install the application dependencies
-RUN apt-get update \
-# && apt-get -y install --no-install-recommends vim \
- && apt-get -y upgrade \
- && rm -rf /var/lib/apt/lists/* \
- && pip install --upgrade pip \
- && pip install poetry
+# Set working directory
+WORKDIR /app/gw-anomaly-detection
 
-# Copy in the sourrce code
-COPY gw_anomaly_detection/ gw_anomaly_detection/
-COPY poetry.lock /opt/
-COPY pyproject.toml /opt/
-COPY README.md /opt/
+# Install dependencies for Poetry and others
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git nano curl \
+    && rm -rf /var/lib/apt/lists/*
 
-# Install python packages
+# Install Poetry
+RUN curl -sSL https://install.python-poetry.org | python3 - \
+    && ln -s /root/.local/bin/poetry /usr/local/bin/poetry
+
+# Copy and install dependencies
+COPY pyproject.toml poetry.lock README.md ./
 RUN poetry lock
-RUN poetry install
+RUN poetry install --no-root
 RUN poetry self add poetry-plugin-shell
 
-# Setup an app user so the container doesn't run as the root user
-# RUN useradd app
-RUN mkdir -p /home/app/data_cache
-RUN mkdir -p /home/app/test_data
+# # UNCOMMENT FOR REMOTE REPO
+# # Add the GitLab SSH host key to known_hosts to bypass host key verification prompt
+# RUN mkdir -p ~/.ssh \
+#     && ssh-keyscan -p 30622 gitlab-ssh.nrp-nautilus.io >> ~/.ssh/known_hosts
 
-# CMD ["python", "hello.py"]
+# # Clone the GitLab repository into the current working directory using SSH
+# # This allows users to clone the repo using their own SSH key
+# RUN --mount=type=ssh git clone ssh://git@gitlab-ssh.nrp-nautilus.io:30622/gwgasf/gw-anomaly-detection.git .
+
+# CLONE LOCAL REPO
+# Copy app source
+COPY . .
+
+# Clean up build tools if desired
+RUN apt-get remove -y git && apt-get autoremove -y && rm -rf /var/lib/apt/lists/*
+
+# Default command
+# CMD ["poetry", "run", "python", "gw_anomaly_detection/gasf/src/main.py"]
+
+
+
