@@ -1,0 +1,52 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: gwgasf-testing
+spec:
+  template:
+    spec:
+      containers:
+      - name: gwgasf-testingpod
+        image: dfredin/gwgasf:testgwdetect
+        command:
+        - "poetry"
+        args:
+        - "run"
+        - "python"
+        - "gw_anomaly_detection/gasf/src/main.py"
+        - "--nbbh"
+        - "50"
+        - "--nbg"
+        - "50"
+        - "--nglitch"
+        - "50"
+        # volumeMounts:
+        # - name: git-repo
+        #   mountPath: /opt/repo
+        resources:
+          limits:
+            memory: 32Gi
+            cpu: "6000m"
+            # nvidia.com/gpu: "1"
+          requests:
+            memory: 32Gi
+            cpu: "4000m"
+            # nvidia.com/gpu: "1"    
+      # initContainers:
+      # - name: init-clone-repo
+      #   image: alpine/git
+      #   args:
+      #     - clone
+      #     - --single-branch
+      #     - -b
+      #     - dev-data
+      #     - https://gitlab.nrp-nautilus.io/Umata/gw-anomaly-detection.git
+      #     - /opt/repo/gw-anomaly-detection
+      #   volumeMounts:
+      #     - name: git-repo
+      #       mountPath: /opt/repo
+      # volumes:
+      # - name: git-repo
+      #   emptyDir: {}
+      restartPolicy: Never
+  backoffLimit: 5

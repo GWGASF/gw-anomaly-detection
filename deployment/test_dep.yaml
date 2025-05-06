@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: gwgasf-testing
+  labels:
+    k8s-app: gwgasf-testing
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      k8s-app: gwgasf-testing
+  template:
+    metadata:
+      labels:
+        k8s-app: gwgasf-testing
+    spec:
+      containers:
+      - name: gwgasf-testingpod
+        image: dfredin/gwgasf:testgwdetect
+        command:
+        - "poetry"
+        args:
+        - "run"
+        - "python"
+        - "gw_anomaly_detection/gasf/src/main.py"
+        - "--nbbh"
+        - "50"
+        - "--nbg"
+        - "50"
+        - "--nglitch"
+        - "50"
+        env:
+        # - name: DATA_PATH
+        #   value: "s3://dfredin/testing/"
+        # - name: DATA_PATH_GASF
+        #   value: "s3://dfredin/dataset_gasf/"
+        # - name: MODELS_PATH
+        #   value: "s3://dfredin/models/"
+        # - name: RESULTS_PATH
+        #   value: "s3://dfredin/results/"
+        # - name: CREATE_NEW_GASF
+        #   value: "true"
+        # - name: APPLY_SNR_FILTER
+        #   value: "false"
+        # - name: SNR_THRESHOLD
+        #   value: "12"
+        # - name: SHUFFLE_DATA
+        #   value: "true"
+        # - name: SELECT_SAMPLES
+        #   value: "true"
+        # - name: TRAIN_MODEL
+        #   value: "false"
+        # - name: NUM_BBH
+        #   value: "1000"
+        # - name: NUM_BG
+        #   value: "1000"
+        # - name: NUM_GLITCH
+        #   value: "1000"
+        # - name: LEARNING_RATE
+        #   value: "0.0005"
+        # - name: EPOCHS
+        #   value: "10"
+        # - name: L2_REG
+        #   value: "0.001"
+        # - name: BATCH_SIZE
+        #   value: "32"
+        # - name: SEED
+        #   value: "55"
+        # - name: TRAIN_RATIO
+        #   value: "0.8"
+        # - name: TEST_RATIO
+        #   value: "0.10"
+        # - name: VALIDATION_RATIO
+        #   value: "0.10"
+        - name: AWS_ACCESS_KEY_ID
+          valueFrom:
+            secretKeyRef:
+              name: s3-credentials
+              key: access_key
+        - name: AWS_SECRET_ACCESS_KEY
+          valueFrom:
+            secretKeyRef:
+              name: s3-credentials
+              key: secret_key
+        - name: AWS_S3_ENDPOINT
+          valueFrom:
+            secretKeyRef:
+              name: s3-credentials
+              key: host_base
+        resources:
+           limits:
+             memory: 50Gi
+             cpu: 3000m
+             ephemeral-storage: 25Gi
+             nvidia.com/gpu: 1  
+           requests:
+             memory: 35Gi
+             cpu: 1500m
+             ephemeral-storage: 6Gi 
+             nvidia.com/gpu: 1
+        # command: ["sh", "-c", "sleep infinity"]
