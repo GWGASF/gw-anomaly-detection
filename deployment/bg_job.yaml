@@ -1,0 +1,25 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: gwgasf-bgdata
+spec:
+  template:
+    spec:
+      containers:
+      - name: gwgasf-bgdata
+        image: dfredin/gwgasf:testgwdetect
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            mkdir -p test_data/noise && \
+            poetry run python get_segments.py && \
+            poetry run python cli.py --sid 500 --eid 1000 --ptype background
+        resources:
+          limits:
+            memory: 32Gi
+            cpu: "6000m"
+          requests:
+            memory: 16Gi
+            cpu: "3000m"
+      restartPolicy: Never
+  backoffLimit: 5

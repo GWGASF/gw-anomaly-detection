@@ -11,10 +11,9 @@ data:
       end: 1238856499
     L1:
       start: 1238166018
-      end: 1238856499
+      end: 1238772909
   sample_rate: 16384
   format: "gwf"
-  # data_cache: "/mnt/d/O3_data"
   data_cache: "./data_cache"
   asd_cache: "./asds"
   processing:
@@ -29,14 +28,14 @@ data:
     number_of_samples: 5000
     sample_interval:
       H1: 
-        start: 1238292998
-        end: 1238296598
+        start: 1238172987
+        end: 1238196793
       L1:
-        start: 1238292998
-        end: 1238296598
+        start: 1238205073
+        end: 1238228885
     segment_files:
-      H1: ["./segments/O3a/H1-background_samples-1238292998-3600.segwizard"]
-      L1: ["./segments/O3a/L1-background_samples-1238292998-3600.segwizard"]
+      H1: ["./segments/O3a/H1-background_samples-1238172987-23806.segwizard"]
+      L1: ["./segments/O3a/L1-background_samples-1238205073-23812.segwizard"]
     start_id: 0
     end_id: 3
     window_length: 4
@@ -47,14 +46,14 @@ data:
     ifos: ["H1", "L1"]
     sample_interval:
       H1: 
-        start: 1238292998
-        end: 1238296598
+        start: 1238172987
+        end: 1238196793
       L1:
-        start: 1238292998
-        end: 1238296598
+        start: 1238205073
+        end: 1238228885
     segment_files:
-      H1: ["./segments/O3a/H1-glitch_samples-1238292998-3600.segwizard"]
-      L1: ["./segments/O3a/L1-glitch_samples-1238292998-3600.segwizard"]
+      H1: ["./segments/O3a/H1-glitch_samples-1238172987-23806.segwizard"]
+      L1: ["./segments/O3a/L1-glitch_samples-1238205073-23812.segwizard"]
     start_id: 0
     end_id: 3
     glitch_info_files:
@@ -69,14 +68,14 @@ data:
     number_of_samples: 5000
     sample_interval:
       H1: 
-        start: 1238292998
-        end: 1238296598
+        start: 1238172987
+        end: 1238196793
       L1:
-        start: 1238292998
-        end: 1238296598
+        start: 1238205073
+        end: 1238228885
     segment_files:
-      H1: ["./segments/O3a/H1-injection_samples-1238292998-3600.segwizard"]
-      L1: ["./segments/O3a/L1-injection_samples-1238292998-3600.segwizard"]
+      H1: ["./segments/O3a/H1-injection_samples-1238172987-23806.segwizard"]
+      L1: ["./segments/O3a/L1-injection_samples-1238205073-23812.segwizard"]
     start_id: 0
     end_id: 3
     waveform: 'ccsn'
@@ -93,14 +92,14 @@ data:
     ifos: ["H1", "L1"]
     sample_interval:
       H1: 
-        start: 1238292998
-        end: 1238296598
+        start: 1238301937
+        end: 1238305537
       L1:
-        start: 1238292998
-        end: 1238296598
+        start: 1238301937
+        end: 1238305537
     segment_files:
-      H1: ["./segments/O3a/H1-test_samples-1238292998-3600.segwizard"]
-      L1: ["./segments/O3a/L1-test_samples-1238292998-3600.segwizard"]
+      H1: ["./segments/O3a/H1-test_samples-1238301937-3600.segwizard"]
+      L1: ["./segments/O3a/L1-test_samples-1238301937-3600.segwizard"]
     window_length: 4
     stride_length: 2
     start_id: 0

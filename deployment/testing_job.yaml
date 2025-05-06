@@ -1,0 +1,23 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: gwgasf-testing
+spec:
+  template:
+    spec:
+      containers:
+      - name: gwgasf-testing
+        image: dfredin/gwgasf:testgwdetect
+        command: ["/bin/sh", "-c"]
+        args:
+          - |
+            poetry run python gw_anomaly_detection/gasf/src/main.py --nbbh 500 --nbg 500 --nglitch 500
+        resources:
+          limits:
+            memory: 32Gi
+            cpu: "6000m"
+          requests:
+            memory: 16Gi
+            cpu: "3000m"
+      restartPolicy: Never
+  backoffLimit: 5
