@@ -1,19 +1,19 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: gwgasf-bbhdata
+  name: gwgasf-glitchdata
 spec:
   template:
     spec:
       containers:
-      - name: gwgasf-bbhdata
-        image: dfredin/gwgasf:testgwdetect
+      - name: gwgasf-glitchdata
+        image: dfredin/gwgasf:gwpipelinetest
         command: ["/bin/sh", "-c"]
         args:
           - |
-            mkdir -p test_data/bbh && \
-            poetry run python get_segments.py && \
-            poetry run python cli.py --sid 1000 --eid 1500 --ptype injection --itype bbh
+            mkdir -p test_data/glitch && \
+            poetry run python get_segments.py --samplenum 5000 && \
+            poetry run python cli.py --sid 0 --eid 500 --ptype glitch
         resources:
           limits:
             memory: 32Gi

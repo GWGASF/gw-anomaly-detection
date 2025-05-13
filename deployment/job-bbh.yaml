@@ -1,19 +1,19 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: gwgasf-bgdata
+  name: gwgasf-bbhdata
 spec:
   template:
     spec:
       containers:
-      - name: gwgasf-bgdata
-        image: dfredin/gwgasf:testgwdetect
+      - name: gwgasf-bbhdata
+        image: dfredin/gwgasf:gwpipelinetest
         command: ["/bin/sh", "-c"]
         args:
           - |
-            mkdir -p test_data/noise && \
-            poetry run python get_segments.py && \
-            poetry run python cli.py --sid 500 --eid 1000 --ptype background
+            mkdir -p test_data/bbh && \
+            poetry run python get_segments.py --samplenum 5000 && \
+            poetry run python cli.py --sid 1000 --eid 1500 --ptype injection --itype bbh
         resources:
           limits:
             memory: 32Gi

@@ -1,5 +1,6 @@
 #!/bin/python
 import yaml
+import argparse
 from gw_anomaly_detection.data.segments import SegmentInfo
 
 def generate_total_segments(
@@ -137,6 +138,14 @@ def main():
     # Loading data_config.yaml
     with open("./data_config.yaml", "r") as file:
         config = yaml.safe_load(file)
+
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--samplenum', type=int, default = config['data']['background']['number_of_samples'])
+
+    args = parser.parse_known_args()[0]
+    config['data']['background']['number_of_samples'] = args.samplenum
+    config['data']['glitch']['number_of_samples'] = args.samplenum
+    config['data']['injection']['number_of_samples'] = args.samplenum
 
     # Get background segments and glitch segments in total interval.
     generate_total_segments(

@@ -1,17 +1,19 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: gwgasf-training
+  name: gwgasf-bgdata
 spec:
   template:
     spec:
       containers:
-      - name: gwgasf-training
-        image: dfredin/gwgasf:testgwdetect
+      - name: gwgasf-bgdata
+        image: dfredin/gwgasf:gwpipelinetest
         command: ["/bin/sh", "-c"]
         args:
           - |
-            poetry run python gw_anomaly_detection/gasf/src/main.py --train --nbbh 500 --nbg 500 --nglitch 500 --epoch 15 --batch 32
+            mkdir -p test_data/noise && \
+            poetry run python get_segments.py --samplenum 5000 && \
+            poetry run python cli.py --sid 500 --eid 1000 --ptype background
         resources:
           limits:
             memory: 32Gi
