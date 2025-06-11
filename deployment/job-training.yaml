@@ -11,7 +11,7 @@ spec:
         command: ["/bin/sh", "-c"]
         args:
           - |
-            poetry run python gw_anomaly_detection/gasf/src/main.py --train --nbbh 500 --nbg 500 --nglitch 500 --epoch 15 --batch 32
+            poetry run python gw_anomaly_detection/gasf/src/main.py --train --nbbh 5000 --nbg 5000 --nglitch 5000 --epoch 15 --batch 32
         resources:
           limits:
             memory: 32Gi

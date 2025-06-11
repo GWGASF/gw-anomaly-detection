@@ -301,13 +301,13 @@ if __name__ == "__main__":
     parser.add_argument('--sid', type=int, default = full_config['data'][full_config['data']['kind']]['start_id'])
     parser.add_argument('--eid', type=int, default = full_config['data'][full_config['data']['kind']]['end_id'])
     parser.add_argument('--processnum', type=int, default = full_config['Process_num'])
-    # parser.add_argument('--samplenum', type=int, default = full_config['data'][full_config['data']['kind']]['number_of_samples'])
+    parser.add_argument('--samplenum', type=int, default = full_config['data'][full_config['data']['kind']]['number_of_samples'])
 
     args = parser.parse_args()
     full_config['Process_num'] = args.processnum
     full_config['data'][full_config['data']['kind']]['start_id'] = args.sid
     full_config['data'][full_config['data']['kind']]['end_id'] = args.eid
-    # full_config['data'][full_config['data']['kind']]['number_of_samples'] = args.samplenum
+    full_config['data'][full_config['data']['kind']]['number_of_samples'] = args.samplenum
 
     # print(full_config['data'][process_type]['end_id'])
 
