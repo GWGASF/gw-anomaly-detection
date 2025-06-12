@@ -1,0 +1,24 @@
+# data_cache: "./data_cache"
+asd_cache: "./asd_cache"
+data_cache: "/mnt/d/O3_data/H1"
+# asd_cache: "/home/jerry/app/asd_cache"
+sample_rate: 16384
+H1:
+  channel: H1:GWOSC-16KHZ_R1_STRAIN
+  seg_start_id: 0
+  seg_end_id: 4
+L1:
+  channel: L1:GWOSC-16KHZ_R1_STRAIN
+  seg_start_id: 0
+  seg_end_id: 4
+asd:
+  min_asd_length: 60
+  max_asd_length: 3600
+  fftlength: 8
+  overlap: 4
+s3:
+  access_key: XRIYL1052YCQ125N75UM
+  secret_key: XES9mLNbxAWKZC1AUcYFlGd7ByyXXSYw5yB3UrwM
+  host_base: https://s3-west.nrp-nautilus.io
+  bucket: cchou
+  upload_dir: 'asds'

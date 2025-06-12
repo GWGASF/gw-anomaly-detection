@@ -47,22 +47,24 @@ class S3_session(boto3.Session):
                 Bucket=Bucket,
                 Delimiter='/',
             )
+            file_list = [f"s3://{Bucket}/" + item['Prefix'] for item in response['CommonPrefixes']]
         else:
             response = self.s3client.list_objects_v2(
                 Bucket=Bucket,
                 Delimiter='/',
-                Prefix=Prefix,
-            )      
+                Prefix=Prefix+"/",
+            )
         try:
-            for prefix in response['CommonPrefixes']:
-                print(f"DIR s3://{Bucket}/{prefix['Prefix']}")
+            if not Silent:
+                for prefix in response['CommonPrefixes']:
+                    print(f"DIR s3://{Bucket}/{prefix['Prefix']}")
         except KeyError:
             pass
         try:
             if not Silent:
                 for content in response['Contents']:
                     print(f"s3://{Bucket}/{content['Key']}")
-            file_list = [item['Key'] for item in response['Contents']]
+            file_list = [f"s3://{Bucket}/" + item['Key'] for item in response['Contents']]
         except KeyError:
             pass
         return file_list
@@ -99,13 +101,29 @@ class S3_session(boto3.Session):
             if not os.path.exists(data_cache+'/'+ifo):
                 os.mkdir(data_cache+'/'+ifo)
             file_name = data_cache+'/'+ifo+'/'+file.split('/')[-1]
-            if not os.path.exists(file_name):
-                self.s3client.download_file(
-                    self.bucket,
-                    file,
-                    file_name,
-                )
+            self.s3client.download_file(
+                self.bucket,
+                file,
+                file_name,
+            )
 
+        return 0
+
+    def download(
+            self,
+            file: str,
+            target_file: str,
+    ):
+        try:
+            self.s3client.download_file(
+                Bucket=self.bucket,
+                Key=file,
+                Filename=target_file,
+            )
+            print(f"s3://{self.bucket}/{file} downloaded to {target_file}")
+        except Exception as e:
+            print(str(e))
+            return 1
         return 0
 
     def upload(
@@ -117,9 +135,9 @@ class S3_session(boto3.Session):
             'ACL': 'public-read',
         }
         try:
-            upload_file_name = f"{file_name.split('/')[-1]}/{file_name.split('/')[-2]}"
+            upload_file_name = file_name.split('/')[-1]
             key = f"{upload_dir}/{upload_file_name}"
-            print(f"Uploading {key} to {self.bucket}/{key}...")
+            print(f"Uploading {file_name} to s3://{self.bucket}/{key}...")
             response = self.s3client.upload_file(
                 Filename=file_name,
                 Bucket=self.bucket,
