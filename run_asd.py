@@ -12,7 +12,7 @@ def main():
     with open("./asd_config.yaml", "r") as file:
         config = yaml.safe_load(file)
 
-    ifo = "H1"
+    ifo = "L1"
     run = "O3a"
     seg_start_id = config[ifo]['seg_start_id']
     seg_end_id = config[ifo]['seg_end_id']
@@ -105,7 +105,8 @@ def main():
     # Upload ASDs to S3 bucket
     asds = glob.glob(f"{output_dir}/*.txt")
     s3 = S3_session(config['s3'])
-    upload_dir = f"{config['s3']['upload_dir']}/{run}/{ifo}"
+    # upload_dir = f"{config['s3']['upload_dir']}/O3/{run}/{ifo}"
+    upload_dir = f"{config['s3']['upload_dir']}/O3/{ifo}"
     for file_name in asds:
         s3.upload(
             file_name=file_name,

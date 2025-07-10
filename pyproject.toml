@@ -12,18 +12,19 @@ python = ">=3.10, <3.11"
 gwpy = "^3.0.10"
 bilby = "^2.3.0"
 PyCBC = "^2.6.0"
-boto3 = "^1.35.43"
+boto3 = "^1.39.3"
 toml = "^0.10.2"
-lalsuite = "7.11" # Use 7.11 only on asz018.
+lalsuite = "7.11" 
 numpy = "<2.0.0"
 multiprocess = "*"
-# torchmetrics = "^1"
-# torchaudio = {version = "^2", source = "torch"}
+torchaudio = {version = "^2.1.2", source = "torch"}
+torchvision = {version = "^0.16.1", source = "torch"}
+torch = {version = "2.1.2", source = "torch"}
+torchsummary = ">=1.5.1"
+# python-ldas-tools-framecpp = "3.0.0"
 
 matplotlib = ">=3.7.1"
 h5py = ">=3.7.0"
-torch = {version = "2.1.2", source = "torch"}
-torchsummary = ">=1.5.1"
 pyts = "=0.13.0"
 tqdm = ">=4.65.0"
 ipykernel = ">=6.19.2"

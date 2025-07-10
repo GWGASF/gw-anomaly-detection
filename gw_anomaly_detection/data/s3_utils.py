@@ -8,6 +8,7 @@ import yaml
 import re
 
 import sys
+from botocore.client import Config  
 sys.path.append(
     os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir, os.path.pardir))
 )
@@ -29,6 +30,7 @@ class S3_session(boto3.Session):
             aws_access_key_id=self.access_key,
             aws_secret_access_key=self.secret_key,
             endpoint_url=self.host_base,
+            config=Config(signature_version='s3')  # <<-- this disables the problematic SHA256
         )
 
     def ls_bucket(self):

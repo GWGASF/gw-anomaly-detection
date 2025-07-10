@@ -1,16 +1,16 @@
-# data_cache: "./data_cache"
+data_cache: "./data_cache"
 asd_cache: "./asd_cache"
-data_cache: "/mnt/d/O3_data/H1"
+# data_cache: "/mnt/d/O3_data/H1"
 # asd_cache: "/home/jerry/app/asd_cache"
 sample_rate: 16384
 H1:
   channel: H1:GWOSC-16KHZ_R1_STRAIN
   seg_start_id: 0
-  seg_end_id: 4
+  seg_end_id: 545
 L1:
   channel: L1:GWOSC-16KHZ_R1_STRAIN
   seg_start_id: 0
-  seg_end_id: 4
+  seg_end_id: 535
 asd:
   min_asd_length: 60
   max_asd_length: 3600

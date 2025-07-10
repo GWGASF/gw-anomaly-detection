@@ -1,7 +1,7 @@
-name: gw-anomaly-detection
+name: gwtesting
 channels:
-  - pytorch
   - conda-forge
+  - pytorch
   - defaults
 
 dependencies:
@@ -15,7 +15,7 @@ dependencies:
   - pycbc=2.6.0
   - boto3=1.35.43
   - toml=0.10.2
-  - lalsuite=7.11  # Optional: may be OS-specific
+  - lalsuite=7.11 
   - numpy<2.0.0
   - multiprocess
   - matplotlib>=3.7.1

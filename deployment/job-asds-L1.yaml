@@ -1,0 +1,21 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: gwgasf-asds-l1
+spec:
+  template:
+    spec:
+      containers:
+      - name: gwgasf-asds-l1
+        image: dfredin/gwgasf:gwpipelineasds
+        command: [ "conda", "run", "--no-capture-output", "-n", "gwtesting", "python" ]
+        args: [ "run_asd.py" ]
+        resources:
+          limits:
+            memory: 32Gi
+            cpu: "6000m"
+          requests:
+            memory: 16Gi
+            cpu: "3000m"
+      restartPolicy: Never
+  backoffLimit: 5
