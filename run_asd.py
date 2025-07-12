@@ -2,6 +2,7 @@
 import os
 import glob
 import yaml
+import argparse
 from lalframe.utils import frtools
 from gwpy.timeseries import TimeSeries
 from gw_anomaly_detection.data.fetch_data import fetch_data
@@ -12,7 +13,22 @@ def main():
     with open("./asd_config.yaml", "r") as file:
         config = yaml.safe_load(file)
 
-    ifo = "L1"
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument('--ifo', type=str, default = 'H1')
+    args = parser.parse_known_args()[0]
+    ifo = args.ifo
+
+    parser.add_argument('--sid', type=int, default = config[ifo]['seg_start_id'])
+    parser.add_argument('--eid', type=int, default = config[ifo]['seg_end_id'])
+
+    args = parser.parse_args()
+
+    config[ifo]['seg_start_id'] = args.sid
+    config[ifo]['seg_end_id'] = args.eid
+    ifo = args.ifo
+
+    # ifo = "L1"
     run = "O3a"
     seg_start_id = config[ifo]['seg_start_id']
     seg_end_id = config[ifo]['seg_end_id']

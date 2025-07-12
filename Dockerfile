@@ -3,27 +3,24 @@ FROM continuumio/miniconda3:23.5.2-0
 # Set working directory
 WORKDIR /app
 
-# Copy your environment.yaml into the image
+# Copy environment.yaml into the image
 COPY environment.yaml .
 
-# Create the base environment
+# Create the environment
 RUN conda update -n base -c defaults conda && \
     conda env create -f environment.yaml && \
     conda clean -afy
 
 # Install framecpp separately to avoid solver hang
-RUN conda run -n gwtesting conda install -c conda-forge python-ldas-tools-framecpp -y && \
+RUN conda install -n gwtesting -c conda-forge python-ldas-tools-framecpp -y && \
     conda clean -afy
 
-# Set default shell to use conda run inside gwtesting
-SHELL ["conda", "run", "-n", "gwtesting", "/bin/bash", "-c"]
-
-# Copy the rest of the code
+# Copy code after env creation to allow caching
 COPY . .
 
-# By default, the container just opens a shell in the env
-ENTRYPOINT [ "conda", "run", "--no-capture-output", "-n", "gwtesting", "bash" ]
-CMD ["-i"]
+# Force conda shell activation in every command
+ENTRYPOINT [ "conda", "run", "--no-capture-output", "-n", "gwtesting" ]
+CMD [ "bash", "-i" ]
 
 
 
