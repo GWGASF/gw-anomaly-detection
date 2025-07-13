@@ -20,7 +20,7 @@ def create_job_yaml(ifo, sid, eid):
                     "containers": [
                         {
                             "name": job_name,
-                            "image": "dfredin/gwgasf:asdtest",
+                            "image": "dfredin/gwgasf:gwpipelineasds",
                             "command": [
                                 "conda", "run", "--no-capture-output", "-n", "gwtesting", "python"
                             ],
