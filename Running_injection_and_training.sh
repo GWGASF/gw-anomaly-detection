@@ -2,8 +2,7 @@
 set -e
 cd .
 mkdir -p test_data/glitch test_data/noise test_data/bbh test_data/lfsg test_data/hfsg test_data/test data_cache/H1 data_cache/L1
-# ./download_asds_in_range.sh 1238166018 1238856499
-python download_asds_in_range.py
+python get_asds.py
 python get_segments.py --samplenum 500
 # python cli.py --ptype test
 python cli.py --sid 0 --eid 50 --ptype glitch
