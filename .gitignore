@@ -11,4 +11,5 @@ __pycache__/
 
 # Some debugging files
 *cache/
+*test_data/
 Test_LM.ipynb

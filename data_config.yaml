@@ -1,7 +1,7 @@
 Process_num: 1
 data:
   ifos: ["H1", "L1"]
-  kind: "injection"
+  kind: "background"
   segment_files:
     H1: ["./segments/O3a/H1-science_segs.segwizard"]
     L1: ["./segments/O3a/L1-science_segs.segwizard"]
@@ -13,9 +13,9 @@ data:
       start: 1238166018
       end: 1238772909
   sample_rate: 16384
-  format: "gwf"
+  format: "hdf5"
   data_cache: "./data_cache"
-  asd_cache: "./asds"
+  asd_cache: "./asd_cache"
   processing:
     window_length: 4
     flow: 30

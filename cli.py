@@ -4,6 +4,7 @@ import os
 import multiprocessing
 import argparse
 import copy
+import warnings
 from gw_anomaly_detection.data.fetch_data import fetch_data
 from gw_anomaly_detection.data.segments import read_segment_files
 from gw_anomaly_detection.data.segments import whole_segment
@@ -58,7 +59,7 @@ def full_process(config, s3):
 
     # Processing glitch.
     if kind == "glitch":
-        print(f"Glitch.")
+        print("\nGlitch:")
         ifos = config['data']['glitch']['ifos']
         segment_files = config['data']['glitch']['segment_files']
         glitch_segments = dict.fromkeys(ifos)
@@ -73,6 +74,7 @@ def full_process(config, s3):
         glitch_window_length = config['data']['glitch']['glitch_window_length']
         output_file_suffix = "_ids_{}-{}.hdf5".format(str(start_id), str(end_id))
         output_file = os.path.join(config['data']['glitch']['output_file_path'], config['data']['glitch']['output_file']+output_file_suffix)
+        print(f"Processing glitch data...")
         # Processing data.
         proc = Process(
             ifos=ifos,
@@ -99,7 +101,7 @@ def full_process(config, s3):
 
     # Processing background noise
     if kind == "background":
-        print("Background.")
+        print("\nBackground:")
         ifos = config['data']['background']['ifos']
         segment_files = config['data']['background']['segment_files']
         background_segments = dict.fromkeys(ifos)
@@ -115,6 +117,7 @@ def full_process(config, s3):
 
         window_length = config['data']['background']['window_length']
         output_file = os.path.join(config['data']['background']['output_file_path'], config['data']['background']['output_file']+output_file_suffix)
+        print("Processing background data...")
 
         # Processing data.
         proc = Process(
@@ -139,14 +142,14 @@ def full_process(config, s3):
 
     # Processing injection data.
     if kind == "injection":
-        print(f"Injection.")
+        print("\nInjection:")
         ifos = config['data']['injection']['ifos']
         segment_files = config['data']['injection']['segment_files']
         background_segments = dict.fromkeys(ifos)
         for ifo in ifos:
             background_segments[ifo] = read_segment_files(segment_files[ifo])
             interval = whole_segment(segment_file=segment_files[ifo])
-            print(f"Number of background segments from {ifo}: {len(background_segments[ifo])}, interval: {interval}.")
+            print(f"Number of injection segments from {ifo}: {len(background_segments[ifo])}, interval: {interval}.")
 
         start_id = config['data']['injection']['start_id']
         end_id = config['data']['injection']['end_id']
@@ -165,6 +168,7 @@ def full_process(config, s3):
         output_file = os.path.join(
             os.path.join(config['data']['injection']['output_file_path'], config['data']['injection']['waveform'])
             , config['data']['injection']['output_file']+output_file_suffix)
+        print(f"Processing injection data...")
 
         # Generating Waveform.
         number = end_id - start_id
@@ -215,6 +219,7 @@ def full_process(config, s3):
             )
         else:
             processed_waveforms = None
+
         proc.write_injection_data(
             output_file=output_file,
             waveform_parameters=params,
@@ -275,7 +280,8 @@ def full_process(config, s3):
     # Gathering data on s3 buckets.
 
 if __name__ == "__main__":
-    
+    warnings.filterwarnings("ignore", message="pkg_resources is deprecated as an API")
+
     script_path = os.path.abspath(__file__)
     script_directory = os.path.dirname(script_path)
     os.chdir(script_directory)
@@ -309,22 +315,34 @@ if __name__ == "__main__":
     full_config['data'][full_config['data']['kind']]['end_id'] = args.eid
     full_config['data'][full_config['data']['kind']]['number_of_samples'] = args.samplenum
 
-    # print(full_config['data'][process_type]['end_id'])
-
     # Loading strain and asd into data cache.
     background_interval = full_config['data']['background']['sample_interval']
     data_cache = full_config['data']['data_cache']
     ifos = full_config['data']['ifos']
-    print("Downloading data from s3 bucket...")
+    sample_rate = full_config['data']['sample_rate']
+    format = full_config['data']['format']
+
+    # print("Downloading data from s3 bucket...")
     s3 = S3_session(full_config['s3'])
+    # for ifo in ifos:
+    #     s3.fetch_data(
+    #         ifo=ifo,
+    #         start=background_interval[ifo]['start'],
+    #         end=background_interval[ifo]['end'],
+    #         data_cache=data_cache,
+    #     )
+
+
+    print("\nDownloading data from https://gwosc.org...")
     for ifo in ifos:
-        s3.fetch_data(
+        fetch_data(
             ifo=ifo,
             start=background_interval[ifo]['start'],
             end=background_interval[ifo]['end'],
+            sample_rate=sample_rate,
+            format=format,
             data_cache=data_cache,
         )
-
 
    
     processes = []

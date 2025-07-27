@@ -1,14 +1,14 @@
 #!/bin/python
 import os
 import boto3
-import h5py
-import toml
+# import h5py
+# import toml
 import numpy as np
-import yaml
+# import yaml
 import re
-
 import sys
-from botocore.client import Config  
+
+from botocore.config import Config  # <-- Make sure this is importedg  
 sys.path.append(
     os.path.abspath(os.path.join(os.path.dirname(__file__), os.path.pardir, os.path.pardir))
 )
@@ -30,7 +30,12 @@ class S3_session(boto3.Session):
             aws_access_key_id=self.access_key,
             aws_secret_access_key=self.secret_key,
             endpoint_url=self.host_base,
-            config=Config(signature_version='s3')  # <<-- this disables the problematic SHA256
+            config=Config(
+                signature_version='s3v4',
+                s3={'addressing_style': 'path'},
+                request_checksum_calculation="when_required",
+                response_checksum_validation="when_required"
+            )
         )
 
     def ls_bucket(self):
@@ -72,7 +77,7 @@ class S3_session(boto3.Session):
         return file_list
 
     def read_file_dir(self, ifo: str):
-        self.prefix = self.config['common_prefix']+ifo+'/'
+        self.prefix = self.config['common_prefix']+ifo
         file_list = self.ls_objects(self.bucket, self.prefix)
         return file_list
 
@@ -140,13 +145,13 @@ class S3_session(boto3.Session):
             upload_file_name = file_name.split('/')[-1]
             key = f"{upload_dir}/{upload_file_name}"
             print(f"Uploading {file_name} to s3://{self.bucket}/{key}...")
-            response = self.s3client.upload_file(
+            self.s3client.upload_file(
                 Filename=file_name,
                 Bucket=self.bucket,
                 Key=key,
                 ExtraArgs=ExtraArgs,
             ) 
-            print(f"Done.")
+            print(f"S3 upload complete.\n")
         except Exception as e:
             print(str(e))
             return 1

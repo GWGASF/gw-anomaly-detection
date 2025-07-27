@@ -4,6 +4,7 @@ import glob
 import re
 import h5py
 import numpy as np
+import time
 from gwpy.timeseries import TimeSeries
 from gwpy.frequencyseries import FrequencySeries
 
@@ -38,17 +39,11 @@ class Process():
         end = segment.end
         if format == "hdf5":
             format = "hdf5.gwosc"
-        # print(f"TimeSeries.read() call:")
-        # print(f"  source: {source}")
-        # print(f"  start: {start}")
-        # print(f"  end: {end}")
-
-
         ts = TimeSeries.read(
             source=source,
             start=start,
-            end=end,
-            format=format,
+            end=end
+            # format=format
         )
         return ts
 
@@ -229,6 +224,7 @@ class Process():
         processed_data: list,
         processed_waveforms: list=None,
     ):
+        print(f"Writing injection data to {output_file}...")
         with h5py.File(output_file, 'w') as w:
             # Waveform Parameters
             param_names = list(waveform_parameters[0].keys())
@@ -335,6 +331,7 @@ class Process():
             processed_background: dict,
     ):
         ifos = list(processed_background.keys())
+        print(f"Writing background data to {output_file}...")
         with h5py.File(output_file, 'w') as w:
             for ifo in ifos:
                 # Time Series Data
@@ -420,6 +417,7 @@ class Process():
             glitch_infos: dict,
     ):
         ifos = list(processed_glitch.keys())
+        print(f"Writing glitch data to {output_file}...")
         with h5py.File(output_file, 'w') as w:
             for ifo in ifos:
                 # Glitch Info
