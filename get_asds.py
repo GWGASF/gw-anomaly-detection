@@ -58,7 +58,7 @@ def main():
         end = intervals[ifo]['end']
         download_asd_files(s3, ifo, start, end)
 
-    print("\nAll ASD downloads completed to ./asd_cache/")
+    print("\nAll ASDs downloaded to ./asd_cache/\n")
 
 if __name__ == "__main__":
     main()

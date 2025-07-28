@@ -268,7 +268,7 @@ class SegmentInfo():
         if (output_file != None) and (output_file_format != None):
             try:
                 test_selected_samples.write(output_file, format=output_file_format)
-                print(f"Sample segment file written to {output_file}")
+                print(f"Test sample segments written to {output_file}")
             except Exception as e:
                 print(str(e))
         

@@ -135,6 +135,7 @@ def generate_test_samples(
 
 
 def main():
+    print("Generating segments and samples...")
     # Loading data_config.yaml
     with open("./data_config.yaml", "r") as file:
         config = yaml.safe_load(file)
@@ -173,7 +174,7 @@ def main():
     generate_test_samples(
         config=config
     )
-
+    print("\nAll segments and samples saved to ./segments/O3a/\n")
 if __name__ == "__main__":
     main()
     
