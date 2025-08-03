@@ -37,21 +37,25 @@ def fetch_data(
 
         print(f"Fetching data from {t0} to {t0 + du}...")
 
-        ts = TimeSeries.fetch_open_data(
-            ifo=ifo,
-            start=t0,
-            end=t0 + du,
-            sample_rate=sample_rate,
-            format=format,
-            host=host,
-        )
+        try:
+            ts = TimeSeries.fetch_open_data(
+                ifo=ifo,
+                start=t0,
+                end=t0 + du,
+                sample_rate=sample_rate,
+                format=format,
+                host=host,
+            )
 
-        ts.write(
-            file_name,
-            format=format,
-            overwrite=True
-        )
-        print(f"Data written to {file_name}.")
+            ts.write(
+                file_name,
+                format=format,
+                overwrite=True
+            )
+            print(f"Data written to {file_name}.")
+        except Exception as e:
+            print(f"Failed to fetch {t0}-{t0 + du}: {e}")
+            continue
 
     return 0
 
@@ -77,4 +81,3 @@ def override_config_with_env(config):
                     config['data'][kind]['sample_interval'][ifo]['end'] = int(end_env)
 
     return config
-
