@@ -54,3 +54,27 @@ def fetch_data(
         print(f"Data written to {file_name}.")
 
     return 0
+
+
+def override_config_with_env(config):
+    # Override total_interval
+    for ifo in ['H1', 'L1']:
+        start_env = os.getenv(f"{ifo}_TOTAL_START")
+        end_env = os.getenv(f"{ifo}_TOTAL_END")
+        if start_env and end_env:
+            config['data']['total_interval'][ifo]['start'] = int(start_env)
+            config['data']['total_interval'][ifo]['end'] = int(end_env)
+
+    # Override sample_interval for all kinds that define it
+    kinds = ['background', 'glitch', 'injection']
+    for kind in kinds:
+        if kind in config['data']:
+            for ifo in ['H1', 'L1']:
+                start_env = os.getenv(f"{ifo}_KIND_START")
+                end_env = os.getenv(f"{ifo}_KIND_END")
+                if start_env and end_env:
+                    config['data'][kind]['sample_interval'][ifo]['start'] = int(start_env)
+                    config['data'][kind]['sample_interval'][ifo]['end'] = int(end_env)
+
+    return config
+

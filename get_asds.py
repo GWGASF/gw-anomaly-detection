@@ -3,11 +3,14 @@ import re
 import yaml
 from pathlib import Path
 from gw_anomaly_detection.data.s3_utils import S3_session
+from gw_anomaly_detection.data.fetch_data import override_config_with_env
+
 
 def load_data_config():
     config_path = os.path.join(os.path.dirname(__file__), "data_config.yaml")
     with open(config_path, "r") as f:
-        return yaml.safe_load(f)
+        data_config = yaml.safe_load(f)
+        return override_config_with_env(data_config)
 
 def filter_files_by_range(file_list, start_gps, end_gps):
     filtered = []

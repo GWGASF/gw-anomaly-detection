@@ -12,7 +12,7 @@ RUN conda update -n base -c defaults conda && \
     conda clean -afy
 
 # Install framecpp separately to avoid solver hang
-RUN conda install -n gwtesting -c conda-forge python-ldas-tools-framecpp -y && \
+RUN conda install -n gwpipelinetest -c conda-forge python-ldas-tools-framecpp -y && \
     conda clean -afy
 
 # Copy code after env creation to allow caching

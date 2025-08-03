@@ -2,6 +2,8 @@
 import yaml
 import argparse
 from gw_anomaly_detection.data.segments import SegmentInfo
+from gw_anomaly_detection.data.fetch_data import override_config_with_env
+
 
 def generate_total_segments(
         config:dict,
@@ -139,6 +141,10 @@ def main():
     # Loading data_config.yaml
     with open("./data_config.yaml", "r") as file:
         config = yaml.safe_load(file)
+    config = override_config_with_env(config)
+
+
+
 
     parser = argparse.ArgumentParser()
     parser.add_argument('--samplenum', type=int, default = config['data']['background']['number_of_samples'])

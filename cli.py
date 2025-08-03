@@ -6,6 +6,7 @@ import argparse
 import copy
 import warnings
 from gw_anomaly_detection.data.fetch_data import fetch_data
+from gw_anomaly_detection.data.fetch_data import override_config_with_env
 from gw_anomaly_detection.data.segments import read_segment_files
 from gw_anomaly_detection.data.segments import whole_segment
 from gw_anomaly_detection.data.s3_utils import S3_session
@@ -289,6 +290,7 @@ if __name__ == "__main__":
     # Loading data_config.yaml
     with open("./data_config.yaml", "r") as file:
         full_config = yaml.safe_load(file)
+    full_config = override_config_with_env(full_config)
 
     # process_type = full_config['data']['kind']
 
