@@ -25,7 +25,7 @@ spec:
             value: "1238166018"
           - name: L1_KIND_END
             value: "1238787928"
-        command: ["conda", "run", "--no-capture-output", "-n", "gwpipeline", "bash", "-c"]
+        command: ["conda", "run", "--no-capture-output", "-n", "gwpipelinetest", "bash", "-c"]
         args:
           - |
             mkdir -p test_data/glitch

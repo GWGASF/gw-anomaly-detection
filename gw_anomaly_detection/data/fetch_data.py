@@ -77,7 +77,19 @@ def override_config_with_env(config):
                 start_env = os.getenv(f"{ifo}_KIND_START")
                 end_env = os.getenv(f"{ifo}_KIND_END")
                 if start_env and end_env:
-                    config['data'][kind]['sample_interval'][ifo]['start'] = int(start_env)
-                    config['data'][kind]['sample_interval'][ifo]['end'] = int(end_env)
+                    start = int(start_env)
+                    end = int(end_env)
+                    config['data'][kind]['sample_interval'][ifo]['start'] = start
+                    config['data'][kind]['sample_interval'][ifo]['end'] = end
+
+            # After updating intervals, update segment_files for this kind
+            segment_files = {}
+            for ifo in config['data'][kind]['ifos']:
+                start = config['data'][kind]['sample_interval'][ifo]['start']
+                end = config['data'][kind]['sample_interval'][ifo]['end']
+                duration = end - start
+                segment_files[ifo] = [f"./segments/O3a/{ifo}-{kind}_samples-{start}-{duration}.segwizard"]
+            config['data'][kind]['segment_files'] = segment_files
 
     return config
+
