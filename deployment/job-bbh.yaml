@@ -7,25 +7,25 @@ spec:
     spec:
       containers:
       - name: gwgasf-bbhdata
-        image: dfredin/gwgasf:gwpipelinetest
+        image: dfredin/gwgasf:gwpipeline
         env:
           - name: H1_TOTAL_START
             value: "1238166018"
           - name: H1_TOTAL_END
-            value: "1238856499"
+            value: "1253976375"
           - name: L1_TOTAL_START
             value: "1238166018"
           - name: L1_TOTAL_END
-            value: "1238772909"
+            value: "1253973796"
           - name: H1_KIND_START
-            value: "1238172987"
+            value: "1238166018"
           - name: H1_KIND_END
-            value: "1238196793"
+            value: "1238856487"
           - name: L1_KIND_START
-            value: "1238205073"
+            value: "1238166018"
           - name: L1_KIND_END
-            value: "1238228885"
-        command: ["conda", "run", "--no-capture-output", "-n", "gwpipelinetest", "bash", "-c"]
+            value: "1238787928"
+        command: ["conda", "run", "--no-capture-output", "-n", "gwpipeline", "bash", "-c"]
         args:
           - |
             mkdir -p test_data/bbh
