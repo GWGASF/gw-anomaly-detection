@@ -108,11 +108,14 @@ class S3_session(boto3.Session):
             if not os.path.exists(data_cache+'/'+ifo):
                 os.mkdir(data_cache+'/'+ifo)
             file_name = data_cache+'/'+ifo+'/'+file.split('/')[-1]
+            key = file.replace(f"s3://{self.bucket}/", "")
             self.s3client.download_file(
                 self.bucket,
-                file,
+                key,
                 file_name,
             )
+            print(f"s3://{self.bucket}/{key} downloaded to {file_name}")
+
 
         return 0
 
@@ -122,6 +125,7 @@ class S3_session(boto3.Session):
             target_file: str,
     ):
         try:
+            key = file.replace(f"s3://{self.bucket}/", "")
             self.s3client.download_file(
                 Bucket=self.bucket,
                 Key=file,

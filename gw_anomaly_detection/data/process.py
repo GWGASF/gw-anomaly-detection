@@ -35,15 +35,23 @@ class Process():
     ):
         source = glob.glob(f"{self.data_cache}/{ifo}/*.{format}")
         source.sort()
+        if not source:
+            raise FileNotFoundError(f"No data files found for IFO {ifo} in {self.data_cache}/{ifo} with extension .{format}")
+
         start = segment.start
         end = segment.end
+        # print(f"[DEBUG] Looking for files at: {self.data_cache}/{ifo}/*.{format}")
+        # print(f"[DEBUG] Segment: {segment}")
+        # print(f"[DEBUG] Found files: {source}")
+
         if format == "hdf5":
             format = "hdf5.gwosc"
         ts = TimeSeries.read(
             source=source,
             start=start,
-            end=end
-            # format=format
+            end=end,
+            format=format,
+            # path="/strain/Strain"
         )
         return ts
 

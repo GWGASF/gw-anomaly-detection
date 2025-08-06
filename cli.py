@@ -324,8 +324,8 @@ if __name__ == "__main__":
     sample_rate = full_config['data']['sample_rate']
     format = full_config['data']['format']
 
-    # print("Downloading data from s3 bucket...")
     s3 = S3_session(full_config['s3'])
+    # print("Downloading data from s3 bucket...")
     # for ifo in ifos:
     #     s3.fetch_data(
     #         ifo=ifo,
