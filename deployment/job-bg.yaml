@@ -30,8 +30,8 @@ spec:
           - |
             mkdir -p test_data/noise
             python get_asds.py &&
-            python get_segments.py --samplenum 15000 &&
-            python cli.py --sid 5000 --eid 10000 --ptype background
+            python get_segments.py --samplenum 150000 &&
+            python cli.py --sid 50000 --eid 100000 --ptype background
         resources:
           limits:
             memory: 32Gi

@@ -1,0 +1,12 @@
+# pvc-gwgasf-shared.yaml
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: gwgasf-shared-cache
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: rook-cephfs-pacific     # or cephfs / rook-cephfs-<region> if you prefer
+  resources:
+    requests:
+      storage: 500Gi                # size to taste; increase if needed

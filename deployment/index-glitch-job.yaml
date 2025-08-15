@@ -1,0 +1,97 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: gwgasf-glitchdata
+spec:
+  completions: 50
+  parallelism: 10
+  completionMode: Indexed
+  backoffLimit: 2
+  ttlSecondsAfterFinished: 3600
+  template:
+    spec:
+      restartPolicy: Never
+      securityContext:
+        fsGroup: 1000
+      initContainers:
+        - name: init-pvc
+          image: busybox:1.36
+          command: ["sh","-lc"]
+          args:
+            - >
+              mkdir -p /pv/data_cache/H1 /pv/data_cache/L1 &&
+              mkdir -p /pv/asd_cache/H1  /pv/asd_cache/L1
+          volumeMounts:
+            - name: shared-cache
+              mountPath: /pv
+      containers:
+        - name: gwgasf-glitchdata
+          image: dfredin/gwgasf:gwpipeline
+          env:
+            - name: H1_TOTAL_START
+              value: "1238166018"
+            - name: H1_TOTAL_END
+              value: "1253976375"
+            - name: L1_TOTAL_START
+              value: "1238166018"
+            - name: L1_TOTAL_END
+              value: "1253973796"
+            - name: H1_KIND_START
+              value: "1238166018"
+            - name: H1_KIND_END
+              value: "1238856487"
+            - name: L1_KIND_START
+              value: "1238166018"
+            - name: L1_KIND_END
+              value: "1238787928"
+            # sharding
+            - name: SHARD_SIZE
+              value: "1000"
+            - name: BASE_START
+              value: "0"
+            - name: JOB_INDEX
+              valueFrom:
+                fieldRef:
+                  fieldPath: "metadata.annotations['batch.kubernetes.io/job-completion-index']"
+            - name: PTYPE
+              value: "glitch"
+          volumeMounts:
+            - name: shared-cache
+              mountPath: /app/data_cache
+              subPath: data_cache
+            - name: shared-cache
+              mountPath: /app/asd_cache
+              subPath: asd_cache
+          resources:
+            requests:
+              cpu: "2000m"
+              memory: 8Gi
+            limits:
+              cpu: "4000m"
+              memory: 12Gi
+          command: ["conda", "run", "--no-capture-output", "-n", "gwpipelinetest", "bash", "-c"]
+          args:
+            - |
+              set -euo pipefail
+              idx=${JOB_INDEX:-0}
+              size=${SHARD_SIZE:-1000}
+              base=${BASE_START:-0}
+              sid=$(( base + idx * size ))
+              eid=$(( sid + size ))   # eid exclusive
+
+              echo "GLITCH shard index=$idx sid=$sid eid=$eid"
+
+              # ensure local (ephemeral) test_data exists
+              mkdir -p ./test_data ./test_data/noise ./test_data/glitch ./test_data/bbh
+
+              export TMPDIR="/tmp/${PTYPE}-${idx}"
+              mkdir -p "$TMPDIR"
+
+              python get_asds.py
+              python get_segments.py --samplenum 150000
+
+              python cli.py --sid "${sid}" --eid "${eid}" --ptype "${PTYPE}"
+      volumes:
+        - name: shared-cache
+          persistentVolumeClaim:
+            claimName: gwgasf-shared-cache

@@ -30,8 +30,8 @@ spec:
           - |
             mkdir -p test_data/glitch
             python get_asds.py &&
-            python get_segments.py --samplenum 15000 &&
-            python cli.py --sid 0 --eid 5000 --ptype glitch
+            python get_segments.py --samplenum 150000 &&
+            python cli.py --sid 0 --eid 50000 --ptype glitch
         resources:
           limits:
             memory: 32Gi

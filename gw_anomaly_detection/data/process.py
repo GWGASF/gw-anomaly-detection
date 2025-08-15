@@ -41,7 +41,7 @@ class Process():
         start = segment.start
         end = segment.end
         # print(f"[DEBUG] Looking for files at: {self.data_cache}/{ifo}/*.{format}")
-        # print(f"[DEBUG] Segment: {segment}")
+        print(f"[DEBUG] Segment: {segment}")
         # print(f"[DEBUG] Found files: {source}")
 
         if format == "hdf5":
