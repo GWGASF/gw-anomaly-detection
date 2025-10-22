@@ -48,7 +48,7 @@ spec:
             - name: SHARD_SIZE
               value: "1000"
             - name: BASE_START
-              value: "50000"
+              value: "52000"
             - name: JOB_INDEX
               valueFrom:
                 fieldRef:
@@ -64,8 +64,8 @@ spec:
               subPath: asd_cache
           resources:
             requests:
-              cpu: "2000m"
-              memory: 8Gi
+              cpu: "1000m"
+              memory: 2Gi
             limits:
               cpu: "4000m"
               memory: 12Gi
@@ -80,6 +80,7 @@ spec:
               eid=$(( sid + size ))   # eid exclusive
 
               echo "BACKGROUND shard index=$idx sid=$sid eid=$eid"
+              sleep $(( (idx % 2) * 3600 + (RANDOM % 5) ))
 
               # ensure local (ephemeral) test_data exists
               mkdir -p ./test_data ./test_data/noise ./test_data/glitch ./test_data/bbh

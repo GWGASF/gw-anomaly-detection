@@ -1,27 +1,32 @@
 name: gwpipelinetest
 channels:
-  - conda-forge
   - pytorch
+  - nvidia
+  - conda-forge
   - defaults
-
 dependencies:
   - python=3.10
   - pytorch=2.1.2
+  - torchvision=0.16.2
+  - torchaudio=2.1.2
+  - pytorch-cuda=12.1       # (or 12.4)
+  - pytorch-mutex=1.0=cuda  # <-- forces CUDA variants
+
+  # Scientific stack
   - scipy=1.10.1
-  - torchvision
-  - torchaudio
-  - cudatoolkit=11.8  # CUDA-enabled PyTorch
   - gwpy=3.0.10
   - bilby=2.3.0
   - pycbc=2.6.0
   - boto3=1.35.43
   - toml=0.10.2
-  - lalsuite=7.11 
+  - lalsuite=7.11
   - numpy<2.0.0
   - multiprocess
   - matplotlib>=3.7.1
   - h5py>=3.7.0
   - pip
+  - jupyterlab
+
   - pip:
       - torchsummary>=1.5.1
       - pyts==0.13.0
@@ -32,6 +37,3 @@ dependencies:
       - s3fs>=2024.12.0
       - pynvml>=12.0.0
       - setuptools<81
-
-  # Development dependencies
-  - jupyterlab

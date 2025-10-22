@@ -1,43 +1,65 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: gwgasf-bgdata
+  name: gwgasf-bgdata-rerun-98000-99000
 spec:
   template:
     spec:
       containers:
-      - name: gwgasf-bgdata
-        image: dfredin/gwgasf:gwpipeline
-        env:
-          - name: H1_TOTAL_START
-            value: "1238166018"
-          - name: H1_TOTAL_END
-            value: "1253976375"
-          - name: L1_TOTAL_START
-            value: "1238166018"
-          - name: L1_TOTAL_END
-            value: "1253973796"
-          - name: H1_KIND_START
-            value: "1238166018"
-          - name: H1_KIND_END
-            value: "1238856487"
-          - name: L1_KIND_START
-            value: "1238166018"
-          - name: L1_KIND_END
-            value: "1238787928"
-        command: ["conda", "run", "--no-capture-output", "-n", "gwpipelinetest", "bash", "-c"]
-        args:
-          - |
-            mkdir -p test_data/noise
-            python get_asds.py &&
-            python get_segments.py --samplenum 150000 &&
-            python cli.py --sid 50000 --eid 100000 --ptype background
-        resources:
-          limits:
-            memory: 32Gi
-            cpu: "6000m"
-          requests:
-            memory: 16Gi
-            cpu: "3000m"
+        - name: gwgasf-bgdata-rerun-98000-99000
+          image: dfredin/gwgasf:gwdata
+          env:
+            - name: HDF5_USE_FILE_LOCKING   # <<< key for concurrent reads
+              value: "FALSE"
+            - name: H1_TOTAL_START
+              value: "1238166018"
+            - name: H1_TOTAL_END
+              value: "1253976375"
+            - name: L1_TOTAL_START
+              value: "1238166018"
+            - name: L1_TOTAL_END
+              value: "1253973796"
+            - name: H1_KIND_START
+              value: "1238166018"
+            - name: H1_KIND_END
+              value: "1238856487"
+            - name: L1_KIND_START
+              value: "1238166018"
+            - name: L1_KIND_END
+              value: "1238787928"
+          volumeMounts:
+            - name: shared-cache
+              mountPath: /app/data_cache
+              subPath: data_cache
+            - readOnly: true
+              name: shared-cache
+              mountPath: /app/asd_cache
+              subPath: asd_cache
+              readOnly: true
+          resources:
+            requests:
+              cpu: "1000m"
+              memory: 2Gi
+            limits:
+              cpu: "4000m"
+              memory: 12Gi
+          command: ["conda", "run", "--no-capture-output", "-n", "gwpipelinetest", "bash", "-c"]
+          args:
+            - |
+              mkdir -p test_data/noise
+              python get_asds.py &&
+              python get_segments.py --samplenum 150000 &&
+              python cli.py --sid 98000 --eid 99000 --ptype background
+          resources:
+            requests:
+              cpu: "1000m"
+              memory: 2Gi
+            limits:
+              cpu: "4000m"
+              memory: 12Gi
+      volumes:
+        - name: shared-cache
+          persistentVolumeClaim:
+            claimName: gwgasf-shared-cache
       restartPolicy: Never
   backoffLimit: 5
